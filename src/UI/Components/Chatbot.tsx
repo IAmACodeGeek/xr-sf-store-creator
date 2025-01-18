@@ -11,7 +11,7 @@ import {
 import Input from "@mui/joy/Input";
 import CloseIcon from "@mui/icons-material/Close";
 import ReactMarkdown from "react-markdown";
-import { useComponentStore } from "./stores/ZustandStores";
+import { useComponentStore } from "../../stores/ZustandStores";
 
 interface ChatbotProps {
   isChatbotModalOpen: boolean;

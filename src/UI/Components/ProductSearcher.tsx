@@ -1,22 +1,14 @@
 import { TextField, Typography, Box } from "@mui/material";
 import { useState, useEffect, useRef, useMemo } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { useComponentStore } from "./stores/ZustandStores";
-import Product from "./Types/Product";
+import { useComponentStore } from "../../stores/ZustandStores";
+import Product from "../../Types/Product";
 import Fuse from "fuse.js";
-import mannequinData from "./data/MannequinData"; 
 
 const ProductSearcher = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([] as Product[]);
-  const { closeProductSearcher, products, setSearchResult, startSearchGSAP } =
-    useComponentStore();
-
-  
-  const filteredProducts = useMemo(() => {
-    const mannequinIds = mannequinData.map((item) => item.id);
-    return products.filter((product) => mannequinIds.includes(product.id));
-  }, [products]);
+  const { closeProductSearcher, products } = useComponentStore();
 
   const fuseOptions = {
     keys: [
@@ -29,16 +21,16 @@ const ProductSearcher = () => {
 
 
   const fuse = useMemo(
-    () => new Fuse(filteredProducts, fuseOptions),
-    [filteredProducts]
+    () => new Fuse(products, fuseOptions),
+    [products]
   );
 
   useEffect(() => {
     const results = searchTerm
       ? fuse.search(searchTerm).map((result) => result.item)
-      : filteredProducts;
+      : products;
     setSearchResults(results);
-  }, [searchTerm, fuse, filteredProducts]);
+  }, [searchTerm, fuse, products]);
 
   const searcherRef = useRef<HTMLDivElement>(null);
   const onClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -156,32 +148,16 @@ const ProductSearcher = () => {
                   }}
                   className="SearchItem"
                   onClick={() => {
-                    const mannequin = mannequinData.find(
-                      (item) => item.id === product.id
-                    );
-                    if (mannequin) {
-                      console.log(
-                        `Position for product ID ${product.id}:`,
-                        mannequin.position
-                      );
-                      const x: number = mannequin.position[0];
-                      const y: number = mannequin.position[1];
-                      const z: number = mannequin.position[2];
-                      setSearchResult({ x, y, z });
-                      startSearchGSAP();
-                    } else {
-                      console.log(
-                        `No position found for product ID ${product.id}`
-                      );
-                    }
+                    
                   }}
                 >
                   <Box
                     component="img"
-                    src={product.images[0].src}
+                    src={product.images[0]?.src}
                     sx={{
                       height: "40px",
                       width: "40px",
+                      minWidth: "40px",
                       backgroundColor: "rgb(255, 255, 255)",
                       objectFit: "contain",
                     }}

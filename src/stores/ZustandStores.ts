@@ -13,28 +13,6 @@ interface ComponentStore {
   setProducts: (products: Product[]) => void;
   setSelectedProduct: (productId: number) => void;
 
-  // Search Handling 
-  searchResult: { x: number; y: number; z: number } | null; 
-  initiateSearchGSAP: boolean; 
-  setSearchResult: (position: { x: number; y: number; z: number }) => void;
-  startSearchGSAP: () => void;
-  resetSearchGSAP: () => void;
-
-  // Modal Handling
-  isModalOpen: boolean;
-  openModal: () => void;
-  closeModal: () => void;
-
-  // Cart Handling
-  isCartOpen: boolean;
-  openCart: () => void;
-  closeCart: () => void;
-
-  // Wishlist Handling
-  isWishlistOpen: boolean;
-  openWishlist: () => void;
-  closeWishlist: () => void;
-
   // Info Handling
   isInfoModalOpen: boolean;
   openInfoModal: () => void;
@@ -57,14 +35,7 @@ interface ComponentStore {
   closeSettingsModal: () => void;
   setAudioPlaying: (play: boolean) => void;
 
-  // Discount Handling
-  discountCode: string;
-  isDiscountModalOpen: boolean;
-  openDiscountModal: () => void;
-  closeDiscountModal: () => void;
-  setDiscountCode: (code: string) => void;
-
-  // Search Handling
+  // Product Searcher
   isProductSearcherOpen: boolean;
   openProductSearcher: () => void;
   closeProductSearcher: () => void;
@@ -87,51 +58,6 @@ const useComponentStore = create<ComponentStore>((set) => ({
       );
       return { ...state, selectedProduct: finalProduct };
     }),
-
-  // Search Handling 
-  searchResult: null,
-  initiateSearchGSAP: false,
-  setSearchResult: (position: { x: number; y: number; z: number }) =>
-    set({ searchResult: position }),
-  startSearchGSAP: () => set({ initiateSearchGSAP: true }),
-  resetSearchGSAP: () =>
-    set({
-      searchResult: null,
-      initiateSearchGSAP: false,
-    }),
-
-  // Modal Handling
-  isModalOpen: false,
-  openModal: () => {
-    set({ crosshairVisible: false });
-    set({ isModalOpen: true });
-  },
-  closeModal: () => {
-    set({ crosshairVisible: true });
-    set({ isModalOpen: false });
-  },
-
-  // Cart Handling
-  isCartOpen: false,
-  openCart: () => {
-    set({ crosshairVisible: false });
-    set({ isCartOpen: true });
-  },
-  closeCart: () => {
-    set({ crosshairVisible: true });
-    set({ isCartOpen: false });
-  },
-
-  // Wishlist Handling
-  isWishlistOpen: false,
-  openWishlist: () => {
-    set({ crosshairVisible: false });
-    set({ isWishlistOpen: true });
-  },
-  closeWishlist: () => {
-    set({ crosshairVisible: true });
-    set({ isWishlistOpen: false });
-  },
 
   // Info Handling
   isInfoModalOpen: false,
@@ -178,19 +104,6 @@ const useComponentStore = create<ComponentStore>((set) => ({
     set({ isSettingsModalOpen: false });
   },
   setAudioPlaying: (play: boolean) => set({ isAudioPlaying: play }),
-
-  // Discount Handling
-  discountCode: "",
-  isDiscountModalOpen: false,
-  openDiscountModal: () => {
-    set({ crosshairVisible: false });
-    set({ isDiscountModalOpen: true });
-  },
-  closeDiscountModal: () => {
-    set({ crosshairVisible: true });
-    set({ isDiscountModalOpen: false });
-  },
-  setDiscountCode: (code: string) => set({ discountCode: code }),
 
   // Search Handling
   isProductSearcherOpen: false,
@@ -248,10 +161,32 @@ const useTourStore = create<TourStore>((set) => ({
   setTourComplete: (value) => set({ tourComplete: value }),
 }));
 
+// Search handling
+interface SearchStore {
+  searchResult: {x: number, y: number, z: number} | undefined,
+  initiateSearchGSAP: boolean,
+  setSearchResult: (position: { x: number; y: number; z: number }) => void,
+  startSearchGSAP: () => void,
+  resetSearchGSAP: () => void,
+}
+const useSearchStore = create<SearchStore>((set) => ({
+  searchResult: undefined,
+  initiateSearchGSAP: false,
+  setSearchResult: (position: { x: number; y: number; z: number }) =>
+    set({ searchResult: position }),
+  startSearchGSAP: () => set({ initiateSearchGSAP: true }),
+  resetSearchGSAP: () =>
+    set({
+      searchResult: undefined,
+      initiateSearchGSAP: false,
+    }),
+}));
+
 export {
   useComponentStore,
   usePointerLockStore,
   useTouchStore,
   useDriverStore,
   useTourStore,
+  useSearchStore
 };

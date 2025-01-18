@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useComponentStore } from "./stores/ZustandStores";
+import { useComponentStore } from "../../stores/ZustandStores";
 import { Card, Box, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

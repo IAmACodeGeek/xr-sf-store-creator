@@ -1,5 +1,5 @@
 import React, { useEffect, ReactNode } from "react";
-import { useComponentStore } from "./stores/ZustandStores";
+import { useComponentStore } from "../stores/ZustandStores";
 
 interface ModalWrapperProps {
   children: ReactNode;

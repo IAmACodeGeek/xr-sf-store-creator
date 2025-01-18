@@ -2,21 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { driver, Driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import styles from "@/UI/UI.module.scss";
-import ChatbotModal from "../Chatbot";
-import { useComponentStore, useDriverStore, useTourStore } from "../stores/ZustandStores";
-import { ShopifyProvider, CartProvider } from "@shopify/hydrogen-react";
-import Modal from "@/NewModal";
-import Cart from "@/Cart";
-import Wishlist from "@/Wishlist";
-import InfoModal from "@/InfoModal";
-import DiscountModal from "@/DiscountModal";
-import SettingsModal from "@/SettingsModal";
-import TermsConditionsModal from "@/TermsModal";
-import ContactUsModal from "@/ContactUsModal";
+import ChatbotModal from "./Components/Chatbot";
+import { useComponentStore, useDriverStore, useSearchStore, useTourStore } from "../stores/ZustandStores";
+import InfoModal from "@/UI/Components/InfoModal";
+import SettingsModal from "@/UI/Components/SettingsModal";
+import TermsConditionsModal from "@/UI/Components/TermsModal";
+import ContactUsModal from "@/UI/Components/ContactUsModal";
 import ReactAudioPlayer from "react-audio-player";
-import ModalWrapper from "@/ModalWrapper";
-import ProductSearcher from "@/ProductSearcher";
-
+import ModalWrapper from "@/world/ModalWrapper";
+import ProductSearcher from "@/UI/Components/ProductSearcher";
 
 const customDriverStyles = `
   .driver-popover {
@@ -59,16 +53,13 @@ const shopifyConfig = {
 const UI = () => {
   const {
     crosshairVisible, hideCrosshair,
-    isModalOpen, closeModal,
-    isCartOpen, openCart, closeCart,
-    isWishlistOpen, openWishlist, closeWishlist,
     isInfoModalOpen, openInfoModal, closeInfoModal,
-    discountCode, isDiscountModalOpen, closeDiscountModal,
     isSettingsModalOpen , openSettingsModal, closeSettingsModal,
-    isAudioPlaying,setSearchResult, startSearchGSAP,
+    isAudioPlaying,
     isTermsModalOpen,isContactModalOpen,
     isProductSearcherOpen,openProductSearcher,closeProductSearcher
   } = useComponentStore();
+  const { setSearchResult, startSearchGSAP } = useSearchStore();
   const { activateDriver, deactivateDriver} = useDriverStore();
   const { setTourComplete } = useTourStore();
 
@@ -124,22 +115,6 @@ const UI = () => {
           },
         },
         {
-          element: '[alt="Cart"]',
-          popover: {
-            title: "Shopping Cart",
-            description: "View and manage items in your shopping cart",
-            side: "bottom",
-          },
-        },
-        {
-          element: '[alt="Wishlist"]',
-          popover: {
-            title: "Wishlist",
-            description: "Save items for later in your wishlist",
-            side: "bottom",
-          },
-        },
-        {
           element: '[alt="Settings"]',
           popover: {
             title: "Settings",
@@ -176,15 +151,10 @@ const UI = () => {
 
   const startTour = () => {
 
-    if (isModalOpen) closeModal();
-    if (isCartOpen) closeCart();
-    if (isWishlistOpen) closeWishlist();
     if (isInfoModalOpen) closeInfoModal();
     if (ChatbotOpen) closeChatbotModal();
-    if (isDiscountModalOpen) closeDiscountModal();
     if (isSettingsModalOpen) closeSettingsModal();
     if (isProductSearcherOpen) closeProductSearcher();
-
  
     if (driverRef.current) {
       driverRef.current.drive();
@@ -218,8 +188,6 @@ const UI = () => {
 
       <div className={styles.iconsContainer}>
         <img src="/icons/Search.svg" alt="Search" className={styles.icon} onClick={openProductSearcher} />
-        <img src="/icons/Cart.svg" alt="Cart" className={styles.icon} onClick={openCart} />
-        <img src="/icons/Wishlist.svg" alt="Wishlist" className={styles.icon} onClick={openWishlist} />
         <img src="/icons/Settings.svg"  alt="Settings" className={styles.icon} onClick={openSettingsModal} />
         <img src="/icons/Help.svg" alt="Help" className={styles.icon} onClick={startTour}/>
       </div>
@@ -245,24 +213,6 @@ const UI = () => {
           }}
         />
       </div>
-
-      <ShopifyProvider
-        countryIsoCode="ID"
-        languageIsoCode="ID"
-        {...shopifyConfig}
-      >
-        <CartProvider>
-          {isModalOpen && (
-            <Modal />
-          )}
-          {isCartOpen && (
-            <Cart></Cart>
-          )}
-        </CartProvider>
-      </ShopifyProvider>
-      {isWishlistOpen && (
-        <Wishlist></Wishlist>
-      )}
       {isInfoModalOpen && (
         <InfoModal></InfoModal>
       )}
@@ -272,11 +222,6 @@ const UI = () => {
       {isContactModalOpen && (
         <ContactUsModal />
       )}
-      <DiscountModal
-        isOpen={isDiscountModalOpen}
-        onClose={closeDiscountModal}
-        discountCode={discountCode}
-      />
       {isSettingsModalOpen && <ModalWrapper><SettingsModal /></ModalWrapper>}
       {isProductSearcherOpen && <ProductSearcher></ProductSearcher>}
       <div>

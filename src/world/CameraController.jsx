@@ -1,6 +1,6 @@
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useTourStore } from "./stores/ZustandStores";
+import { useTourStore } from "../stores/ZustandStores";
 import { useEffect } from "react";
 
 export const CameraController = ({ setAnimating, playerRef }) => {

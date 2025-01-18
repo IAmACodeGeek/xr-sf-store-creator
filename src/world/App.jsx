@@ -1,22 +1,21 @@
 import * as TWEEN from "@tweenjs/tween.js";
 import { PointerLockControls } from "@react-three/drei";
-import { Ground } from "@/Ground.jsx";
+import { Ground } from "./Ground.jsx";
 import { Physics } from "@react-three/rapier";
-import { Player } from "@/Player.jsx";
+import { Player } from "./Player.jsx";
 import { useFrame } from "@react-three/fiber";
 import Television from "./Television";
 import BrandPoster from "./BrandPoster";
 import ImageShowcase from "./ImageShowcase";
 import Products from "./Products";
-import ChestBox from "./Chestbox";
 import { Suspense, useState, useEffect } from "react";
 import Skybox from "./Skybox";
 import {
   useComponentStore,
   usePointerLockStore,
   useDriverStore,
-} from "./stores/ZustandStores";
-import { useTouchStore } from "./stores/ZustandStores";
+} from "../stores/ZustandStores";
+import { useTouchStore } from "../stores/ZustandStores";
 
 const shadowOffset = 50;
 
@@ -98,7 +97,6 @@ export const App = () => {
           <Player />
         </Suspense>
         <Products />
-        <ChestBox />
         <Television
           videoPath="/media/backhome.mp4"
           scale={[0.9, 0.9, 0.9]}

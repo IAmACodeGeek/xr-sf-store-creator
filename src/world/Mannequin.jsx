@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { PivotControls, Billboard, Image } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useComponentStore } from "./stores/ZustandStores";
+import { useComponentStore } from "../stores/ZustandStores";
 import Swal from "sweetalert2";
 import styles from "@/UI/UI.module.scss";
-import { ProductService } from "./api/shopifyAPIService";
+import { ProductService } from "../api/shopifyAPIService";
 
 const DraggableMannequin = ({
   position = [0, 0, 0],

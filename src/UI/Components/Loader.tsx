@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import React from "react";
-import "./styles/loading-animation.css";
+import "./loading-animation.css";
 
 interface LoadProps {
   progress: number; 

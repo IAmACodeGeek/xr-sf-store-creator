@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useComponentStore } from "./stores/ZustandStores";
+import { useComponentStore } from "../stores/ZustandStores";
 
 export const ProductGSAPUtil = ({ setAnimating, playerRef }) => {
   const { camera } = useThree();
