@@ -70,6 +70,7 @@ const DraggableMannequin = ({
         anchor={[0, 0, 0]}
         scale={1}
         activeAxes={[false, false, false]}
+        disableScaling={true}
       >
         <primitive
           object={memoizedModelScene}
@@ -80,9 +81,7 @@ const DraggableMannequin = ({
           onClick={handleEvent}
           castShadow
           receiveShadow
-        />
-
-        
+        />    
         {sale && (
           <Billboard
             follow={true}

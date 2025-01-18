@@ -5,19 +5,18 @@ const LazyMannequin = React.lazy(() => import("./Mannequin"));
 
 const Products = () => {
   return (
-    // <Suspense fallback={null}>
-    //   {mannequinData.map((data, index) => (
-    //     <ModelWrapper
-    //       key={index}
-    //       productId={data.id}
-    //       modelPath={data.modelPath}
-    //       position={data.position}
-    //       scale={data.scale}
-    //       sale={data.sale || false }
-    //     />
-    //   ))}
-    // </Suspense>
-    null
+    <Suspense fallback={null}>
+      {mannequinData.map((data, index) => (
+        <ModelWrapper
+          key={index}
+          productId={data.id}
+          modelPath={data.modelPath}
+          position={data.position}
+          scale={data.scale}
+          sale={data.sale || false }
+        />
+      ))}
+    </Suspense>
   );
 };
 

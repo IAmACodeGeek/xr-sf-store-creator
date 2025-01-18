@@ -313,7 +313,7 @@ export const Player = () => {
 
 
     const { x, y, z } = playerRef.current.translation();
-    const lerpFactor = 0.05;
+    const lerpFactor = 0.1;
     state.camera.position.lerp({ x, y, z }, lerpFactor);
   });
 

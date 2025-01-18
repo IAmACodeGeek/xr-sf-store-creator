@@ -11,6 +11,7 @@ import ContactUsModal from "@/UI/Components/ContactUsModal";
 import ReactAudioPlayer from "react-audio-player";
 import ModalWrapper from "@/world/ModalWrapper";
 import ProductSearcher from "@/UI/Components/ProductSearcher";
+import { CreatorKit } from "./Components/CreatorKit";
 
 const customDriverStyles = `
   .driver-popover {
@@ -53,6 +54,7 @@ const shopifyConfig = {
 const UI = () => {
   const {
     crosshairVisible, hideCrosshair,
+    isCreatorKitOpen,
     isInfoModalOpen, openInfoModal, closeInfoModal,
     isSettingsModalOpen , openSettingsModal, closeSettingsModal,
     isAudioPlaying,
@@ -193,14 +195,13 @@ const UI = () => {
       </div>
 
   
-      <div className={styles.brandLogoContainer}>
+      {/* <div className={styles.brandLogoContainer}>
         <img
           src="/logo.avif"
           alt="Brand Logo"
           className={styles.brandLogo}
         />
-      </div>
-
+      </div> */}
     
       <div className={styles.chatLogoContainer}>
         <img
@@ -213,6 +214,7 @@ const UI = () => {
           }}
         />
       </div>
+      <CreatorKit/>
       {isInfoModalOpen && (
         <InfoModal></InfoModal>
       )}

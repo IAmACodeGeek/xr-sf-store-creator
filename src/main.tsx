@@ -10,18 +10,19 @@ import { ProductService } from "./api/shopifyAPIService";
 import { useComponentStore } from "./stores/ZustandStores";
 
 function CanvasWrapper() {
-  const { setProducts } = useComponentStore();
+  const { products, setProducts, setSelectedProduct } = useComponentStore();
   const { progress } = useProgress();
 
   async function fetchProducts() {
     try {
       const response = await ProductService.getAllProducts();
       setProducts(response);
-      
+      setSelectedProduct(response[0].id);
     } catch (err) {
       console.error(err);
     }
   }
+
   useEffect(() => {
     fetchProducts();
   }, []);

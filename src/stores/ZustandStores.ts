@@ -13,6 +13,11 @@ interface ComponentStore {
   setProducts: (products: Product[]) => void;
   setSelectedProduct: (productId: number) => void;
 
+  // Creator Kit handling
+  isCreatorKitOpen: boolean;
+  openCreatorKit: () => void;
+  closeCreatorKit: () => void;
+
   // Info Handling
   isInfoModalOpen: boolean;
   openInfoModal: () => void;
@@ -58,6 +63,17 @@ const useComponentStore = create<ComponentStore>((set) => ({
       );
       return { ...state, selectedProduct: finalProduct };
     }),
+
+  // Creator Kit handling
+  isCreatorKitOpen: false,
+  openCreatorKit: () => {
+    set({ crosshairVisible: false });
+    set({ isCreatorKitOpen: true });
+  },
+  closeCreatorKit: () => {
+    set({ crosshairVisible: true });
+    set({ isCreatorKitOpen: false });
+  },
 
   // Info Handling
   isInfoModalOpen: false,

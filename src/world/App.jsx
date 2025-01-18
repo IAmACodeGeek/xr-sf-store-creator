@@ -14,8 +14,8 @@ import {
   useComponentStore,
   usePointerLockStore,
   useDriverStore,
+  useTouchStore
 } from "../stores/ZustandStores";
-import { useTouchStore } from "../stores/ZustandStores";
 
 const shadowOffset = 50;
 
@@ -23,11 +23,7 @@ export const App = () => {
   const [isMobile, setIsMobile] = useState(false);
   const {
     crosshairVisible,
-    isModalOpen,
-    isWishlistOpen,
-    isCartOpen,
     isInfoModalOpen,
-    isDiscountModalOpen,
     isSettingsModalOpen,
     isTermsModalOpen,
     isContactModalOpen,
@@ -50,11 +46,7 @@ export const App = () => {
       isTouchEnabled &&
       crosshairVisible &&
       !driverActive &&
-      !isModalOpen &&
-      !isCartOpen &&
-      !isWishlistOpen &&
       !isInfoModalOpen &&
-      !isDiscountModalOpen &&
       !isSettingsModalOpen &&
       !isTermsModalOpen &&
       !isContactModalOpen &&
@@ -116,13 +108,6 @@ export const App = () => {
           height={108 * 4}
           position={[-2.2, 3.2, -55.35]}
           rotation={[0, 90, 1]}
-        />
-        <ImageShowcase
-          url="https://cdn.shopify.com/s/files/1/0901/2222/3909/files/image_7.png?v=1736493908"
-          width={108 * 1.5}
-          height={192 * 1.5}
-          position={[-14, -2.5, -70.35]}
-          transparent
         />
       </Physics>
     </>

@@ -660,7 +660,6 @@ const Modal = () => {
       const findIfVariantExists = (optionName: string, optionValue: string) => {
 
         const num = selectedProduct?.options.map((option) => option.name).indexOf(optionName) || 0;
-
         
         if (selectedVariant && selectedProduct) {
           return selectedProduct.variants.find((variant) => {
