@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
-import { Html, useProgress } from "@react-three/drei";
+import { Html, useGLTF, useProgress } from "@react-three/drei";
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
 import { EnvProduct, useComponentStore, useEnvProductStore } from "./stores/ZustandStores";
+import Product from "./Types/Product.js";
 
 function CanvasWrapper() {
   const { products, setProducts, setSelectedProduct } = useComponentStore();
@@ -42,21 +43,49 @@ function CanvasWrapper() {
         };
         return envProduct;
       })
-    )
+    );
+  }, [products]);
+
+  // Show loader for minimum of 3 seconds
+  const [showLoader, setShowLoader] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(false); // Hide loader after 3 seconds
+    }, 3000);
+
+    // Cleanup timer on component unmount
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Preload models
+  const preloadModels = (products: Product[]) => {
+    for (const product of products) {
+      for (const model of product.models) {
+        const url = model.sources?.[0].url || '';
+        if (url) {
+          useGLTF.preload(url);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    preloadModels(products);
   }, [products]);
 
   return (
     <div id="container">
-      {progress >= 100 && <UI />}
+      {( progress >= 100) && <UI />}
+      {(showLoader || progress < 100) && <Load progress={progress}/>}
       <Canvas camera={{ fov: 45 }} shadows>
         <React.Suspense
           fallback={
             <Html center>
-              <Load progress={progress} />
+              <Load progress={progress}/>
             </Html>
           }
         >
-          <App />
+          <App/>
         </React.Suspense>
       </Canvas>
     </div>

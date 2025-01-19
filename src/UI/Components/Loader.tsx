@@ -8,13 +8,6 @@ interface LoadProps {
 
 const Load: React.FC<LoadProps> = ({ progress }) => {
 
-  const prevProgressRef = useRef(0);
-
-  const displayProgress = Math.max(progress, prevProgressRef.current);
-
-  prevProgressRef.current = displayProgress;
-
-
   return (
     <div
       className="loader-background"
@@ -31,7 +24,7 @@ const Load: React.FC<LoadProps> = ({ progress }) => {
           </div>
           <div className="loading-text-container">
             <div className="loading-text typewriter">Delta XR</div>
-            <div className="loading-text">{Math.round(displayProgress)}%</div>
+            <div className="loading-text">{Math.round(progress)}%</div>
           </div>
           <img
             id="powered-by-loader"
