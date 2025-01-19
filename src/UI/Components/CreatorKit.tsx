@@ -1,14 +1,32 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
-import { useComponentStore } from "../../stores/ZustandStores";
+import { useComponentStore, useEnvProductStore, EnvProduct } from "../../stores/ZustandStores";
 import { useEffect, useRef } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 
 export const CreatorKit = () => {
   const { products, selectedProduct, setSelectedProduct, isCreatorKitOpen, openCreatorKit, closeCreatorKit } = useComponentStore();
-  
+  const { envProducts, modifyEnvProduct } = useEnvProductStore();
+
+  useEffect(() => {
+    if(!selectedProduct && products[0]){
+      setSelectedProduct(products[0].id);
+    }
+  }, [products]);
+
   // For saving and retrieving scroll position from session storage
   const productListRef = useRef<HTMLDivElement>(null);
+  const productPaneRef = useRef<HTMLDivElement>(null);
+  
+  const handleScroll = () => {
+    if (productListRef.current) {
+      sessionStorage.setItem("productListScrollPosition", productListRef.current.scrollTop.toString());
+    }
+    if (productPaneRef.current){
+      sessionStorage.setItem("productPaneScrollPosition", productPaneRef.current.scrollTop.toString());
+    }
+  };
+
   useEffect(() => {
     if (productListRef.current) {
       const storedScrollPosition = sessionStorage.getItem("productListScrollPosition");
@@ -17,15 +35,20 @@ export const CreatorKit = () => {
       }
     }
   }, [isCreatorKitOpen, selectedProduct]);
-  const handleScroll = () => {
-    if (productListRef.current) {
-      sessionStorage.setItem("productListScrollPosition", productListRef.current.scrollTop.toString());
+
+  useEffect(() => {
+    if(productPaneRef.current){
+      const storedScrollPosition = sessionStorage.getItem("productPaneScrollPosition");
+      if(storedScrollPosition){
+        productPaneRef.current.scrollTop = parseFloat(storedScrollPosition);
+      }
     }
-  };
+  }, [envProducts]);
 
   const ProductPane = () => {
     const MediaSelector = () => {
       const mediaTypes = ["Image", "Model_3D"];
+      
       return (
         <Box
           sx={{
@@ -65,23 +88,85 @@ export const CreatorKit = () => {
                   className="ListofValues"
                 >
                   {(mediaType.toUpperCase() === "IMAGE") &&
-                    selectedProduct?.images.map((image) => {
+                    selectedProduct?.images.map((image, index) => {
                       return (
                         <Box
-                          component="img"
-                          src={image.src}
                           sx={{
-                            width: "150px", minWidth: "150px", aspectRatio: "1 / 1",
-                            backgroundColor: "rgba(255, 255, 255, 0.05)",
-                            borderRadius: "10px"
+                            width: "180px", minWidth: "180px",
+                            display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
+                            backgroundColor: (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)?
+                            "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
+                            padding: "15px", boxSizing: "border-box",
+                            gap: "20px"
                           }}
                           key={image.src}
-                        />
+                        >
+                          <Box
+                            component="img"
+                            src={image.src}
+                            sx={{
+                              width: "100%", minWidth: "100%", aspectRatio: "1 / 1",
+                              backgroundColor: "rgba(255, 255, 255, 0.075)",
+                            }}
+                          />
+                          <Button
+                            sx={{
+                              width: "100%", minWidth: "100%",
+                              backgroundColor: "#24a0ed", color: "white",
+                              borderRadius: "0",
+                              fontFamily: "'Poppins', sans-serif",
+                              fontSize: "14px"
+                            }}
+                            disabled={
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "PHOTO") && 
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)
+                            }
+                            className="UseAsPhotoButton"
+                            onClick={() => {
+                              const envProduct: EnvProduct = {
+                                id: selectedProduct.id,
+                                type: "PHOTO",
+                                imageIndex: index,
+                                modelIndex: undefined,
+                                isEnvironmentProduct: true
+                              };
+                              modifyEnvProduct(selectedProduct.id, envProduct);
+                            }}
+                          >
+                            Use as Photo
+                          </Button>
+                          <Button
+                            sx={{
+                              width: "100%", minWidth: "100%",
+                              backgroundColor: "#24a0ed", color: "white",
+                              borderRadius: "0",
+                              fontFamily: "'Poppins', sans-serif", 
+                              fontSize: "14px"
+                            }}
+                            className="Pseudo3dButton"
+                            disabled={
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "PSEUDO_3D") &&
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)
+                            }
+                            onClick={() => {
+                              const envProduct: EnvProduct = {
+                                id: selectedProduct.id,
+                                type: "PSEUDO_3D",
+                                imageIndex: index,
+                                modelIndex: undefined,
+                                isEnvironmentProduct: true
+                              };
+                              modifyEnvProduct(selectedProduct.id, envProduct);
+                            }}
+                          >
+                            Pseudo 3D
+                          </Button>
+                        </Box>
                       );
                     })
                   }
                   {(mediaType.toUpperCase() === "MODEL_3D") &&
-                    selectedProduct?.models.map((model) => {
+                    selectedProduct?.models.map((model, index) => {
                       
                       const modelData = {
                         id: model.id,
@@ -90,36 +175,72 @@ export const CreatorKit = () => {
                       };
                       const iosSrc = model.sources && model.sources[1].url;
                       
-                      return (                        
+                      return (
                         <Box
                           sx={{
-                            width: "250px", minWidth: "250px", aspectRatio: "1 / 1",
-                            "& model-viewer": {
-                              "--poster-color": "transparent",
-                              "--ar-button-display": "none !important",
-                            }
+                            width: "230px", minWidth: "230px",
+                            display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
+                            backgroundColor: "rgba(255, 255, 255, 0.05)",
+                            padding: "15px", boxSizing: "border-box",
+                            gap: "20px"
                           }}
-                        >
-                          <ModelViewer
-                            style={{
-                              height: "100%",
-                              width: "100%",
+                          key={model.id}
+                        >                      
+                          <Box
+                            sx={{
+                              width: "200px", minWidth: "200px", aspectRatio: "1 / 1",
+                              "& model-viewer": {
+                                "--poster-color": "transparent",
+                                "--ar-button-display": "none !important",
+                              }
                             }}
-                            data={modelData}
-                            ar={true} 
-                            arModes="scene-viewer webxr quick-look" 
-                            arScale="auto" 
-                            iosSrc={iosSrc} 
-                            cameraControls={true} 
-                            environmentImage="neutral" 
-                            poster="" 
-                            alt="A 3D model of a product"
-                            onArStatus={(event: unknown) => console.log("AR Status:", event)} 
-                            onLoad={() => console.log("Model loaded")} 
-                          />
+                          >
+                            <ModelViewer
+                              style={{
+                                height: "100%",
+                                width: "100%",
+                              }}
+                              data={modelData}
+                              ar={true} 
+                              arModes="scene-viewer webxr quick-look" 
+                              arScale="auto" 
+                              iosSrc={iosSrc} 
+                              cameraControls={true} 
+                              environmentImage="neutral" 
+                              poster="" 
+                              alt="A 3D model of a product"
+                              onArStatus={(event: unknown) => console.log("AR Status:", event)} 
+                              onLoad={() => console.log("Model loaded")} 
+                            />
+                          </Box>
+                          <Button
+                            sx={{
+                              width: "100%", minWidth: "100%",
+                              backgroundColor: "#24a0ed", color: "white",
+                              borderRadius: "0",
+                              fontFamily: "'Poppins', sans-serif", 
+                              fontSize: "14px"
+                            }}
+                            disabled={
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "MODEL_3D") &&
+                              (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].modelIndex === index)
+                            }
+                            onClick={() => {
+                              const envProduct: EnvProduct = {
+                                id: selectedProduct.id,
+                                type: "MODEL_3D",
+                                imageIndex: undefined,
+                                modelIndex: index,
+                                isEnvironmentProduct: true
+                              };
+                              // console.log(selectedProduct.models[envProduct.modelIndex || 0]?.sources[0].url);
+                              modifyEnvProduct(selectedProduct.id, envProduct);
+                            }}
+                          >
+                            Use 3D Model
+                          </Button>
                         </Box>
                       );
-                      
                     })
                   }
                 </Box>
@@ -140,6 +261,8 @@ export const CreatorKit = () => {
           padding: "20px", boxSizing: "border-box",
           borderRadius: "0 20px 20px 0"
         }}
+        onScroll={handleScroll}
+        ref={productPaneRef}
         className="ProductPane"
       >
         <Typography
@@ -183,7 +306,8 @@ export const CreatorKit = () => {
                 "&:hover": {
                   backgroundColor: "rgba(255, 255, 255, 0.15)",
                   cursor: "pointer"
-                }
+                },
+                padding: "0 10px 0 10px", boxSizing: "border-box"
               }}
               key={product.id}
               className="ProductItem"

@@ -1,39 +1,32 @@
 import React, { Suspense } from "react";
-import { useGLTFWithKTX2 } from "./useGTLFwithKTX";
-import mannequinData from "../data/MannequinData";
-const LazyMannequin = React.lazy(() => import("./Mannequin"));
+import { useEnvProductStore } from "@/stores/ZustandStores";
+
+const LazyDraggableContainer = React.lazy(() => 
+  import("./DraggableContainer").then(module => ({ 
+    default: module.default || module 
+  }))
+);
 
 const Products = () => {
+  const {envProducts} = useEnvProductStore();
+
   return (
     <Suspense fallback={null}>
-      {mannequinData.map((data, index) => (
-        <ModelWrapper
-          key={index}
-          productId={data.id}
-          modelPath={data.modelPath}
-          position={data.position}
-          scale={data.scale}
-          sale={data.sale || false }
-        />
-      ))}
+      {
+        Object.keys(envProducts).map((id) => {
+          return ( envProducts[id].isEnvironmentProduct &&
+            <LazyDraggableContainer
+              position={envProducts[id].position}
+              rotation={envProducts[id].rotation}
+              scale={envProducts[id].scale}
+              envProduct={envProducts[id]}
+              key={id}
+            />
+          );
+        })
+      }
     </Suspense>
   );
-};
-
-
-const ModelWrapper = ({ productId, modelPath, position, scale ,sale}) => {
-  const { scene } = useGLTFWithKTX2(modelPath); 
-
-  return scene ? ( 
-    <LazyMannequin
-      productId={productId}
-      position={position}
-      modelPath={modelPath}
-      sale = {sale}
-      scale={scale}
-      model={{ scene }}
-    />
-  ) : null; 
 };
 
 export default Products;

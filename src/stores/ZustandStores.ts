@@ -198,11 +198,42 @@ const useSearchStore = create<SearchStore>((set) => ({
     }),
 }));
 
+// Environment Product Handling
+interface EnvProduct {
+  id: number;
+  type: string;
+  imageIndex: number | undefined;
+  modelIndex: number | undefined;
+  position?: number[];
+  rotation?: number[];
+  scale?: number;
+  isEnvironmentProduct: boolean;
+}
+
+interface EnvProductStore {
+  envProducts: {[id: number]: EnvProduct};
+  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => void;
+  modifyEnvProduct: (id: number, envProduct: EnvProduct) => void;
+}
+
+const useEnvProductStore = create<EnvProductStore>((set) => ({
+  envProducts: {},
+  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => set({envProducts: envProducts}),
+  modifyEnvProduct: (id: number, envProduct: EnvProduct) => set((state: { envProducts: { [id: number]: EnvProduct } }) => ({
+    envProducts: {
+      ...state.envProducts,
+      [id]: { ...state.envProducts[id], ...envProduct },
+    },
+  }))
+}));
+
 export {
   useComponentStore,
   usePointerLockStore,
   useTouchStore,
   useDriverStore,
   useTourStore,
-  useSearchStore
-};
+  useSearchStore,
+  useEnvProductStore
+};  
+export type { EnvProduct };
