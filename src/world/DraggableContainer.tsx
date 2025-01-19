@@ -3,18 +3,19 @@ import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useState } from "react";
 import type Product from '../Types/Product';
+import {Box3, Vector3} from 'three';
 
 interface DraggableContainerProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
-  scale?: number;
+  scale: number | undefined;
   envProduct: EnvProduct;
 }
 
 const DraggableContainer = ({
   position = [2, -4, -77],
   rotation = [0, 0, 0],
-  scale = 1,
+  scale,
   envProduct
 }: DraggableContainerProps) => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
@@ -67,6 +68,18 @@ const DraggableContainer = ({
     return rotation.map((deg) => (deg * Math.PI) / 180) as [number, number, number];
   }, [rotation]);
 
+  const computedScale = useMemo(() => {
+    if(scale) 
+      return scale;
+
+    // Manually compute scale such that object not too big
+    const box = new Box3().setFromObject(scene);
+    const standardHeight = 1;
+    const size = new Vector3();
+    box.getSize(size);
+    return standardHeight / size.z;
+  }, [scene])
+
   const handleClick = (event) => {
     event.stopPropagation();
     if (envProduct) {
@@ -92,7 +105,7 @@ const DraggableContainer = ({
           object={memoizedModelScene}
           position={position}
           rotation={computedRotation}
-          scale={[scale, scale, scale]}
+          scale={[computedScale, computedScale, computedScale]}
           onClick={handleClick}
           onPointerDown={handleClick}
           castShadow
