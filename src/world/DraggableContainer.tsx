@@ -6,16 +6,16 @@ import type Product from '../Types/Product';
 import {Box3, Vector3} from 'three';
 
 interface DraggableContainerProps {
-  position?: [number, number, number];
-  rotation?: [number, number, number];
-  scale: number | undefined;
+  position?: [number, number, number] | undefined;
+  rotation?: [number, number, number] | undefined;
+  scale?: number | undefined;
   envProduct: EnvProduct;
 }
 
 const DraggableContainer = ({
-  position = [2, -4, -77],
-  rotation = [0, 0, 0],
-  scale,
+  position = [0, 0, 0],
+  rotation = undefined,
+  scale = undefined,
   envProduct
 }: DraggableContainerProps) => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
@@ -65,9 +65,12 @@ const DraggableContainer = ({
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
-    return rotation.map((deg) => (deg * Math.PI) / 180) as [number, number, number];
+    if(rotation)
+      return rotation.map((deg) => (deg * Math.PI) / 180) as [number, number, number];
+    else
+      return [0, 0, 0];
   }, [rotation]);
-
+  
   const computedScale = useMemo(() => {
     if(scale) 
       return scale;
@@ -77,12 +80,30 @@ const DraggableContainer = ({
     const standardHeight = 1;
     const size = new Vector3();
     box.getSize(size);
-    return standardHeight / size.z;
-  }, [scene])
+    return standardHeight / size.y;
+  }, [scene, scale]);
+
+  const computedPosition = useMemo(() => {
+    const positionVector = new Vector3(position[0], position[1], position[2]);
+    
+    // Get the bounding box AFTER applying scale
+    const scaledScene = scene.clone();
+    scaledScene.scale.set(computedScale, computedScale, computedScale);
+    const box = new Box3().setFromObject(scaledScene);
+    
+    // Calculate center offset
+    const boxCenter = new Vector3();
+    box.getCenter(boxCenter);
+    
+    // Adjust position to account for scaled center offset
+    const newPosition = positionVector.clone().sub(boxCenter.clone().sub(positionVector));
+    
+    return [newPosition.x, newPosition.y, newPosition.z];
+  }, [scene, computedScale, position]);
 
   const handleClick = (event) => {
     event.stopPropagation();
-    if (envProduct) {
+    if (envProduct && envProduct.id !== selectedProduct?.id) {
       setSelectedProduct(envProduct.id);
     }
   };
@@ -101,16 +122,17 @@ const DraggableContainer = ({
         visible={isSelected}
         disableScaling
       >
-        <primitive
+        {envProduct.type === "MODEL_3D" &&
+          <primitive
           object={memoizedModelScene}
-          position={position}
+          position={computedPosition}
           rotation={computedRotation}
           scale={[computedScale, computedScale, computedScale]}
           onClick={handleClick}
           onPointerDown={handleClick}
           castShadow
           receiveShadow
-        />
+        />}
       </PivotControls>
     </RigidBody>
   );
