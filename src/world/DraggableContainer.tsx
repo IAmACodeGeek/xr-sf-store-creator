@@ -3,19 +3,20 @@ import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-th
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useState } from "react";
 import type Product from '../Types/Product';
-import {Box3, Vector3} from 'three';
+import {Box3, Euler, TextureLoader, Vector3} from 'three';
+import { useLoader } from "@react-three/fiber";
 
 interface DraggableContainerProps {
-  position?: [number, number, number] | undefined;
-  rotation?: [number, number, number] | undefined;
-  scale?: number | undefined;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number;
   envProduct: EnvProduct;
 }
 
 const DraggableContainer = ({
-  position = [0, 0, 0],
-  rotation = undefined,
-  scale = undefined,
+  position = [0, 0, -20],
+  rotation = [0, 0, 0],
+  scale = 1,
   envProduct
 }: DraggableContainerProps) => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
@@ -68,24 +69,25 @@ const DraggableContainer = ({
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
-    if(rotation)
-      return rotation.map((deg) => (deg * Math.PI) / 180) as [number, number, number];
-    else
-      return [0, 0, 0];
+    const rotArray = rotation || [0, 0, 0];
+    return new Euler(
+      rotArray[0] * Math.PI / 180,
+      rotArray[1] * Math.PI / 180,
+      rotArray[2] * Math.PI / 180
+    )
   }, [rotation]);
   
   // Manually compute scale such that object has unit height
   const computedScaleForModel = useMemo(() => {
     if(!scene) return null;
 
-    if(scale) return scale;
-
     const box = new Box3().setFromObject(scene);
-    const standardHeight = 1.5;
+
     const size = new Vector3();
     box.getSize(size);
-    return standardHeight / size.y;
-  }, [scene, scale, envProduct.type]);
+
+    return scale / size.y;
+  }, [scene, scale]);
 
   const computedPositionForModel = useMemo(() => {
     if(!computedScaleForModel || !scene) return null;
@@ -102,10 +104,40 @@ const DraggableContainer = ({
     box.getCenter(boxCenter);
     
     // Adjust position to account for scaled center offset
-    const newPosition = positionVector.clone().sub(boxCenter.clone().sub(positionVector));
+    const newPosition = positionVector.clone().sub(boxCenter.clone());
     
     return [newPosition.x, newPosition.y, newPosition.z];
   }, [scene, computedScaleForModel, position]);
+
+  const imageUrl = useMemo(() => {
+    if(!envProduct.imageIndex || !["PSEUDO_3D", "PHOTO"].includes(envProduct.type)) return null;
+    return product?.images[envProduct.imageIndex].src || "";
+  }, [envProduct.type, envProduct.imageIndex, product?.images]);
+
+  const imageTexture = useMemo(() => {
+    if(!imageUrl) return null;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useLoader(TextureLoader, imageUrl);
+  }, [imageUrl]);
+
+  const computedSizeForImage = useMemo(() => {
+    if(!imageTexture) return null;
+
+    const width = imageTexture.image.width;
+    const height = imageTexture.image.height;
+
+    // Convert to world size
+    const convertPixelToWorldSize = (i: number) => { return i / 100 };
+    const imageWidthInWorld = convertPixelToWorldSize(width);
+    const imageHeightInWorld = convertPixelToWorldSize(height)
+
+    // Scale
+    const computedScale = scale / imageHeightInWorld;
+    return [
+      computedScale * imageWidthInWorld,
+      computedScale * imageHeightInWorld
+    ];
+  }, [imageTexture, scale]);
 
   const handleClick = (event) => {
     event.stopPropagation();
@@ -143,6 +175,18 @@ const DraggableContainer = ({
               transparent={true} 
             />
           </Billboard>
+        }
+        {envProduct.type === "PHOTO" && computedSizeForImage &&
+          <mesh
+            position={position}
+            rotation={computedRotation}
+          >
+            <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
+            <meshBasicMaterial 
+              map={imageTexture}
+              transparent={false}
+            />
+          </mesh>
         }
       </PivotControls>
     </RigidBody>

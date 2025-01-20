@@ -6,7 +6,6 @@ import { Player } from "./Player.jsx";
 import { useFrame } from "@react-three/fiber";
 import Television from "./Television";
 import BrandPoster from "./BrandPoster";
-import ImageShowcase from "./ImageShowcase";
 import Products from "./Products";
 import { Suspense, useState, useEffect } from "react";
 import Skybox from "./Skybox";
