@@ -1,9 +1,9 @@
 import { useComponentStore, EnvProduct } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
-import {Box3, Euler, TextureLoader, Vector3} from 'three';
+import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader } from "@react-three/fiber";
 
 interface DraggableContainerProps {
@@ -31,7 +31,7 @@ const DraggableContainer = ({
   useEffect(() => {
     setIsSelected(selectedProduct?.id === envProduct.id);
   }, [selectedProduct, envProduct.id]);
-
+  
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
     if (envProduct.type !== "MODEL_3D" || !product?.models || envProduct.modelIndex === undefined) {
@@ -89,8 +89,11 @@ const DraggableContainer = ({
     return scale / size.y;
   }, [scene, scale]);
 
-  const computedPositionForModel = useMemo(() => {
-    if(!computedScaleForModel || !scene) return null;
+  const {computedPositionForModel, boxCenter} = useMemo(() => {
+    if(!computedScaleForModel || !scene) return {
+      computedPositionForModel: null,
+      boxCenter: null
+    };
 
     const positionVector = new Vector3(position[0], position[1], position[2]);
     
@@ -106,8 +109,51 @@ const DraggableContainer = ({
     // Adjust position to account for scaled center offset
     const newPosition = positionVector.clone().sub(boxCenter.clone());
     
-    return [newPosition.x, newPosition.y, newPosition.z];
+    return {
+      computedPositionForModel: [newPosition.x, newPosition.y, newPosition.z],
+      boxCenter: boxCenter
+    }
   }, [scene, computedScaleForModel, position]);
+
+  // Set position and rotation
+  const objectRef = useRef<Mesh | Object3D>(null);
+  useEffect(() => {
+    if(!objectRef.current) return;
+
+    // Position
+    let worldPosition = new Vector3(0, 0, 0);
+    
+    if(envProduct.type === "PHOTO" || envProduct.type === "PSEUDO_3D"){
+      worldPosition = new Vector3(...position);
+      console.log("photo");
+      console.log(position);
+    }
+    else if(envProduct.type === "MODEL_3D" && computedPositionForModel){
+      worldPosition = new Vector3(...computedPositionForModel);
+      console.log("model", worldPosition);
+    }
+    
+    objectRef.current.matrixWorld.setPosition(worldPosition);
+    if (objectRef.current.parent) {
+      worldPosition.applyMatrix4(objectRef.current.parent.matrixWorld.invert());
+    }
+    objectRef.current.position.copy(worldPosition);
+
+    // Rotation
+    const worldRotation = computedRotation;
+    const quaternion = new Quaternion();
+    quaternion.setFromEuler(worldRotation);
+
+    if (objectRef.current.parent){
+      const parentQuaternion = new Quaternion();
+      objectRef.current.parent.getWorldQuaternion(parentQuaternion);
+
+      parentQuaternion.invert();
+      quaternion.multiplyQuaternions(parentQuaternion, quaternion);
+    }
+    objectRef.current.setRotationFromQuaternion(quaternion);
+
+  }, [position, computedPositionForModel, envProduct.type, computedRotation]);
 
   const imageUrl = useMemo(() => {
     if(!envProduct.imageIndex || !["PSEUDO_3D", "PHOTO"].includes(envProduct.type)) return null;
@@ -146,49 +192,84 @@ const DraggableContainer = ({
     }
   };
 
+  const handleObjectMove = () => {
+    if(!objectRef.current) return;
+
+    objectRef.current.updateMatrixWorld();
+
+    const position = new Vector3();
+    objectRef.current.getWorldPosition(position);
+    if(envProduct.type === "MODEL_3D" && boxCenter){ // Neutralize the auto generated offset
+      position.add(boxCenter);
+    }
+
+    const quaternion = new Quaternion();
+    objectRef.current.getWorldQuaternion(quaternion);
+
+    const euler = new Euler();
+    euler.setFromQuaternion(quaternion);
+
+    const pos = [position.x, position.y, position.z];
+    const rot =  [
+      euler.x * 180 / Math.PI,
+      euler.y * 180 / Math.PI,
+      euler.z * 180 / Math.PI
+    ];
+    
+    envProduct.position = pos;
+    envProduct.rotation = rot;
+  };
+
   return (
     <RigidBody type="fixed">
-      <PivotControls
-        anchor={[0, 0, 0]}
-        scale={1.25}
-        activeAxes={[isSelected, isSelected, isSelected]}
-        visible={isSelected}
-        disableScaling
+      <group
+        position={[0, 0, 0]}
+        rotation={new Euler(0, 0, 0)}
       >
-        {envProduct.type === "MODEL_3D" && memoizedModelScene &&
-          <primitive
-            object={memoizedModelScene}
-            position={computedPositionForModel}
-            rotation={computedRotation}
-            scale={[computedScaleForModel, computedScaleForModel, computedScaleForModel]}
-            onClick={handleClick}
-            onPointerDown={handleClick}
-            castShadow
-            receiveShadow
-          />
-        }
-        {envProduct.type === "PSEUDO_3D" &&
-          <Billboard position={position} follow={true} lockX={false} lockY={false} lockZ={false}>
-            <DreiImage 
-              url={product?.images?.[envProduct.imageIndex || 0].src || ""}
-              scale={[scale || 1, scale || 1]} 
-              transparent={true} 
+        <PivotControls
+          anchor={[0, 0, 0]}
+          scale={1.25}
+          activeAxes={[isSelected, isSelected, isSelected]}
+          visible={isSelected}
+          onDragEnd={handleObjectMove}
+          disableScaling
+        >
+          {envProduct.type === "MODEL_3D" && memoizedModelScene &&
+            <primitive
+              ref={objectRef}
+              object={memoizedModelScene}
+              scale={[computedScaleForModel, computedScaleForModel, computedScaleForModel]}
+              onClick={handleClick}
+              onPointerDown={handleClick}
+              castShadow
+              receiveShadow
             />
-          </Billboard>
-        }
-        {envProduct.type === "PHOTO" && computedSizeForImage &&
-          <mesh
-            position={position}
-            rotation={computedRotation}
-          >
-            <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
-            <meshBasicMaterial 
-              map={imageTexture}
-              transparent={false}
-            />
-          </mesh>
-        }
-      </PivotControls>
+          }
+          {envProduct.type === "PSEUDO_3D" &&
+            <Billboard follow={true} lockX={false} lockY={false} lockZ={false}
+              ref={objectRef}
+            >
+              <DreiImage 
+                url={product?.images?.[envProduct.imageIndex || 0].src || ""}
+                scale={[scale || 1, scale || 1]} 
+                transparent={true} 
+              />
+            </Billboard>
+          }
+          {envProduct.type === "PHOTO" && computedSizeForImage &&
+            <mesh
+              rotation={computedRotation}
+              ref={objectRef}
+            >
+              <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
+              <meshBasicMaterial 
+                map={imageTexture}
+                transparent={false}
+              />
+            </mesh>
+          }
+        </PivotControls>
+      </group>
     </RigidBody>
   );
 };
