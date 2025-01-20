@@ -1,5 +1,5 @@
 import { useComponentStore, EnvProduct } from "@/stores/ZustandStores";
-import { PivotControls, useGLTF } from "@react-three/drei";
+import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useState } from "react";
 import type Product from '../Types/Product';
@@ -19,17 +19,21 @@ const DraggableContainer = ({
   envProduct
 }: DraggableContainerProps) => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
-  const [isSelected, setIsSelected] = useState(false);
-  const [currentModel, setCurrentModel] = useState<string | null>(null);
-
+  
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
     return products.find((p: Product) => p.id === envProduct.id);
   }, [products, envProduct.id]);
 
+  // To show axes when selected
+  const [isSelected, setIsSelected] = useState(false);
+  useEffect(() => {
+    setIsSelected(selectedProduct?.id === envProduct.id);
+  }, [selectedProduct, envProduct.id]);
+
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
-    if (!product?.models || typeof envProduct.modelIndex !== 'number') {
+    if (envProduct.type !== "MODEL_3D" || !product?.models || envProduct.modelIndex === undefined) {
       return null;
     }
 
@@ -39,29 +43,28 @@ const DraggableContainer = ({
     }
     
     return model.sources[0].url;
-  }, [product, envProduct.modelIndex]);
+  }, [product, envProduct.modelIndex, envProduct.type]);
 
-  // Update current model when modelUrl changes
-  useEffect(() => {
-    if (modelUrl && modelUrl !== currentModel) {
-      setCurrentModel(modelUrl);
+  // Load the GLTF model
+  const model = useMemo(() => {
+    if (!modelUrl) return null;
+    try {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useGLTF(modelUrl);
+    } catch (error) {
+      console.error('Error loading model:', error);
+      return null;
     }
   }, [modelUrl]);
 
-  // Load the GLTF model
-  const { scene } = useGLTF(modelUrl || '');
+  const scene = model?.scene;
 
   // Memoize the scene to prevent unnecessary rerenders
   const memoizedModelScene = useMemo(() => {
     if (!scene) return null;
     const clonedScene = scene.clone();
     return clonedScene;
-  }, [scene, modelUrl]);
-
-  // Update selection state
-  useEffect(() => {
-    setIsSelected(selectedProduct?.id === envProduct.id);
-  }, [selectedProduct, envProduct.id]);
+  }, [scene]);
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
@@ -71,24 +74,27 @@ const DraggableContainer = ({
       return [0, 0, 0];
   }, [rotation]);
   
-  const computedScale = useMemo(() => {
-    if(scale) 
-      return scale;
+  // Manually compute scale such that object has unit height
+  const computedScaleForModel = useMemo(() => {
+    if(!scene) return null;
 
-    // Manually compute scale such that object not too big
+    if(scale) return scale;
+
     const box = new Box3().setFromObject(scene);
-    const standardHeight = 1;
+    const standardHeight = 1.5;
     const size = new Vector3();
     box.getSize(size);
     return standardHeight / size.y;
-  }, [scene, scale]);
+  }, [scene, scale, envProduct.type]);
 
-  const computedPosition = useMemo(() => {
+  const computedPositionForModel = useMemo(() => {
+    if(!computedScaleForModel || !scene) return null;
+
     const positionVector = new Vector3(position[0], position[1], position[2]);
     
     // Get the bounding box AFTER applying scale
     const scaledScene = scene.clone();
-    scaledScene.scale.set(computedScale, computedScale, computedScale);
+    scaledScene.scale.set(computedScaleForModel, computedScaleForModel, computedScaleForModel);
     const box = new Box3().setFromObject(scaledScene);
     
     // Calculate center offset
@@ -99,7 +105,7 @@ const DraggableContainer = ({
     const newPosition = positionVector.clone().sub(boxCenter.clone().sub(positionVector));
     
     return [newPosition.x, newPosition.y, newPosition.z];
-  }, [scene, computedScale, position]);
+  }, [scene, computedScaleForModel, position]);
 
   const handleClick = (event) => {
     event.stopPropagation();
@@ -108,31 +114,36 @@ const DraggableContainer = ({
     }
   };
 
-  // Don't render anything if we don't have a valid model
-  if (!memoizedModelScene || !modelUrl) {
-    return null;
-  }
-
   return (
     <RigidBody type="fixed">
       <PivotControls
         anchor={[0, 0, 0]}
-        scale={1}
+        scale={1.25}
         activeAxes={[isSelected, isSelected, isSelected]}
         visible={isSelected}
         disableScaling
       >
-        {envProduct.type === "MODEL_3D" &&
+        {envProduct.type === "MODEL_3D" && memoizedModelScene &&
           <primitive
-          object={memoizedModelScene}
-          position={computedPosition}
-          rotation={computedRotation}
-          scale={[computedScale, computedScale, computedScale]}
-          onClick={handleClick}
-          onPointerDown={handleClick}
-          castShadow
-          receiveShadow
-        />}
+            object={memoizedModelScene}
+            position={computedPositionForModel}
+            rotation={computedRotation}
+            scale={[computedScaleForModel, computedScaleForModel, computedScaleForModel]}
+            onClick={handleClick}
+            onPointerDown={handleClick}
+            castShadow
+            receiveShadow
+          />
+        }
+        {envProduct.type === "PSEUDO_3D" &&
+          <Billboard position={position} follow={true} lockX={false} lockY={false} lockZ={false}>
+            <DreiImage 
+              url={product?.images?.[envProduct.imageIndex || 0].src || ""}
+              scale={[scale || 1, scale || 1]} 
+              transparent={true} 
+            />
+          </Billboard>
+        }
       </PivotControls>
     </RigidBody>
   );

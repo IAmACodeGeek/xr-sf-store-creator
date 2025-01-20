@@ -2,18 +2,18 @@ import React from 'react';
 import { Billboard, Image as DreiImage } from '@react-three/drei';
 import { RigidBody } from "@react-three/rapier";
 
-export default function Image({
+export default function ImageShowcase({
   url,
   width = 1920, 
   height = 1080, 
   position = [0, 0, 0],
-  transparent = false,
-  scale = [1, 1],
+  transparent = true,
+  scale = 1,
 }) {
   // Convert pixels to Three.js world units
   const pixelsToUnits = (pixels) => pixels / 100;
-  const widthInUnits = pixelsToUnits(width) * scale[0];
-  const heightInUnits = pixelsToUnits(height) * scale[1];
+  const widthInUnits = pixelsToUnits(width) * scale;
+  const heightInUnits = pixelsToUnits(height) * scale;
 
   return (
     <RigidBody mass={1}>
