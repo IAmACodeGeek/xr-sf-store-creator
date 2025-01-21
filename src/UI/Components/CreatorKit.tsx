@@ -1,20 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
 
 import { useComponentStore, useEnvProductStore } from "../../stores/ZustandStores";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
-import { Quaternion, Vector3 } from "three";
-import { useThree } from "@react-three/fiber";
 
 export const CreatorKit = () => {
-  const { products, selectedProduct, setSelectedProduct, isCreatorKitOpen, openCreatorKit, closeCreatorKit } = useComponentStore();
+  const { products, selectedProduct, setSelectedProduct } = useComponentStore();
   const { envProducts, modifyEnvProduct } = useEnvProductStore();
-
-  useEffect(() => {
-    if(!selectedProduct && products[0]){
-      setSelectedProduct(products[0].id);
-    }
-  }, [products]);
 
   // For saving and retrieving scroll position from session storage
   const productListRef = useRef<HTMLDivElement>(null);
@@ -28,15 +20,6 @@ export const CreatorKit = () => {
       sessionStorage.setItem("productPaneScrollPosition", productPaneRef.current.scrollTop.toString());
     }
   };
-
-  useEffect(() => {
-    if (productListRef.current) {
-      const storedScrollPosition = sessionStorage.getItem("productListScrollPosition");
-      if (storedScrollPosition) {
-        productListRef.current.scrollTop = parseFloat(storedScrollPosition);
-      }
-    }
-  }, [isCreatorKitOpen, selectedProduct]);
 
   useEffect(() => {
     if(productPaneRef.current){
@@ -337,54 +320,157 @@ export const CreatorKit = () => {
     );
   };
 
-  return (
-    <div
-      style={{
-        width: "70vw", height: "100vh", position: "fixed",
-        display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
-        pointerEvents: "auto",
-        right: "100%", transform: isCreatorKitOpen ? "translateX(100%)" : "translateX(0)",
-        transition: "transform 0.5s ease"
-      }}
-      onClick={(event: React.MouseEvent<HTMLDivElement>) => { event.stopPropagation();}}
-      className="CreatorKitContainer"
-    >
+  const [ entityType, setEntityType ] = useState("PRODUCT");
+
+  const ProductOrAssetButtons = () => {
+    return (
       <Box
         sx={{
-          display: "flex", flexDirection: "row", width: "100%", height: "100%", alignItems: "center",
-          backdropFilter: "blur(10px)", overflowX: "visible",
-          position: "relative"
+          display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
+          width: "100%", height: "100px", gap: "25px",
+          padding: "30px", boxSizing: "border-box",
+          backgroundColor: "rgb(7, 7, 7)"
         }}
-        className="CreatorKit"
+        className="ProductOrAsset"
       >
-        <ProductList/>
-        <ProductPane/>
-        <Box
-          component="img"
-          src="icons/Arrow.svg"
+        <Button
           sx={{
-            width: "30px", height: "120px",
-            transform: isCreatorKitOpen? "rotate(180deg) translateY(50%)" : "translateY(-50%)",
-            clipPath: isCreatorKitOpen? "polygon(0 20%, 100% 0%, 100% 100%, 0 80%)" : "polygon(0 0, 100% 20%, 100% 80%, 0 100%)",
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            pointerEvents: "all",
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+            fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+            textTransform: "none",
+            color: entityType === "PRODUCT" ? "white" : "rgb(77, 177, 255)",
+            backgroundColor: entityType === "PRODUCT" ? "rgb(77, 177, 255)" : "transparent",
             "&:hover": {
-              cursor: "pointer",
-            },
-            position: "absolute", top: "50%", left: "100%"
+              backgroundColor: entityType === "PRODUCT" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
+            }
           }}
           onClick={() => {
-            if(!isCreatorKitOpen){
-              openCreatorKit();
-            }
-            else {
-              closeCreatorKit();
+            if(entityType !== "PRODUCT") setEntityType("PRODUCT");
+          }}
+          className="ProductButton"
+        >
+          Products
+        </Button>
+        <Button
+          sx={{
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+            fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+            textTransform: "none",
+            color: entityType === "ASSET" ? "white" : "rgb(77, 177, 255)",
+            backgroundColor: entityType === "ASSET" ? "rgb(77, 177, 255)" : "transparent",
+            "&:hover": {
+              backgroundColor: entityType === "ASSET" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
             }
           }}
-
-          className="CreatorKitToggleButton"
-        />
+          onClick={() => {
+            if(entityType !== "ASSET") setEntityType("ASSET");
+          }}
+          className="AssetButton"
+        >
+          Assets
+        </Button>
       </Box>
-    </div>
+    );
+  }
+
+  const SaveStoreButton = () => {
+    return (
+      <Button
+        sx={{
+          width: "100%",
+          padding: "10px", boxSizing: "border-box",
+          borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+          fontFamily: "'Poppins', sans-serif", fontSize: "16px",
+          color: "white",
+          backgroundColor: "rgb(77, 177, 255)",
+        }}
+        className="SaveStoreButton"
+      >
+        Save Store
+      </Button>
+    )
+  }
+
+  const ProductEditor = () => {
+    return (
+      <Box
+        sx={{
+          width: "100%", flexGrow: 1,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": { display: "none" }
+        }}
+        className="ProductEditor"
+      >
+        {products.map((product) => {
+          return (
+            <Box
+              sx={{
+                width: "100%", gap: "5%", minHeight: "80px", height: "80px",
+                display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
+                backgroundColor: (product.id === selectedProduct?.id) ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  cursor: "pointer"
+                },
+                padding: "0 10px 0 10px", boxSizing: "border-box"
+              }}
+              key={product.id}
+              className="ProductItem"
+              onClick={() => {setSelectedProduct(product.id)}}
+            >
+              <Box
+                component="img"
+                src={product.images[0]?.src}
+                sx={{
+                  height: "60px",
+                  width: "60px",
+                  minWidth: "60px",
+                  backgroundColor: "rgb(255, 255, 255)",
+                  objectFit: "contain",
+                }}
+              />
+              <Typography
+                sx={{
+                  fontSize: { xs: "16px", },
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: "normal",
+                  color: "rgba(255, 255, 255, 0.83)",
+                  textAlign: "left",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                }}
+              >
+                {product.title}
+              </Typography>
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        width: "30%", height: "100vh", 
+        position: "fixed", left: 0,
+        display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center",
+        pointerEvents: "auto",
+        backgroundColor: "rgb(0, 0, 0)"
+      }}
+      onClick={(event: React.MouseEvent<HTMLDivElement>) => { event.stopPropagation();}}
+      className="CreatorKit"
+    >
+      <ProductOrAssetButtons/>
+      <ProductEditor/>
+      <SaveStoreButton/>
+    </Box>
   );
 };
