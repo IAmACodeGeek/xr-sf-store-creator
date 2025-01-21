@@ -16,7 +16,6 @@ export const CameraController = ({ setAnimating, playerRef }) => {
         y: -4 + 1.95,
         z: -64
       };
-
       
       const timeline = gsap.timeline({
         onComplete: () => {
@@ -39,7 +38,6 @@ export const CameraController = ({ setAnimating, playerRef }) => {
         duration: 2,
         ease: "power2.inOut"
       });
-
 
       timeline.to(camera.position, {
         x: targetPosition.x,

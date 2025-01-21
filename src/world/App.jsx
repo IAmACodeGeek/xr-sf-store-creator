@@ -1,5 +1,4 @@
 import * as TWEEN from "@tweenjs/tween.js";
-import { PointerLockControls } from "@react-three/drei";
 import { Ground } from "./Ground.jsx";
 import { Physics } from "@react-three/rapier";
 import { Player } from "./Player.jsx";
@@ -11,7 +10,6 @@ import { Suspense, useState, useEffect } from "react";
 import Skybox from "./Skybox";
 import {
   useComponentStore,
-  usePointerLockStore,
   useDriverStore,
   useTouchStore
 } from "../stores/ZustandStores";
@@ -20,17 +18,6 @@ const shadowOffset = 50;
 
 export const App = () => {
   const [isMobile, setIsMobile] = useState(false);
-  const {
-    crosshairVisible,
-    isInfoModalOpen,
-    isSettingsModalOpen,
-    isTermsModalOpen,
-    isContactModalOpen,
-    isProductSearcherOpen,
-  } = useComponentStore();
-  const { lockPointer, unlockPointer } = usePointerLockStore();
-  const { driverActive } = useDriverStore();
-  const { isTouchEnabled } = useTouchStore();
 
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
@@ -40,35 +27,8 @@ export const App = () => {
     TWEEN.update();
   });
 
-  const pointerLockControlsLockHandler = () => {
-    if (
-      isTouchEnabled &&
-      crosshairVisible &&
-      !driverActive &&
-      !isInfoModalOpen &&
-      !isSettingsModalOpen &&
-      !isTermsModalOpen &&
-      !isContactModalOpen &&
-      !isProductSearcherOpen
-    ) {
-      lockPointer();
-    } else {
-      document.exitPointerLock?.();
-    }
-  };
-
-  const pointerLockControlsUnlockHandler = () => {
-    unlockPointer();
-  };
-
   return (
     <>
-      {!isMobile && (
-        <PointerLockControls
-          onLock={pointerLockControlsLockHandler}
-          onUnlock={pointerLockControlsUnlockHandler}
-        />
-      )}
       <Skybox />
       <ambientLight intensity={3.5} />
       <directionalLight

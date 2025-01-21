@@ -551,7 +551,7 @@ const Modal = () => {
         <Box sx={{display: "flex", flexDirection: "row",width: "100%",justifyContent:"center",gap:"10px"}}>
         <Button
         disabled={!isMobile || isIosChrome}
-        onPointerDown={handleViewInAR}
+        onClick={handleViewInAR}
           sx={{
             minWidth: "30%",
             backgroundColor: "#424147",
@@ -571,7 +571,7 @@ const Modal = () => {
           View in AR
         </Button>
         <Button
-        onPointerDown={handleARTryOn}
+          onClick={handleARTryOn}
           sx={{
             minWidth: "30%",
             backgroundColor: "#424147",
