@@ -9,6 +9,7 @@ import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
 import { EnvProduct, useComponentStore, useEnvProductStore } from "./stores/ZustandStores";
 import Product from "./Types/Product.js";
+import productdata from "./data/ProductData.js";
 
 function CanvasWrapper() {
   const { products, setProducts, setSelectedProduct } = useComponentStore();
@@ -16,13 +17,14 @@ function CanvasWrapper() {
   const { setEnvProducts } = useEnvProductStore();
 
   async function fetchProducts() {
-    try {
-      const response = await ProductService.getAllProducts();
-      setProducts(response);
-      sessionStorage.setItem("Products", JSON.stringify(response));
-    } catch (err) {
-      console.error(err);
-    }
+    // try {
+    //   const response = await ProductService.getAllProducts();
+    //   setProducts(response);
+    //   sessionStorage.setItem("Products", JSON.stringify(response));
+    // } catch (err) {
+    //   console.error(err);
+    // }
+    setProducts(productdata);
   }
 
   useEffect(() => {

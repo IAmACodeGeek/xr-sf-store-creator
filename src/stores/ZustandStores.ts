@@ -201,9 +201,9 @@ const useSearchStore = create<SearchStore>((set) => ({
 // Environment Product Handling
 interface EnvProduct {
   id: number;
-  type: string;
-  imageIndex: number | undefined;
-  modelIndex: number | undefined;
+  type?: string;
+  imageIndex?: number | undefined;
+  modelIndex?: number | undefined;
   position?: number[];
   rotation?: number[];
   scale?: number;
