@@ -1,8 +1,10 @@
 import { Box, Button, Typography } from "@mui/material";
 
-import { useComponentStore, useEnvProductStore, EnvProduct } from "../../stores/ZustandStores";
+import { useComponentStore, useEnvProductStore } from "../../stores/ZustandStores";
 import { useEffect, useRef } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
+import { Quaternion, Vector3 } from "three";
+import { useThree } from "@react-three/fiber";
 
 export const CreatorKit = () => {
   const { products, selectedProduct, setSelectedProduct, isCreatorKitOpen, openCreatorKit, closeCreatorKit } = useComponentStore();
@@ -48,7 +50,19 @@ export const CreatorKit = () => {
   const ProductPane = () => {
     const MediaSelector = () => {
       const mediaTypes = ["Image", "Model_3D"];
-      
+
+      const createEnvProduct = (type: string, index: number) => {
+        if(!selectedProduct) return;
+        const envProduct = {
+          id: selectedProduct.id,
+          type: type,
+          imageIndex: (type === "PHOTO" || type === "PSEUDO_3D")? index : undefined,
+          modelIndex: (type === "MODEL_3D")? index : undefined,
+          isEnvironmentProduct: true,
+        };
+        modifyEnvProduct(envProduct.id, envProduct);
+      }
+
       return (
         <Box
           sx={{
@@ -123,14 +137,7 @@ export const CreatorKit = () => {
                             }
                             className="UseAsPhotoButton"
                             onClick={() => {
-                              const envProduct: EnvProduct = {
-                                id: selectedProduct.id,
-                                type: "PHOTO",
-                                imageIndex: index,
-                                modelIndex: undefined,
-                                isEnvironmentProduct: true
-                              };
-                              modifyEnvProduct(selectedProduct.id, envProduct);
+                              createEnvProduct("PHOTO", index)
                             }}
                           >
                             Use as Photo
@@ -149,14 +156,7 @@ export const CreatorKit = () => {
                               (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)
                             }
                             onClick={() => {
-                              const envProduct: EnvProduct = {
-                                id: selectedProduct.id,
-                                type: "PSEUDO_3D",
-                                imageIndex: index,
-                                modelIndex: undefined,
-                                isEnvironmentProduct: true
-                              };
-                              modifyEnvProduct(selectedProduct.id, envProduct);
+                              createEnvProduct("PSEUDO_3D", index)
                             }}
                           >
                             Pseudo 3D
@@ -226,15 +226,7 @@ export const CreatorKit = () => {
                               (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].modelIndex === index)
                             }
                             onClick={() => {
-                              const envProduct: EnvProduct = {
-                                id: selectedProduct.id,
-                                type: "MODEL_3D",
-                                imageIndex: undefined,
-                                modelIndex: index,
-                                isEnvironmentProduct: true
-                              };
-                              // console.log(selectedProduct.models[envProduct.modelIndex || 0]?.sources[0].url);
-                              modifyEnvProduct(selectedProduct.id, envProduct);
+                              createEnvProduct("MODEL_3D", index)
                             }}
                           >
                             Use 3D Model

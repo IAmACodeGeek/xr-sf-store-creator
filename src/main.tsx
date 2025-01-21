@@ -19,13 +19,19 @@ function CanvasWrapper() {
     try {
       const response = await ProductService.getAllProducts();
       setProducts(response);
+      sessionStorage.setItem("Products", JSON.stringify(response));
     } catch (err) {
       console.error(err);
     }
   }
 
   useEffect(() => {
-    fetchProducts();
+    const productsFromSessionStorage = sessionStorage.getItem("Products");
+    if(productsFromSessionStorage){
+      setProducts(JSON.parse(productsFromSessionStorage));
+    }else{
+      fetchProducts();
+    }
   }, []);
 
   useEffect(() => {

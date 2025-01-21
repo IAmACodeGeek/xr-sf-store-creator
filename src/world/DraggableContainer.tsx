@@ -4,23 +4,24 @@ import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
-import { useLoader } from "@react-three/fiber";
+import { useLoader, useThree } from "@react-three/fiber";
 
 interface DraggableContainerProps {
-  position?: [number, number, number];
+  position?: [number, number, number] | undefined;
   rotation?: [number, number, number];
   scale?: number;
   envProduct: EnvProduct;
 }
 
 const DraggableContainer = ({
-  position = [0, 0, -20],
+  position = undefined,
   rotation = [0, 0, 0],
   scale = 1,
   envProduct
 }: DraggableContainerProps) => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
-  
+  const {camera} = useThree();
+
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
     return products.find((p: Product) => p.id === envProduct.id);
@@ -95,7 +96,11 @@ const DraggableContainer = ({
       boxCenter: null
     };
 
-    const positionVector = new Vector3(position[0], position[1], position[2]);
+    const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
+    const cameraDirection = new Vector3(); camera.getWorldDirection(cameraDirection);
+    cameraDirection.multiplyScalar(5);
+    cameraPosition.add(cameraDirection);
+    const positionVector = position? new Vector3(position[0], position[1], position[2]) : cameraPosition;
     
     // Get the bounding box AFTER applying scale
     const scaledScene = scene.clone();
@@ -113,7 +118,7 @@ const DraggableContainer = ({
       computedPositionForModel: [newPosition.x, newPosition.y, newPosition.z],
       boxCenter: boxCenter
     }
-  }, [scene, computedScaleForModel, position]);
+  }, [scene, computedScaleForModel, position, camera]);
 
   // Set position and rotation
   const objectRef = useRef<Mesh | Object3D>(null);
@@ -124,13 +129,18 @@ const DraggableContainer = ({
     let worldPosition = new Vector3(0, 0, 0);
     
     if(envProduct.type === "PHOTO" || envProduct.type === "PSEUDO_3D"){
-      worldPosition = new Vector3(...position);
-      console.log("photo");
-      console.log(position);
+      const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
+      const cameraDirection = new Vector3(); camera.getWorldDirection(cameraDirection);
+      cameraDirection.multiplyScalar(5);
+      cameraPosition.add(cameraDirection);
+
+      worldPosition = position? new Vector3(...position) : cameraPosition;
+      // console.log("photo");
+      // console.log(position);
     }
     else if(envProduct.type === "MODEL_3D" && computedPositionForModel){
       worldPosition = new Vector3(...computedPositionForModel);
-      console.log("model", worldPosition);
+      // console.log("model", worldPosition);
     }
     
     objectRef.current.matrixWorld.setPosition(worldPosition);
@@ -153,7 +163,7 @@ const DraggableContainer = ({
     }
     objectRef.current.setRotationFromQuaternion(quaternion);
 
-  }, [position, computedPositionForModel, envProduct.type, computedRotation]);
+  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera]);
 
   const imageUrl = useMemo(() => {
     if(!envProduct.imageIndex || !["PSEUDO_3D", "PHOTO"].includes(envProduct.type)) return null;
