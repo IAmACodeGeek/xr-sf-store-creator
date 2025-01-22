@@ -8,320 +8,10 @@ export const CreatorKit = () => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
   const { envProducts, modifyEnvProduct } = useEnvProductStore();
 
-  // For saving and retrieving scroll position from session storage
-  const productListRef = useRef<HTMLDivElement>(null);
-  const productPaneRef = useRef<HTMLDivElement>(null);
-  
-  const handleScroll = () => {
-    if (productListRef.current) {
-      sessionStorage.setItem("productListScrollPosition", productListRef.current.scrollTop.toString());
-    }
-    if (productPaneRef.current){
-      sessionStorage.setItem("productPaneScrollPosition", productPaneRef.current.scrollTop.toString());
-    }
-  };
-
-  useEffect(() => {
-    if(productPaneRef.current){
-      const storedScrollPosition = sessionStorage.getItem("productPaneScrollPosition");
-      if(storedScrollPosition){
-        productPaneRef.current.scrollTop = parseFloat(storedScrollPosition);
-      }
-    }
-  }, [envProducts]);
-
-  // const ProductPane = () => {
-  //   const MediaSelector = () => {
-  //     const mediaTypes = ["Image", "Model_3D"];
-
-  //     const createEnvProduct = (type: string, index: number) => {
-  //       if(!selectedProduct) return;
-  //       const envProduct = {
-  //         id: selectedProduct.id,
-  //         type: type,
-  //         imageIndex: (type === "PHOTO" || type === "PSEUDO_3D")? index : undefined,
-  //         modelIndex: (type === "MODEL_3D")? index : undefined,
-  //         isEnvironmentProduct: true,
-  //       };
-  //       modifyEnvProduct(envProduct.id, envProduct);
-  //     }
-
-  //     return (
-  //       <Box
-  //         sx={{
-  //           width: "100%",
-  //           display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center",
-  //           gap: "25px", marginTop: "20px",
-  //         }}
-  //         className="MediaSelector"
-  //       >
-  //         {mediaTypes.map((mediaType: string) => {
-  //           return (
-  //             <Box
-  //               sx={{
-  //                 width: "100%",
-  //                 display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "flex-start",
-  //                 gap: "10px",
-  //               }}
-  //               className="MediaOption"
-  //               key={mediaType}
-  //             >
-  //               <Typography
-  //                 sx={{
-  //                   maxWidth: "100%", width: "100%",
-  //                   overflowWrap: "break-word",
-  //                   fontSize: "20px", fontFamily: "'Poppins', sans-serif",
-  //                   color: "rgb(255, 255, 255)",
-  //                 }}
-  //               >
-  //                 {mediaType}
-  //               </Typography>
-  //               <Box
-  //                 sx={{
-  //                   display: "flex", flexDirection: "row", justifyContent: "center", alignItems: 'center',
-  //                   flexWrap: "wrap", gap: "20px", 
-  //                   width: "100%"
-  //                 }}
-  //                 className="ListofValues"
-  //               >
-  //                 {(mediaType.toUpperCase() === "IMAGE") &&
-  //                   selectedProduct?.images.map((image, index) => {
-  //                     return (
-  //                       <Box
-  //                         sx={{
-  //                           width: "180px", minWidth: "180px",
-  //                           display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-  //                           backgroundColor: (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)?
-  //                           "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
-  //                           padding: "15px", boxSizing: "border-box",
-  //                           gap: "20px"
-  //                         }}
-  //                         key={image.src}
-  //                       >
-  //                         <Box
-  //                           component="img"
-  //                           src={image.src}
-  //                           sx={{
-  //                             width: "100%", minWidth: "100%", aspectRatio: "1 / 1",
-  //                             backgroundColor: "rgba(255, 255, 255, 0.075)",
-  //                           }}
-  //                         />
-  //                         <Button
-  //                           sx={{
-  //                             width: "100%", minWidth: "100%",
-  //                             backgroundColor: "#24a0ed", color: "white",
-  //                             borderRadius: "0",
-  //                             fontFamily: "'Poppins', sans-serif",
-  //                             fontSize: "14px"
-  //                           }}
-  //                           disabled={
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "PHOTO") && 
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)
-  //                           }
-  //                           className="UseAsPhotoButton"
-  //                           onClick={() => {
-  //                             createEnvProduct("PHOTO", index)
-  //                           }}
-  //                         >
-  //                           Use as Photo
-  //                         </Button>
-  //                         <Button
-  //                           sx={{
-  //                             width: "100%", minWidth: "100%",
-  //                             backgroundColor: "#24a0ed", color: "white",
-  //                             borderRadius: "0",
-  //                             fontFamily: "'Poppins', sans-serif", 
-  //                             fontSize: "14px"
-  //                           }}
-  //                           className="Pseudo3dButton"
-  //                           disabled={
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "PSEUDO_3D") &&
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].imageIndex === index)
-  //                           }
-  //                           onClick={() => {
-  //                             createEnvProduct("PSEUDO_3D", index)
-  //                           }}
-  //                         >
-  //                           Pseudo 3D
-  //                         </Button>
-  //                       </Box>
-  //                     );
-  //                   })
-  //                 }
-  //                 {(mediaType.toUpperCase() === "MODEL_3D") &&
-  //                   selectedProduct?.models.map((model, index) => {
-                      
-  //                     const modelData = {
-  //                       id: model.id,
-  //                       sources: [model.sources && model.sources[0]],
-  //                       alt: "3D Model"
-  //                     };
-  //                     const iosSrc = model.sources && model.sources[1].url;
-                      
-  //                     return (
-  //                       <Box
-  //                         sx={{
-  //                           width: "230px", minWidth: "230px",
-  //                           display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-  //                           backgroundColor: "rgba(255, 255, 255, 0.05)",
-  //                           padding: "15px", boxSizing: "border-box",
-  //                           gap: "20px"
-  //                         }}
-  //                         key={model.id}
-  //                       >                      
-  //                         <Box
-  //                           sx={{
-  //                             width: "200px", minWidth: "200px", aspectRatio: "1 / 1",
-  //                             "& model-viewer": {
-  //                               "--poster-color": "transparent",
-  //                               "--ar-button-display": "none !important",
-  //                             }
-  //                           }}
-  //                         >
-  //                           <ModelViewer
-  //                             style={{
-  //                               height: "100%",
-  //                               width: "100%",
-  //                             }}
-  //                             data={modelData}
-  //                             ar={true} 
-  //                             arModes="scene-viewer webxr quick-look" 
-  //                             arScale="auto" 
-  //                             iosSrc={iosSrc} 
-  //                             cameraControls={true} 
-  //                             environmentImage="neutral" 
-  //                             poster="" 
-  //                             alt="A 3D model of a product"
-  //                             onArStatus={(event: unknown) => console.log("AR Status:", event)} 
-  //                             onLoad={() => console.log("Model loaded")} 
-  //                           />
-  //                         </Box>
-  //                         <Button
-  //                           sx={{
-  //                             width: "100%", minWidth: "100%",
-  //                             backgroundColor: "#24a0ed", color: "white",
-  //                             borderRadius: "0",
-  //                             fontFamily: "'Poppins', sans-serif", 
-  //                             fontSize: "14px"
-  //                           }}
-  //                           disabled={
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].type === "MODEL_3D") &&
-  //                             (envProducts[selectedProduct.id] && envProducts[selectedProduct.id].modelIndex === index)
-  //                           }
-  //                           onClick={() => {
-  //                             createEnvProduct("MODEL_3D", index)
-  //                           }}
-  //                         >
-  //                           Use 3D Model
-  //                         </Button>
-  //                       </Box>
-  //                     );
-  //                   })
-  //                 }
-  //               </Box>
-  //             </Box>
-  //           );
-  //         })}
-  //       </Box>
-  //     );
-  //   };
-
-  //   return (
-  //     <Box
-  //       sx={{
-  //         display: "flex", flexDirection: "column", justifyContent: "start",
-  //         height: "100%", width: "60%",
-  //         overflowY: "scroll", "&::-webkit-scrollbar": { display: "none" }, scrollbarWidth: "none",
-  //         backgroundColor: "rgba(0, 0, 0, 0.9)",
-  //         padding: "20px", boxSizing: "border-box",
-  //         borderRadius: "0 20px 20px 0"
-  //       }}
-  //       onScroll={handleScroll}
-  //       ref={productPaneRef}
-  //       className="ProductPane"
-  //     >
-  //       <Typography
-  //           sx={{
-  //             fontSize: "24px", fontFamily: "'Poppins', sans-serif", fontWeight: 600,
-  //             color: "rgb(255, 255, 255)",
-  //             textOverflow: "ellipsis",
-  //             whiteSpace: "nowrap",
-  //             overflow: "hidden",
-  //           }}
-  //           className="ProductTitle"
-  //         >
-  //           {selectedProduct?.title}
-  //         </Typography>
-  //         <MediaSelector/>
-  //     </Box>
-  //   );
-  // };
-
-  const ProductList = () => {
-    return (
-      <Box
-        sx={{
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start",
-          height: "100%", width: "40%",
-          overflowY: "scroll", "&::-webkit-scrollbar": { display: "none" }, scrollbarWidth: "none",
-          backgroundColor: "rgba(0, 0, 0, 0.85)",
-          padding: "10px 0 10px 0", boxSizing: "border-box"
-        }}
-        ref={productListRef}
-        onScroll={handleScroll}
-        className="ProductList"
-      >
-        {products.map((product) => {
-          return (
-            <Box
-              sx={{
-                width: "100%", gap: "5%", height: "80px",
-                display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
-                backgroundColor: (product.id === selectedProduct?.id) ? "rgba(255, 255, 255, 0.1)" : "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
-                  cursor: "pointer"
-                },
-                padding: "0 10px 0 10px", boxSizing: "border-box"
-              }}
-              key={product.id}
-              className="ProductItem"
-              onClick={() => {setSelectedProduct(product.id)}}
-            >
-              <Box
-                component="img"
-                src={product.images[0]?.src}
-                sx={{
-                  height: "60px",
-                  width: "60px",
-                  minWidth: "60px",
-                  backgroundColor: "rgb(255, 255, 255)",
-                  objectFit: "contain",
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: { xs: "16px", },
-                  fontFamily: "'Poppins', sans-serif",
-                  fontWeight: "normal",
-                  color: "rgba(255, 255, 255, 0.83)",
-                  textAlign: "left",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                }}
-              >
-                {product.title}
-              </Typography>
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
-
   const [ entityType, setEntityType ] = useState("PRODUCT");
   const [activeProductId, setActiveProductId] = useState<number | null>(null);
+  const [toolType, setToolType] = useState<string>("MEDIA");
+
   const ProductOrAssetButtons = () => {
     return (
       <Box
@@ -401,50 +91,47 @@ export const CreatorKit = () => {
     const productEditorRef = useRef<HTMLDivElement>(null);
     const productItemRefs = useRef<{[id: number]: HTMLSpanElement | null}>({});
   
-    // Cubic easing function for smoother animation
-  const easeInOutCubic = (t: number) => {
-    return t < 0.5 
-      ? 4 * t * t * t 
-      : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  };
-
-  // Smooth scroll function with custom easing
-  const smoothScrollTo = (element: HTMLDivElement, to: number, duration: number) => {
-    const start = element.scrollTop;
-    const change = to - start;
-    const startTime = performance.now();
-
-    const animateScroll = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      element.scrollTop = start + change * easeInOutCubic(progress);
-
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
+    // Scroll
+    const easeInOutCubic = (t: number) => {
+      return t < 0.5 
+        ? 4 * t * t * t 
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
     };
+    const smoothScrollTo = (element: HTMLDivElement, to: number, duration: number) => {
+      const start = element.scrollTop;
+      const change = to - start;
+      const startTime = performance.now();
 
-    requestAnimationFrame(animateScroll);
-  };
+      const animateScroll = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
 
-  useEffect(() => {
-    if (activeProductId && productItemRefs.current[activeProductId] && productEditorRef.current) {
-      const container = productEditorRef.current;
-      const element = productItemRefs.current[activeProductId];
-      
-      // Get the element's position relative to the container
-      const elementRect = element.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+        element.scrollTop = start + change * easeInOutCubic(progress);
 
-      // Add a small offset from the top if desired
-      const offset = 0; // Adjust this value to change the final position
-      
-      // Animate the scroll with custom easing
-      smoothScrollTo(container, relativeTop - offset, 800); // 800ms duration - adjust for faster/slower animation
-    }
-  }, [activeProductId]);
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+
+      requestAnimationFrame(animateScroll);
+    };
+    useEffect(() => {
+      if (activeProductId && productItemRefs.current[activeProductId] && productEditorRef.current) {
+        const container = productEditorRef.current;
+        const element = productItemRefs.current[activeProductId];
+        
+        // Get the element's position relative to the container
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+
+        // Add a small offset from the top if desired
+        const offset = 0; // Adjust this value to change the final position
+        
+        // Animate the scroll with custom easing
+        smoothScrollTo(container, relativeTop - offset, 800); // 800ms duration - adjust for faster/slower animation
+      }
+    }, [activeProductId]);
 
     const ProductPane = () => {
       const [mediaType, setMediaType] = useState("2D");
@@ -521,57 +208,53 @@ export const CreatorKit = () => {
         return (
           <Box
             sx={{
-              display: "flex", flexDirection: "row", justifyContent: "center", alignItems: 'center',
-              flexWrap: "wrap", gap: "20px", 
-              width: "100%"
+              width: "100%", display: "flex", flexGrow: 1,
+              padding: "30px", paddingTop: 0, boxSizing: "border-box",
+              overflow: "hidden"
             }}
-            className="MediaItems"
+            className="MediaContainer"
           >
-            {
-              product?.images.map((image, index) => {
-                return (
-                  <Box
-                    sx={{
-                      width: "180px", minWidth: "180px",
-                      display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-                      backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
-                      "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
-                      padding: "15px", boxSizing: "border-box",
-                      gap: "20px"
-                    }}
-                    key={image.src}
-                  >
+            <Box
+              sx={{
+                display: "flex", flexDirection: "row", justifyContent: "center", alignItems: 'center',
+                flexWrap: "wrap", gap: "20px", 
+                width: "100%",
+                overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": {display: "none"},
+              }}
+              className="MediaItems"
+            >
+              {mediaType === "2D" &&
+                product?.images.map((image, index) => {
+                  return (
                     <Box
-                      component="img"
-                      src={image.src}
                       sx={{
-                        width: "100%", minWidth: "100%", aspectRatio: "1 / 1",
-                        backgroundColor: "rgba(255, 255, 255, 0.075)",
+                        maxWidth: "calc(50% - 20px)", flexGrow: 1,
+                        display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
+                        backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                        "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.03)",
+                        padding: "15px", boxSizing: "border-box",
+                        gap: "20px",
+                        "&:hover": {
+                          backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                          "rgba(255, 255, 255, 0.15)": "rgba(255, 255, 255, 0.075)",
+                          cursor: "pointer"
+                        }
                       }}
-                    />
-                    <Button
-                      sx={{
-                        width: "100%", minWidth: "100%",
-                        backgroundColor: "#24a0ed", color: "white",
-                        borderRadius: "0",
-                        fontFamily: "'Poppins', sans-serif",
-                        fontSize: "14px"
-                      }}
-                      disabled={
-                        (envProducts[product.id] && envProducts[product.id].type === "PHOTO") && 
-                        (envProducts[product.id] && envProducts[product.id].imageIndex === index)
-                      }
-                      className="UseAsPhotoButton"
-                      onClick={() => {
-                        createEnvProduct("PHOTO", index)
-                      }}
+                      key={image.src}
                     >
-                      Use
-                    </Button>
-                  </Box>
-                );
-              })
-            }
+                      <Box
+                        component="img"
+                        src={image.src}
+                        sx={{
+                          width: "100%", minWidth: "100%", aspectRatio: "1 / 1",
+                          backgroundColor: "rgba(255, 255, 255, 0.075)",
+                        }}
+                      />
+                    </Box>
+                  );
+                })
+              }
+            </Box>
           </Box>
         );
       };
@@ -581,14 +264,16 @@ export const CreatorKit = () => {
           sx={{
             display: "flex", flexDirection: "column", alignItems: "center",
             width: "100%", height: `${productPaneHeight}px`,
-            paddingBottom: "30px", boxSizing: "border-box",
             backgroundColor: "black",
-            overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": { display: "none" }, 
           }}
           className="ProductPane"
         >
-          <MediaTypeButtons/>
-          <MediaContainer/>
+          {toolType === "MEDIA" &&
+            <MediaTypeButtons/>
+          }
+          {toolType === "MEDIA" &&
+            <MediaContainer/>
+          }
         </Box>
       );
     };
@@ -610,7 +295,14 @@ export const CreatorKit = () => {
               isEnvironmentProduct: event.target.checked
             };
             modifyEnvProduct(product.id, envProduct);
-            setActiveProductId(null);
+            if(event.target.checked){
+              setActiveProductId(product.id);
+              setToolType("MEDIA");
+            }
+            else{
+              setActiveProductId(null);
+              setToolType("");
+            }
           };
 
           return (
@@ -670,10 +362,10 @@ export const CreatorKit = () => {
                 </Typography>
                 <Box
                   component="img"
-                  src="icons/Cube.svg"
+                  src="icons/Attach.svg"
                   sx={{
-                    width: "30px", height: "30px",
-                    opacity: product.id === activeProductId ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
+                    width: "20px", height: "20px",
+                    opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
                     "&:hover": {
                       opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
                       cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
@@ -681,15 +373,53 @@ export const CreatorKit = () => {
                   }}
                   onClick={() => {
                     if(envProducts[product.id]?.isEnvironmentProduct){
-                      if(product.id !== activeProductId)
-                        setActiveProductId(product.id)
-                      else
-                        setActiveProductId(null);
+                      if(product.id === activeProductId){
+                        if(toolType === "3DPARAMS"){
+                          setToolType("MEDIA");
+                        }
+                        else{
+                          setActiveProductId(null);
+                          setToolType("");
+                        }
+                      }
+                      else{
+                        setActiveProductId(product.id);
+                        setToolType("MEDIA");
+                      }
+                    }
+                  }}
+                />
+                <Box
+                  component="img"
+                  src="icons/Cube.svg"
+                  sx={{
+                    width: "30px", height: "30px",
+                    opacity: (product.id === activeProductId && toolType === "3DPARAMS") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
+                    "&:hover": {
+                      opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
+                      cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
+                    }
+                  }}
+                  onClick={() => {
+                    if(envProducts[product.id]?.isEnvironmentProduct){
+                      if(product.id === activeProductId){
+                        if(toolType === "MEDIA"){
+                          setToolType("3DPARAMS");
+                        }
+                        else{
+                          setActiveProductId(null);
+                          setToolType("");
+                        }
+                      }
+                      else{
+                        setActiveProductId(product.id);
+                        setToolType("3DPARAMS");
+                      }
                     }
                   }}
                 />
               </Box>
-              {activeProductId === product.id && 
+              {activeProductId === product.id &&
                 <ProductPane/>
               }
             </span>
