@@ -1,4 +1,4 @@
-import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -23,7 +23,8 @@ const DraggableContainer = ({
   const {camera} = useThree();
   const {activeProductId} = useActiveProductStore();
   const {toolType} = useToolStore();
-  
+  const {modifyEnvProduct} = useEnvProductStore();
+
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
     return products.find((p: Product) => p.id === envProduct.id);
@@ -114,7 +115,7 @@ const DraggableContainer = ({
     
     // Adjust position to account for scaled center offset
     const newPosition = positionVector.clone().sub(boxCenter.clone());
-    
+    console.log(newPosition);
     return {
       computedPositionForModel: [newPosition.x, newPosition.y, newPosition.z],
       boxCenter: boxCenter
@@ -248,8 +249,14 @@ const DraggableContainer = ({
         euler.z * 180 / Math.PI
       ];
       
-      envProduct.position = pos;
-      envProduct.rotation = rot;
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        position: pos,
+        rotation: rot,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
     }
     else if(envProduct.type === "PHOTO"){
       if(!meshRef.current) return;
@@ -272,8 +279,14 @@ const DraggableContainer = ({
         euler.z * 180 / Math.PI
       ];
       
-      envProduct.position = pos;
-      envProduct.rotation = rot;
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        position: pos,
+        rotation: rot,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
     }
   };
 

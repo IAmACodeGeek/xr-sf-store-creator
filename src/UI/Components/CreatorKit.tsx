@@ -356,7 +356,7 @@ export const CreatorKit = () => {
       }
 
       const setMediaItem = (type: string, index: number) => {
-        if(!product || !envProducts[product.id]) return;
+        if(!product) return;
 
         const envProduct: EnvProduct = {
           id: product.id,
@@ -367,7 +367,6 @@ export const CreatorKit = () => {
         };
 
         modifyEnvProduct(product.id, envProduct);
-        console.log(index);
       };
       const MediaContainer = () => {
         return (
@@ -395,12 +394,12 @@ export const CreatorKit = () => {
                       sx={{
                         width: "calc(50% - 10px)", aspectRatio: "1 / 1",
                         display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-                        backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                        backgroundColor: (envProducts[product.id].imageIndex === index)?
                         "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
-                        border: (envProducts[product.id] && envProducts[product.id].imageIndex === index)? "2px solid #4cb1ff" : "none",
+                        border: (envProducts[product.id].imageIndex === index)? "2px solid #4cb1ff" : "none",
                         padding: "15px", boxSizing: "border-box",
                         "&:hover": {
-                          backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                          backgroundColor: (envProducts[product.id].imageIndex === index)?
                           "rgba(255, 255, 255, 0.1)": "rgba(255, 255, 255, 0.075)",
                           cursor: "pointer"
                         }
@@ -437,9 +436,9 @@ export const CreatorKit = () => {
                       sx={{
                         width: "100%", aspectRatio: "1 / 1",
                         display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-                        backgroundColor: (envProducts[product.id] && envProducts[product.id].modelIndex === index)?
+                        backgroundColor: (envProducts[product.id].modelIndex === index)?
                         "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
-                        border: (envProducts[product.id] && envProducts[product.id].modelIndex === index)? "2px solid #4cb1ff" : "none",
+                        border: (envProducts[product.id].modelIndex === index)? "2px solid #4cb1ff" : "none",
                         padding: "25px", boxSizing: "border-box",
                       }}
                       key={index}
