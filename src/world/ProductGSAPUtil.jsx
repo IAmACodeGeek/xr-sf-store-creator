@@ -21,7 +21,6 @@ export const ProductGSAPUtil = ({ setAnimating, playerRef }) => {
       onComplete: () => {
         if (playerRef.current) {
           playerRef.current.setTranslation(targetPosition);
-          console.log(targetPosition);
           playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
           playerRef.current.setAngvel({ x: 0, y: 0, z: 0 });
           setAnimating(false);

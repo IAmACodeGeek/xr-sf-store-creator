@@ -1,8 +1,11 @@
 import { Box, Button, Checkbox, Typography } from "@mui/material";
 
-import { useComponentStore, useEnvProductStore } from "../../stores/ZustandStores";
-import { useEffect, useRef, useState } from "react";
+import { EnvProduct, useComponentStore, useEnvProductStore } from "../../stores/ZustandStores";
+import React, { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
+import Product from "@/Types/Product";
+import Swal from "sweetalert2";
+import styles from "../UI.module.scss";
 
 export const CreatorKit = () => {
   const { products, selectedProduct, setSelectedProduct } = useComponentStore();
@@ -11,6 +14,11 @@ export const CreatorKit = () => {
   const [ entityType, setEntityType ] = useState("PRODUCT");
   const [activeProductId, setActiveProductId] = useState<number | null>(null);
   const [toolType, setToolType] = useState<string>("MEDIA");
+  const [mediaType, setMediaType] = useState("2D");
+
+  useEffect(() => {
+    setSelectedProduct(activeProductId);
+  }, [activeProductId]);
 
   const ProductOrAssetButtons = () => {
     return (
@@ -69,7 +77,7 @@ export const CreatorKit = () => {
     );
   }
 
-  const SaveStoreButton = () => {
+  const FullWideButton: React.FC<{text: string, onClick?: () => void}> = ({text, onClick = () => {}}) => {
     return (
       <Button
         sx={{
@@ -81,14 +89,31 @@ export const CreatorKit = () => {
           backgroundColor: "rgb(77, 177, 255)",
         }}
         className="SaveStoreButton"
+        onClick={onClick}
       >
-        Save Store
+        {text}
       </Button>
     )
   }
 
-  const ProductEditor = () => {
-    const productEditorRef = useRef<HTMLDivElement>(null);
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, product: Product) => {
+    const envProduct = {
+      id: product.id,
+      isEnvironmentProduct: event.target.checked
+    };
+    modifyEnvProduct(product.id, envProduct);
+    if(event.target.checked){
+      setActiveProductId(product.id);
+      setToolType("MEDIA");
+    }
+    else{
+      setActiveProductId(null);
+      setToolType("");
+    }
+  };
+
+  const ProductList = () => {
+    const productListRef = useRef<HTMLDivElement>(null);
     const productItemRefs = useRef<{[id: number]: HTMLSpanElement | null}>({});
   
     // Scroll
@@ -116,8 +141,8 @@ export const CreatorKit = () => {
       requestAnimationFrame(animateScroll);
     };
     useEffect(() => {
-      if (activeProductId && productItemRefs.current[activeProductId] && productEditorRef.current) {
-        const container = productEditorRef.current;
+      if (activeProductId && productItemRefs.current[activeProductId] && productListRef.current) {
+        const container = productListRef.current;
         const element = productItemRefs.current[activeProductId];
         
         // Get the element's position relative to the container
@@ -133,178 +158,17 @@ export const CreatorKit = () => {
       }
     }, [activeProductId]);
 
-    const ProductPane = () => {
-      const [mediaType, setMediaType] = useState("2D");
-
-      // Auto compute Product pane height
-      const [productPaneHeight, setProductPaneHeight] = useState<number>(0);
-      useEffect(() => {
-        setProductPaneHeight((productEditorRef.current?.clientHeight || 0) - (productItemRefs.current?.[products[0].id]?.clientHeight || 0));
-      }, [productEditorRef.current?.clientHeight])
-      if(!activeProductId) return null;
-
-      const MediaTypeButtons = () => {
-        return (
-          <Box
-            sx={{
-              display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
-              width: "100%", height: "100px", gap: "25px",
-              padding: "30px", boxSizing: "border-box"
-            }}
-            className="MediaTypeButtons"
-          >
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
-                textTransform: "none",
-                color: mediaType === "2D" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(mediaType !== "2D") setMediaType("2D");
-              }}
-              className="2DButton"
-            >
-              2D
-            </Button>
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
-                textTransform: "none",
-                color: mediaType === "3D" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(mediaType !== "3D") setMediaType("3D");
-              }}
-              className="3DButton"
-            >
-              3D
-            </Button>
-          </Box>
-        );
-      }
-
-      const createEnvProduct = (type: string, index: number) => {
-        return;
-      }
-
-      const MediaContainer = () => {
-        const product = products.find((product) => product.id === activeProductId);
-        return (
-          <Box
-            sx={{
-              width: "100%", display: "flex", flexGrow: 1,
-              padding: "30px", paddingTop: 0, boxSizing: "border-box",
-              overflow: "hidden"
-            }}
-            className="MediaContainer"
-          >
-            <Box
-              sx={{
-                display: "flex", flexDirection: "row", justifyContent: "center", alignItems: 'center',
-                flexWrap: "wrap", gap: "20px", 
-                width: "100%",
-                overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": {display: "none"},
-              }}
-              className="MediaItems"
-            >
-              {mediaType === "2D" &&
-                product?.images.map((image, index) => {
-                  return (
-                    <Box
-                      sx={{
-                        maxWidth: "calc(50% - 20px)", flexGrow: 1,
-                        display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
-                        backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
-                        "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.03)",
-                        padding: "15px", boxSizing: "border-box",
-                        gap: "20px",
-                        "&:hover": {
-                          backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
-                          "rgba(255, 255, 255, 0.15)": "rgba(255, 255, 255, 0.075)",
-                          cursor: "pointer"
-                        }
-                      }}
-                      key={image.src}
-                    >
-                      <Box
-                        component="img"
-                        src={image.src}
-                        sx={{
-                          width: "100%", minWidth: "100%", aspectRatio: "1 / 1",
-                          backgroundColor: "rgba(255, 255, 255, 0.075)",
-                        }}
-                      />
-                    </Box>
-                  );
-                })
-              }
-            </Box>
-          </Box>
-        );
-      };
-      
-      return (
-        <Box
-          sx={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            width: "100%", height: `${productPaneHeight}px`,
-            backgroundColor: "black",
-          }}
-          className="ProductPane"
-        >
-          {toolType === "MEDIA" &&
-            <MediaTypeButtons/>
-          }
-          {toolType === "MEDIA" &&
-            <MediaContainer/>
-          }
-        </Box>
-      );
-    };
-
-    return (
+    return ( !activeProductId &&
       <Box
         sx={{
           width: "100%", flexGrow: 1,
           display: "flex", flexDirection: "column", alignItems: "center",
           overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": { display: "none" },
         }}
-        ref={productEditorRef}
-        className="ProductEditor"
+        ref={productListRef}
+        className="ProductList"
       >
         {products.map((product) => {
-          const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-            const envProduct = {
-              id: product.id,
-              isEnvironmentProduct: event.target.checked
-            };
-            modifyEnvProduct(product.id, envProduct);
-            if(event.target.checked){
-              setActiveProductId(product.id);
-              setToolType("MEDIA");
-            }
-            else{
-              setActiveProductId(null);
-              setToolType("");
-            }
-          };
-
           return (
             <span 
               key={product.id}
@@ -330,7 +194,7 @@ export const CreatorKit = () => {
                     borderRadius: 0,
                   }}
                   checked={envProducts[product.id]?.isEnvironmentProduct || false}
-                  onChange={handleChange}
+                  onChange={(event) => {handleCheckboxChange(event, product)}}
                   color={"primary"}
                 />
                 <Box
@@ -419,12 +283,287 @@ export const CreatorKit = () => {
                   }}
                 />
               </Box>
-              {activeProductId === product.id &&
-                <ProductPane/>
-              }
             </span>
           );
         })}
+      </Box>
+    );
+  }
+
+  const ProductEditor = () => {
+    const productEditorRef = useRef<HTMLDivElement>(null);
+    const productItemRef = useRef<HTMLDivElement>(null);
+    const product = products.find((product) => product.id === activeProductId);
+
+    const ProductPane = () => {
+      // Auto compute Product pane height
+      const [productPaneHeight, setProductPaneHeight] = useState<number>(0);
+      useEffect(() => {
+        setProductPaneHeight((productEditorRef.current?.clientHeight || 0) - (productItemRef.current?.clientHeight || 0));
+      }, [productEditorRef.current?.clientHeight])
+      if(!activeProductId) return null;
+
+      const MediaTypeButtons = () => {
+        return (
+          <Box
+            sx={{
+              display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
+              width: "100%", height: "100px", gap: "25px",
+              padding: "30px", boxSizing: "border-box"
+            }}
+            className="MediaTypeButtons"
+          >
+            <Button
+              sx={{
+                width: "40%", height: "100%", flexGrow: 1,
+                padding: "10px", boxSizing: "border-box",
+                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+                fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+                textTransform: "none",
+                color: mediaType === "2D" ? "white" : "rgb(77, 177, 255)",
+                backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "transparent",
+                "&:hover": {
+                  backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+                  color: "white"
+                }
+              }}
+              onClick={() => {
+                if(mediaType !== "2D") setMediaType("2D");
+              }}
+              className="2DButton"
+            >
+              2D
+            </Button>
+            <Button
+              sx={{
+                width: "40%", height: "100%", flexGrow: 1,
+                padding: "10px", boxSizing: "border-box",
+                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+                fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+                textTransform: "none",
+                color: mediaType === "3D" ? "white" : "rgb(77, 177, 255)",
+                backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "transparent",
+                "&:hover": {
+                  backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+                  color: "white"
+                }
+              }}
+              onClick={() => {
+                if(mediaType !== "3D") setMediaType("3D");
+              }}
+              className="3DButton"
+            >
+              3D
+            </Button>
+          </Box>
+        );
+      }
+
+      const setMediaItem = (type: string, index: number) => {
+        if(!product || !envProducts[product.id]) return;
+
+        const envProduct: EnvProduct = {
+          id: product.id,
+          type: type,
+          imageIndex: type === "PHOTO"? index : undefined,
+          modelIndex: type === "MODEL"? index: undefined,
+          isEnvironmentProduct: true
+        };
+
+        modifyEnvProduct(product.id, envProduct);
+
+        setActiveProductId(product.id);
+      };
+
+      const MediaContainer = () => {
+        return (
+          <Box
+            sx={{
+              width: "100%", display: "flex",
+              padding: "30px", paddingTop: 0, boxSizing: "border-box",
+              overflow: "hidden"
+            }}
+            className="MediaContainer"
+          >
+            <Box
+              sx={{
+                display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center",
+                gap: "20px",
+                width: "100%",
+                overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": {display: "none"},
+              }}
+              className="MediaItems"
+            >
+              {mediaType === "2D" &&
+                product?.images.map((image, index) => {
+                  return (
+                    <Box
+                      sx={{
+                        width: "calc(50% - 10px)", aspectRatio: "1 / 1",
+                        display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
+                        backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                        "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
+                        border: (envProducts[product.id] && envProducts[product.id].imageIndex === index)? "2px solid #4cb1ff" : "none",
+                        padding: "15px", boxSizing: "border-box",
+                        "&:hover": {
+                          backgroundColor: (envProducts[product.id] && envProducts[product.id].imageIndex === index)?
+                          "rgba(255, 255, 255, 0.1)": "rgba(255, 255, 255, 0.075)",
+                          cursor: "pointer"
+                        }
+                      }}
+                      key={index}
+                      onClick={() => {
+                        setMediaItem("PHOTO", index);
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={image.src}
+                        sx={{
+                          width: "100%", aspectRatio: "1 / 1",
+                          backgroundColor: "rgba(255, 255, 255, 0.075)",
+                        }}
+                      />
+                    </Box>
+                  );
+                })
+              }
+            </Box>
+          </Box>
+        );
+      };
+      
+      return (
+        <Box
+          sx={{
+            display: "flex", flexDirection: "column", alignItems: "center",
+            width: "100%", height: `${productPaneHeight}px`,
+            backgroundColor: "black",
+          }}
+          className="ProductPane"
+        >
+          {toolType === "MEDIA" &&
+            <MediaTypeButtons/>
+          }
+          {toolType === "MEDIA" &&
+            <MediaContainer/>
+          }
+        </Box>
+      );
+    };
+
+    return ( activeProductId && product &&
+      <Box
+        sx={{
+          width: "100%", flexGrow: 1,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": { display: "none" },
+        }}
+        ref={productEditorRef}
+        className="ProductEditor"
+      >
+        <Box
+          sx={{
+            width: "100%", gap: "5%", minHeight: "80px", height: "80px",
+            display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
+            backgroundColor: (envProducts[product.id]?.isEnvironmentProduct) ? "rgb(10, 10, 10)" : "rgb(5, 5, 5)",
+            padding: "0 15px 0 15px", boxSizing: "border-box"
+          }}
+          key={product.id}
+          ref={productItemRef}
+          className="ProductItem"
+        >
+          <Checkbox
+            sx={{
+              background: "transparent",
+              color: "rgb(56, 56, 56)",
+              padding: 0,
+              borderRadius: 0,
+            }}
+            checked={envProducts[product.id]?.isEnvironmentProduct || false}
+            onChange={(event) => {handleCheckboxChange(event, product)}}
+            color={"primary"}
+          />
+          <Box
+            component="img"
+            src={product.images[0]?.src}
+            sx={{
+              height: "60px",
+              width: "60px",
+              minWidth: "60px",
+              backgroundColor: "rgb(255, 255, 255)",
+              objectFit: "contain",
+              opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.5
+            }}
+          />
+          <Typography
+            sx={{
+              flexGrow: 1,
+              fontSize: { xs: "16px", },
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: "normal",
+              color: (envProducts[product.id]?.isEnvironmentProduct) ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
+              textAlign: "left",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+            }}
+          >
+            {product.title}
+          </Typography>
+          <Box
+            component="img"
+            src="icons/Attach.svg"
+            sx={{
+              width: "20px", height: "20px",
+              opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
+              "&:hover": {
+                opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
+                cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
+              }
+            }}
+            onClick={() => {
+              if(product.id === activeProductId && toolType !== "MEDIA"){
+                setToolType("MEDIA");
+              }
+            }}
+          />
+          <Box
+            component="img"
+            src="icons/Cube.svg"
+            sx={{
+              width: "30px", height: "30px",
+              opacity: (product.id === activeProductId && toolType === "3DPARAMS") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
+              "&:hover": {
+                opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
+                cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
+              }
+            }}
+            onClick={() => {
+              if(envProducts[product.id]?.isEnvironmentProduct){
+                if(product.id === activeProductId && toolType !== "3DPARAMS"){
+                  if((envProducts[product.id].imageIndex !== undefined) || (envProducts[product.id].modelIndex !== undefined)){
+                    setToolType("3DPARAMS");
+                  }
+                  else{
+                    Swal.fire({
+                      title: "No Asset Selected",
+                      text: "Please select one of the provided 2D or 3D assets before proceeding.",
+                      icon: "warning",
+                      showConfirmButton: true,
+                      allowOutsideClick: false,
+                      customClass: {
+                        title: styles.swalTitle,
+                        popup: styles.swalPopup,
+                      },
+                    });
+                  }
+                } 
+              }
+            }}
+          />
+        </Box>
+        <ProductPane/>
       </Box>
     );
   }
@@ -442,8 +581,33 @@ export const CreatorKit = () => {
       className="CreatorKit"
     >
       <ProductOrAssetButtons/>
+      {entityType === "PRODUCT" && <ProductList/>}
       {entityType === "PRODUCT" && <ProductEditor/>}
-      <SaveStoreButton/>
+      {!activeProductId && <FullWideButton text={"Save Store"}/>}
+      {activeProductId && 
+        <FullWideButton text={"Done"} 
+          onClick={() => {
+            if(!envProducts[activeProductId]) return null;
+
+            if((envProducts[activeProductId].imageIndex !== undefined) || (envProducts[activeProductId].modelIndex !== undefined)){
+              setActiveProductId(null);
+            }
+            else{
+              Swal.fire({
+                title: "No Asset Selected",
+                text: "Please select one of the provided 2D or 3D assets before proceeding.",
+                icon: "warning",
+                showConfirmButton: true,
+                allowOutsideClick: false,
+                customClass: {
+                  title: styles.swalTitle,
+                  popup: styles.swalPopup,
+                },
+              });
+            }
+          }}
+        />
+      }
     </Box>
   );
 };

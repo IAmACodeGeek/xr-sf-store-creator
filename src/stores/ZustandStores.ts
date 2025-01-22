@@ -11,7 +11,7 @@ interface ComponentStore {
   products: Product[];
   selectedProduct: Product | undefined;
   setProducts: (products: Product[]) => void;
-  setSelectedProduct: (productId: number) => void;
+  setSelectedProduct: (productId: number | null) => void;
 
   // Creator Kit handling
   isCreatorKitOpen: boolean;
@@ -56,13 +56,14 @@ const useComponentStore = create<ComponentStore>((set) => ({
   products: [],
   selectedProduct: undefined,
   setProducts: (products: Product[]) => set({ products }),
-  setSelectedProduct: (productId: number) =>
+  setSelectedProduct: (productId: number | null) => {
     set((state: { products: Product[] }) => {
       const finalProduct = state.products.find(
         (product: Product) => product.id === productId
       );
       return { ...state, selectedProduct: finalProduct };
-    }),
+    });
+  },
 
   // Creator Kit handling
   isCreatorKitOpen: false,

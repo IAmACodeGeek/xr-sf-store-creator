@@ -26,7 +26,6 @@ const Modal = () => {
         const element = containerRef.current?.querySelector("model-viewer");
         if (element) {
           modelViewerElement.current = element; 
-          console.log("Found <model-viewer> element:", element);
 
           if (element.activateAR) {
             setArSupported(true); 
@@ -217,7 +216,6 @@ const Modal = () => {
     
     if (modelViewerElement.current?.activateAR) {
       modelViewerElement.current.activateAR();
-      console.log("AR support exists");
     } else {
       console.error("AR is not supported or activateAR is undefined");
     }

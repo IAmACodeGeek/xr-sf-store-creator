@@ -128,19 +128,16 @@ const DraggableContainer = ({
     // Position
     let worldPosition = new Vector3(0, 0, 0);
     
-    if(envProduct.type === "PHOTO" || envProduct.type === "PSEUDO_3D"){
+    if(envProduct.type === "PHOTO"){
       const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
       const cameraDirection = new Vector3(); camera.getWorldDirection(cameraDirection);
       cameraDirection.multiplyScalar(5);
       cameraPosition.add(cameraDirection);
 
       worldPosition = position? new Vector3(...position) : cameraPosition;
-      // console.log("photo");
-      // console.log(position);
     }
     else if(envProduct.type === "MODEL_3D" && computedPositionForModel){
       worldPosition = new Vector3(...computedPositionForModel);
-      // console.log("model", worldPosition);
     }
     
     objectRef.current.matrixWorld.setPosition(worldPosition);
@@ -166,7 +163,7 @@ const DraggableContainer = ({
   }, [position, computedPositionForModel, envProduct.type, computedRotation, camera]);
 
   const imageUrl = useMemo(() => {
-    if(!envProduct.imageIndex || !["PSEUDO_3D", "PHOTO"].includes(envProduct.type)) return null;
+    if((envProduct.imageIndex === undefined) || envProduct.type !== "PHOTO") return null;
     return product?.images[envProduct.imageIndex].src || "";
   }, [envProduct.type, envProduct.imageIndex, product?.images]);
 
@@ -195,7 +192,7 @@ const DraggableContainer = ({
     ];
   }, [imageTexture, scale]);
 
-  const handleClick = (event) => {
+  const handleClick = (event: React.MouseEvent<Object3D>) => {
     event.stopPropagation();
     if (envProduct && envProduct.id !== selectedProduct?.id) {
       setSelectedProduct(envProduct.id);
@@ -254,17 +251,6 @@ const DraggableContainer = ({
               castShadow
               receiveShadow
             />
-          }
-          {envProduct.type === "PSEUDO_3D" &&
-            <Billboard follow={true} lockX={false} lockY={false} lockZ={false}
-              ref={objectRef}
-            >
-              <DreiImage 
-                url={product?.images?.[envProduct.imageIndex || 0].src || ""}
-                scale={[scale || 1, scale || 1]} 
-                transparent={true} 
-              />
-            </Billboard>
           }
           {envProduct.type === "PHOTO" && computedSizeForImage &&
             <mesh

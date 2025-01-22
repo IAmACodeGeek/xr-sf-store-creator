@@ -8,6 +8,7 @@ const productData: Product[] = [
       {src: "https://tse4.mm.bing.net/th?id=OIP.hJYe3V9T_3LFPz_Z6Lj-8wHaE8&pid=Api&P=0&h=180"},
       {src: "https://tse4.mm.bing.net/th?id=OIP.1Aah4qzDUq-2vU9sPRPAJwHaE7&pid=Api&P=0&h=180"},
       {src: "https://tse2.mm.bing.net/th?id=OIP.-fXeDZvAZovtj7Vh0097mQHaFW&pid=Api&P=0&h=180"},
+      {src: "https://tse3.mm.bing.net/th?id=OIP.Hir50VQ8NFJoeouNk-t_UQHaHa&pid=Api&P=0&h=180"},
       {src: "https://tse3.mm.bing.net/th?id=OIP.Hir50VQ8NFJoeouNk-t_UQHaHa&pid=Api&P=0&h=180"}
     ],
     models: [],
