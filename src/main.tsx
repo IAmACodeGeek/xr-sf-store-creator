@@ -41,11 +41,11 @@ function CanvasWrapper() {
       products.map((product) => {
         const envProduct: EnvProduct = {
           id: product.id,
-          type: "MODEL_3D",
+          type: "PHOTO",
           imageIndex: undefined,
           modelIndex: undefined,
-          position: [0, 0, 0],
-          rotation: [0, 0, 0],
+          position: undefined,
+          rotation: undefined,
           scale: 1,
           isEnvironmentProduct: false
         };
@@ -85,17 +85,19 @@ function CanvasWrapper() {
     <div id="container">
       {( progress >= 100) && <UI />}
       {(showLoader || progress < 100) && <Load progress={progress}/>}
-      <Canvas camera={{ fov: 45 }} shadows>
-        <React.Suspense
-          fallback={
-            <Html center>
-              <Load progress={progress}/>
-            </Html>
-          }
-        >
-          <App/>
-        </React.Suspense>
-      </Canvas>
+      <div className="canvas-container">
+        <Canvas camera={{ fov: 45 }} shadows>
+          <React.Suspense
+            fallback={
+              <Html center>
+                <Load progress={progress}/>
+              </Html>
+            }
+          >
+            <App/>
+          </React.Suspense>
+        </Canvas>
+      </div>
     </div>
   );
 }

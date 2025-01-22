@@ -87,7 +87,6 @@ export const Player = () => {
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
       
-      console.log("MouseDown");
       setMouseDown(true);
     };
 
@@ -95,8 +94,7 @@ export const Player = () => {
       if(!isMouseDown) return;
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
-      console.log("Mouse move");
-      console.log(e);
+      
       const deltaX = previousMousePosition.current? e.clientX - previousMousePosition.current.x : 0;
       const deltaY = previousMousePosition.current? e.clientY - previousMousePosition.current.y : 0;
 
@@ -117,7 +115,6 @@ export const Player = () => {
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
       
-      console.log("MouseUp");
       setMouseDown(false);
       previousMousePosition.current = null;
     };
