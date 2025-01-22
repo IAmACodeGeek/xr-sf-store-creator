@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, Typography } from "@mui/material";
 
-import { EnvProduct, useComponentStore, useEnvProductStore } from "../../stores/ZustandStores";
+import { EnvProduct, useActiveProductStore, useComponentStore, useEnvProductStore, useToolStore } from "../../stores/ZustandStores";
 import React, { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
@@ -8,17 +8,13 @@ import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
 
 export const CreatorKit = () => {
-  const { products, selectedProduct, setSelectedProduct } = useComponentStore();
+  const { products } = useComponentStore();
   const { envProducts, modifyEnvProduct } = useEnvProductStore();
 
   const [ entityType, setEntityType ] = useState("PRODUCT");
-  const [activeProductId, setActiveProductId] = useState<number | null>(null);
-  const [toolType, setToolType] = useState<string>("MEDIA");
+  const {activeProductId, setActiveProductId} = useActiveProductStore();
+  const {toolType, setToolType} = useToolStore();
   const [mediaType, setMediaType] = useState("2D");
-
-  useEffect(() => {
-    setSelectedProduct(activeProductId);
-  }, [activeProductId]);
 
   const ProductOrAssetButtons = () => {
     return (
@@ -97,19 +93,19 @@ export const CreatorKit = () => {
   }
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, product: Product) => {
-    const envProduct = {
-      id: product.id,
-      isEnvironmentProduct: event.target.checked
-    };
-    modifyEnvProduct(product.id, envProduct);
-    if(event.target.checked){
+    if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
       setActiveProductId(product.id);
       setToolType("MEDIA");
     }
     else{
       setActiveProductId(null);
-      setToolType("");
+      setToolType(null);
     }
+    const envProduct = {
+      id: product.id,
+      isEnvironmentProduct: event.target.checked
+    };
+    modifyEnvProduct(product.id, envProduct);
   };
 
   const ProductList = () => {
@@ -243,7 +239,7 @@ export const CreatorKit = () => {
                         }
                         else{
                           setActiveProductId(null);
-                          setToolType("");
+                          setToolType(null);
                         }
                       }
                       else{
@@ -272,7 +268,7 @@ export const CreatorKit = () => {
                         }
                         else{
                           setActiveProductId(null);
-                          setToolType("");
+                          setToolType(null);
                         }
                       }
                       else{
@@ -366,15 +362,13 @@ export const CreatorKit = () => {
           id: product.id,
           type: type,
           imageIndex: type === "PHOTO"? index : undefined,
-          modelIndex: type === "MODEL"? index: undefined,
+          modelIndex: type === "MODEL_3D"? index: undefined,
           isEnvironmentProduct: true
         };
 
         modifyEnvProduct(product.id, envProduct);
-
-        setActiveProductId(product.id);
+        console.log(index);
       };
-
       const MediaContainer = () => {
         return (
           <Box
@@ -413,6 +407,7 @@ export const CreatorKit = () => {
                       }}
                       key={index}
                       onClick={() => {
+                        setActiveProductId(product.id);
                         setMediaItem("PHOTO", index);
                       }}
                     >
@@ -424,6 +419,54 @@ export const CreatorKit = () => {
                           backgroundColor: "rgba(255, 255, 255, 0.075)",
                         }}
                       />
+                    </Box>
+                  );
+                })
+              }
+              {mediaType === "3D" &&
+                product?.models.map((model, index) => {
+                  const modelData = {
+                    id: model.id,
+                    sources: [model.sources && model.sources[0]],
+                    alt: "3D Model"
+                  };
+                  const iosSrc = model.sources && model.sources[1].url;
+
+                  return (
+                    <Box
+                      sx={{
+                        width: "100%", aspectRatio: "1 / 1",
+                        display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
+                        backgroundColor: (envProducts[product.id] && envProducts[product.id].modelIndex === index)?
+                        "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
+                        border: (envProducts[product.id] && envProducts[product.id].modelIndex === index)? "2px solid #4cb1ff" : "none",
+                        padding: "25px", boxSizing: "border-box",
+                      }}
+                      key={index}
+                    >
+                      <ModelViewer
+                        style={{
+                          width: "100%", height: "100%",
+                          backgroundColor: "rgb(15, 15, 15)"
+                        }}
+                        data={modelData}
+                        ar={true} 
+                        arModes="scene-viewer webxr quick-look" 
+                        arScale="auto" 
+                        iosSrc={iosSrc} 
+                        cameraControls={true} 
+                        environmentImage="neutral" 
+                        poster="" 
+                        alt="A 3D model of a product"
+                        onArStatus={(event: unknown) => console.log("AR Status:", event)} 
+                        onLoad={() => console.log("Model loaded")} 
+                      />
+                      <FullWideButton text="Use This Model" onClick={() => {
+                        console.log("pressed");
+                        console.log(index);
+                        setActiveProductId(product.id);
+                        setMediaItem("MODEL_3D", index);
+                      }}/>
                     </Box>
                   );
                 })

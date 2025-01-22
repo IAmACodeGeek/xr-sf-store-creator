@@ -1,4 +1,4 @@
-import { useComponentStore, EnvProduct } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,19 +19,20 @@ const DraggableContainer = ({
   scale = 1,
   envProduct
 }: DraggableContainerProps) => {
-  const { products, selectedProduct, setSelectedProduct } = useComponentStore();
+  const { products, setSelectedProduct } = useComponentStore();
   const {camera} = useThree();
-
+  const {activeProductId} = useActiveProductStore();
+  const {toolType} = useToolStore();
+  
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
     return products.find((p: Product) => p.id === envProduct.id);
   }, [products, envProduct.id]);
 
   // To show axes when selected
-  const [isSelected, setIsSelected] = useState(false);
-  useEffect(() => {
-    setIsSelected(selectedProduct?.id === envProduct.id);
-  }, [selectedProduct, envProduct.id]);
+  const isActive = useMemo(() => {
+    return activeProductId === envProduct.id && toolType === "3DPARAMS";
+  }, [activeProductId, envProduct.id, toolType]);
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
@@ -121,46 +122,68 @@ const DraggableContainer = ({
   }, [scene, computedScaleForModel, position, camera]);
 
   // Set position and rotation
-  const objectRef = useRef<Mesh | Object3D>(null);
+  const modelRef = useRef<Object3D>(null);
+  const meshRef = useRef<Mesh>(null);
   useEffect(() => {
-    if(!objectRef.current) return;
+    if(!modelRef.current || envProduct.type !== "MODEL_3D") return;
 
     // Position
-    let worldPosition = new Vector3(0, 0, 0);
+    const worldPosition = new Vector3(...(computedPositionForModel || [0, 0, 0]));
     
-    if(envProduct.type === "PHOTO"){
-      const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
-      const cameraDirection = new Vector3(); camera.getWorldDirection(cameraDirection);
-      cameraDirection.multiplyScalar(5);
-      cameraPosition.add(cameraDirection);
-
-      worldPosition = position? new Vector3(...position) : cameraPosition;
+    modelRef.current.matrixWorld.setPosition(worldPosition);
+    if (modelRef.current.parent) {
+      worldPosition.applyMatrix4(modelRef.current.parent.matrixWorld.invert());
     }
-    else if(envProduct.type === "MODEL_3D" && computedPositionForModel){
-      worldPosition = new Vector3(...computedPositionForModel);
-    }
-    
-    objectRef.current.matrixWorld.setPosition(worldPosition);
-    if (objectRef.current.parent) {
-      worldPosition.applyMatrix4(objectRef.current.parent.matrixWorld.invert());
-    }
-    objectRef.current.position.copy(worldPosition);
+    modelRef.current.position.copy(worldPosition);
 
     // Rotation
     const worldRotation = computedRotation;
     const quaternion = new Quaternion();
     quaternion.setFromEuler(worldRotation);
 
-    if (objectRef.current.parent){
+    if (modelRef.current.parent){
       const parentQuaternion = new Quaternion();
-      objectRef.current.parent.getWorldQuaternion(parentQuaternion);
+      modelRef.current.parent.getWorldQuaternion(parentQuaternion);
 
       parentQuaternion.invert();
       quaternion.multiplyQuaternions(parentQuaternion, quaternion);
     }
-    objectRef.current.setRotationFromQuaternion(quaternion);
+    modelRef.current.setRotationFromQuaternion(quaternion);
 
-  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera]);
+  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, modelRef]);
+
+  useEffect(() => {
+    if(!meshRef.current || envProduct.type !== "PHOTO") return;
+
+    // Position
+    const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
+    const cameraDirection = new Vector3(); camera.getWorldDirection(cameraDirection);
+    cameraDirection.multiplyScalar(5);
+    cameraPosition.add(cameraDirection);
+
+    const worldPosition = position? new Vector3(...position) : cameraPosition;
+    
+    meshRef.current.matrixWorld.setPosition(worldPosition);
+    if (meshRef.current.parent) {
+      worldPosition.applyMatrix4(meshRef.current.parent.matrixWorld.invert());
+    }
+    meshRef.current.position.copy(worldPosition);
+
+    // Rotation
+    const worldRotation = computedRotation;
+    const quaternion = new Quaternion();
+    quaternion.setFromEuler(worldRotation);
+
+    if (meshRef.current.parent){
+      const parentQuaternion = new Quaternion();
+      meshRef.current.parent.getWorldQuaternion(parentQuaternion);
+
+      parentQuaternion.invert();
+      quaternion.multiplyQuaternions(parentQuaternion, quaternion);
+    }
+    meshRef.current.setRotationFromQuaternion(quaternion);
+
+  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, meshRef]);
 
   const imageUrl = useMemo(() => {
     if((envProduct.imageIndex === undefined) || envProduct.type !== "PHOTO") return null;
@@ -194,37 +217,64 @@ const DraggableContainer = ({
 
   const handleClick = (event: React.MouseEvent<Object3D>) => {
     event.stopPropagation();
-    if (envProduct && envProduct.id !== selectedProduct?.id) {
+    if (envProduct && envProduct.id !== activeProductId) {
       setSelectedProduct(envProduct.id);
     }
   };
 
   const handleObjectMove = () => {
-    if(!objectRef.current) return;
-
-    objectRef.current.updateMatrixWorld();
-
-    const position = new Vector3();
-    objectRef.current.getWorldPosition(position);
-    if(envProduct.type === "MODEL_3D" && boxCenter){ // Neutralize the auto generated offset
-      position.add(boxCenter);
+    if(envProduct.type === "MODEL_3D"){
+      if(!modelRef.current) return;
+  
+      modelRef.current.updateMatrixWorld();
+  
+      const position = new Vector3();
+      modelRef.current.getWorldPosition(position);
+      
+      if(boxCenter){ // Neutralize the auto generated offset
+        position.add(boxCenter);
+      }
+  
+      const quaternion = new Quaternion();
+      modelRef.current.getWorldQuaternion(quaternion);
+  
+      const euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+  
+      const pos = [position.x, position.y, position.z];
+      const rot =  [
+        euler.x * 180 / Math.PI,
+        euler.y * 180 / Math.PI,
+        euler.z * 180 / Math.PI
+      ];
+      
+      envProduct.position = pos;
+      envProduct.rotation = rot;
     }
-
-    const quaternion = new Quaternion();
-    objectRef.current.getWorldQuaternion(quaternion);
-
-    const euler = new Euler();
-    euler.setFromQuaternion(quaternion);
-
-    const pos = [position.x, position.y, position.z];
-    const rot =  [
-      euler.x * 180 / Math.PI,
-      euler.y * 180 / Math.PI,
-      euler.z * 180 / Math.PI
-    ];
-    
-    envProduct.position = pos;
-    envProduct.rotation = rot;
+    else if(envProduct.type === "PHOTO"){
+      if(!meshRef.current) return;
+  
+      meshRef.current.updateMatrixWorld();
+  
+      const position = new Vector3();
+      meshRef.current.getWorldPosition(position);
+  
+      const quaternion = new Quaternion();
+      meshRef.current.getWorldQuaternion(quaternion);
+  
+      const euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+  
+      const pos = [position.x, position.y, position.z];
+      const rot =  [
+        euler.x * 180 / Math.PI,
+        euler.y * 180 / Math.PI,
+        euler.z * 180 / Math.PI
+      ];
+      
+      envProduct.position = pos;
+      envProduct.rotation = rot;
+    }
   };
 
   return (
@@ -236,14 +286,14 @@ const DraggableContainer = ({
         <PivotControls
           anchor={[0, 0, 0]}
           scale={1.25}
-          activeAxes={[isSelected, isSelected, isSelected]}
-          visible={isSelected}
-          onDragEnd={handleObjectMove}
+          activeAxes={[isActive, isActive, isActive]}
+          visible={isActive}
+          onDragEnd={() => {handleObjectMove();}}
           disableScaling
         >
           {envProduct.type === "MODEL_3D" && memoizedModelScene &&
             <primitive
-              ref={objectRef}
+              ref={modelRef}
               object={memoizedModelScene}
               scale={[computedScaleForModel, computedScaleForModel, computedScaleForModel]}
               onClick={handleClick}
@@ -255,12 +305,12 @@ const DraggableContainer = ({
           {envProduct.type === "PHOTO" && computedSizeForImage &&
             <mesh
               rotation={computedRotation}
-              ref={objectRef}
+              ref={meshRef}
             >
               <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
               <meshBasicMaterial 
                 map={imageTexture}
-                transparent={false}
+                transparent={true}
               />
             </mesh>
           }

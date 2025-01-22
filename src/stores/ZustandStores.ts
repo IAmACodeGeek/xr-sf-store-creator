@@ -128,18 +128,15 @@ const useComponentStore = create<ComponentStore>((set) => ({
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
 }));
 
-// // Pointer lock handling
-// interface PointerLockStore {
-//   isPointerLocked: boolean;
-//   lockPointer: () => void;
-//   unlockPointer: () => void;
-// }
+interface ActiveProductStore {
+  activeProductId: number | null;
+  setActiveProductId: (value: number | null) => void;
+}
 
-// const usePointerLockStore = create<PointerLockStore>((set) => ({
-//   isPointerLocked: false,
-//   lockPointer: () => set({ isPointerLocked: true }),
-//   unlockPointer: () => set({ isPointerLocked: false }),
-// }));
+const useActiveProductStore = create<ActiveProductStore>((set) => ({
+  activeProductId: null,
+  setActiveProductId: (value: number | null) => set({activeProductId: value})
+}));  
 
 // Touch handling
 interface TouchStore {
@@ -228,13 +225,24 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
   }))
 }));
 
+interface ToolStore {
+  toolType: "MEDIA" | "3DPARAMS" | null,
+  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => void
+}
+
+const useToolStore = create<ToolStore>((set) => ({
+  toolType: "MEDIA",
+  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => set({toolType: value})
+}));
+
 export {
   useComponentStore,
-  // usePointerLockStore,
   useTouchStore,
   useDriverStore,
   useTourStore,
   useSearchStore,
-  useEnvProductStore
+  useEnvProductStore,
+  useActiveProductStore,
+  useToolStore
 };  
 export type { EnvProduct };

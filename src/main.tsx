@@ -9,7 +9,6 @@ import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
 import { EnvProduct, useComponentStore, useEnvProductStore } from "./stores/ZustandStores";
 import Product from "./Types/Product.js";
-import productdata from "./data/ProductData.js";
 
 function CanvasWrapper() {
   const { products, setProducts, setSelectedProduct } = useComponentStore();
@@ -17,14 +16,14 @@ function CanvasWrapper() {
   const { setEnvProducts } = useEnvProductStore();
 
   async function fetchProducts() {
-    // try {
-    //   const response = await ProductService.getAllProducts();
-    //   setProducts(response);
-    //   sessionStorage.setItem("Products", JSON.stringify(response));
-    // } catch (err) {
-    //   console.error(err);
-    // }
-    setProducts(productdata);
+    try {
+      const response = await ProductService.getAllProducts();
+      setProducts(response);
+      sessionStorage.setItem("Products", JSON.stringify(response));
+      console.log(sessionStorage.getItem("Products"));
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   useEffect(() => {
@@ -83,17 +82,11 @@ function CanvasWrapper() {
 
   return (
     <div id="container">
-      {( progress >= 100) && <UI />}
-      {(showLoader || progress < 100) && <Load progress={progress}/>}
+      <UI/>
+      <Load progress={progress} showLoader={showLoader}/>
       <div className="canvas-container">
         <Canvas camera={{ fov: 45 }} shadows>
-          <React.Suspense
-            fallback={
-              <Html center>
-                <Load progress={progress}/>
-              </Html>
-            }
-          >
+          <React.Suspense>
             <App/>
           </React.Suspense>
         </Canvas>

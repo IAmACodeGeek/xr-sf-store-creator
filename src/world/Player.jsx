@@ -1,18 +1,14 @@
 import * as THREE from "three";
 import { CapsuleCollider, RigidBody } from "@react-three/rapier";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { usePersonControls } from "@/hooks.js";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useComponentStore, useTouchStore } from "../stores/ZustandStores";
+import { useActiveProductStore, useComponentStore, useTouchStore } from "../stores/ZustandStores";
 import { CameraController } from "./CameraController";
 import { ProductGSAPUtil } from "./ProductGSAPUtil";
 
 const MOVE_SPEED = 12;
-const TOUCH_SENSITIVITY = {
-  x: 0.005,
-  y: 0.005
-};
 
 const direction = new THREE.Vector3();
 const frontVector = new THREE.Vector3();
@@ -40,6 +36,10 @@ export const Player = () => {
   } = useComponentStore();
 
   const { isTouchEnabled, enableTouch } = useTouchStore();
+
+  const {isActiveProduct} = useActiveProductStore();
+
+  const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003};
 
   useEffect(() => {
     if (!playerRef.current || initialTourComplete.current) return;
@@ -119,12 +119,12 @@ export const Player = () => {
       previousMousePosition.current = null;
     };
 
-    document.addEventListener("mousedown", handleMouseDown);
+    document.querySelector(".canvas-container").addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener("mousestart", handleMouseDown);
+      document.querySelector(".canvas-container").removeEventListener("mousestart", handleMouseDown);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
