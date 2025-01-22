@@ -1,10 +1,8 @@
 import * as THREE from "three";
-import * as RAPIER from "@dimforge/rapier3d-compat";
-import { CapsuleCollider, RigidBody, useRapier } from "@react-three/rapier";
+import { CapsuleCollider, RigidBody } from "@react-three/rapier";
 import { useRef, useState, useEffect } from "react";
 import { usePersonControls } from "@/hooks.js";
 import { useFrame, useThree } from "@react-three/fiber";
-import nipplejs from "nipplejs";
 import gsap from "gsap";
 import { useComponentStore, useTouchStore } from "../stores/ZustandStores";
 import { CameraController } from "./CameraController";
@@ -12,14 +10,8 @@ import { ProductGSAPUtil } from "./ProductGSAPUtil";
 
 const MOVE_SPEED = 12;
 const TOUCH_SENSITIVITY = {
-  PORTRAIT: {
-    x: 0.004,
-    y: 0.004,
-  },
-  LANDSCAPE: {
-    x: 0.004,
-    y: 0.004,
-  },
+  x: 0.005,
+  y: 0.005
 };
 
 const direction = new THREE.Vector3();
@@ -31,116 +23,15 @@ const START_POSITION = new THREE.Vector3(0, 7, -5);
 
 export const Player = () => {
   const playerRef = useRef();
-  const touchRef = useRef({
-    cameraTouch: null,
-    previousCameraTouch: null,
-  });
+
+  const previousMousePosition = useRef(null);
+  const [isMouseDown, setMouseDown] = useState(false);
+
   const { forward, backward, left, right, jump } = usePersonControls();
   const [canJump, setCanJump] = useState(true);
   const [isAnimating, setAnimating] = useState(false);
-  const [isMobile, setIsMobile] = useState(
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|Kindle|Silk|Mobile|Tablet|Touch/i.test(
-      navigator.userAgent
-    )
-  );
-  const [isPortrait, setIsPortrait] = useState(
-    window.innerHeight > window.innerWidth
-  );
+  
   const { camera } = useThree();
-
-  const rapier = useRapier();
-
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      setIsPortrait(window.innerHeight > window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleOrientationChange);
-    handleOrientationChange();
-
-    return () => {
-      window.removeEventListener("resize", handleOrientationChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const joystickZone = document.createElement("div");
-    joystickZone.id = "joystickZone";
-    joystickZone.style.position = "absolute";
-    joystickZone.style.bottom = "15vh";
-    joystickZone.style.left = "13vw";
-    joystickZone.style.width = "150px";
-    joystickZone.style.height = "150px";
-    joystickZone.style.zIndex = "3";
-    joystickZone.style.pointerEvents = "all";
-    document.body.appendChild(joystickZone);
-
-    const JOYSTICK_SIZE = 130;
-    const PORTRAIT_MARGIN = {
-      bottom: 70,
-      left: 80,
-    };
-    const LANDSCAPE_MARGIN = {
-      bottom: 80,
-      left: 120,
-    };
-
-    const calculatePosition = () => {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      const isLandscape = viewportWidth > viewportHeight;
-
-      const margins = isLandscape ? LANDSCAPE_MARGIN : PORTRAIT_MARGIN;
-
-
-      const bottom = isLandscape
-        ? Math.min(margins.bottom, viewportHeight * 0.45)
-        : Math.min(margins.bottom, viewportHeight * 0.01);
-
-      const left = isLandscape
-        ? Math.min(margins.left, viewportWidth * 0.08)
-        : Math.min(margins.left, viewportWidth * 0.12);
-
-      return {
-        bottom: `${bottom}px`,
-        left: `${left}px`,
-      };
-    };
-
-    const manager = nipplejs.create({
-      zone: joystickZone,
-      size: JOYSTICK_SIZE,
-      mode: "static",
-      position: calculatePosition(),
-      color: "black",
-      dynamicPage: true,
-    });
-
-    const handleMove = (evt, data) => {
-      if (!data) return;
-
-      const { angle, distance } = data;
-      const radian = angle.radian;
-      const speed = (distance / 100) * MOVE_SPEED;
-
-      direction.set(Math.cos(radian) * speed, 0, -Math.sin(radian) * speed * 2);
-    };
-
-    const handleEnd = () => {
-      direction.set(0, 0, 0);
-    };
-
-    manager.on("move", handleMove);
-    manager.on("end", handleEnd);
-
-    return () => {
-      manager.destroy();
-      document.body.removeChild(joystickZone);
-    };
-  }, [isMobile]);
 
   const initialTourComplete = useRef(false);
   const {
@@ -192,81 +83,55 @@ export const Player = () => {
   }, [camera]);
 
   useEffect(() => {
-    const handleTouchStart = (e) => {
+    const handleMouseDown = (e) => {
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
-
-      if (e.target.closest("#joystickZone")) return;
-
-      const touches = Array.from(e.touches);
-      const rightmostTouch = touches.reduce((rightmost, touch) => {
-        return !rightmost || touch.clientX > rightmost.clientX
-          ? touch
-          : rightmost;
-      }, null);
-
-      if (rightmostTouch) {
-        touchRef.current.cameraTouch = rightmostTouch.identifier;
-        touchRef.current.previousCameraTouch = {
-          x: rightmostTouch.clientX,
-          y: rightmostTouch.clientY,
-        };
-      }
+      
+      console.log("MouseDown");
+      setMouseDown(true);
     };
 
-    const handleTouchMove = (e) => {
+    const handleMouseMove = (e) => {
+      if(!isMouseDown) return;
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
-
-      const touch = Array.from(e.touches).find(
-        (t) => t.identifier === touchRef.current.cameraTouch
-      );
-
-      if (!touch) return;
-
-      const deltaX = touch.clientX - touchRef.current.previousCameraTouch.x;
-      const deltaY = touch.clientY - touchRef.current.previousCameraTouch.y;
-
-      const sensitivity = TOUCH_SENSITIVITY.PORTRAIT;
+      console.log("Mouse move");
+      console.log(e);
+      const deltaX = previousMousePosition.current? e.clientX - previousMousePosition.current.x : 0;
+      const deltaY = previousMousePosition.current? e.clientY - previousMousePosition.current.y : 0;
 
       camera.rotation.order = "YXZ";
-      camera.rotation.y -= deltaX * sensitivity.x;
+      camera.rotation.y -= deltaX * TOUCH_SENSITIVITY.x;
       camera.rotation.x = Math.max(
         -Math.PI / 2,
-        Math.min(Math.PI / 2, camera.rotation.x - deltaY * sensitivity.y)
+        Math.min(Math.PI / 2, camera.rotation.x - deltaY * TOUCH_SENSITIVITY.y)
       );
 
-      touchRef.current.previousCameraTouch = {
-        x: touch.clientX,
-        y: touch.clientY,
+      previousMousePosition.current = {
+        x: e.clientX,
+        y: e.clientY,
       };
     };
 
-    const handleTouchEnd = (e) => {
+    const handleMouseUp = (e) => {
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
-
-      const remainingTouches = Array.from(e.touches);
-      if (
-        !remainingTouches.some(
-          (t) => t.identifier === touchRef.current.cameraTouch
-        )
-      ) {
-        touchRef.current.cameraTouch = null;
-        touchRef.current.previousCameraTouch = null;
-      }
+      
+      console.log("MouseUp");
+      setMouseDown(false);
+      previousMousePosition.current = null;
     };
 
-    document.addEventListener("touchstart", handleTouchStart);
-    document.addEventListener("touchmove", handleTouchMove);
-    document.addEventListener("touchend", handleTouchEnd);
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("mousestart", handleMouseDown);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [camera, isPortrait, isTouchEnabled, isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, crosshairVisible, isProductSearcherOpen]);
+  }, [isMouseDown, camera, isTouchEnabled, isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, crosshairVisible, isProductSearcherOpen]);
 
   const combinedInput = new THREE.Vector3();
   const movementDirection = new THREE.Vector3();
@@ -310,7 +175,6 @@ export const Player = () => {
         setTimeout(() => setCanJump(true), 500);
       }
     }
-
 
     const { x, y, z } = playerRef.current.translation();
     const lerpFactor = 0.1;

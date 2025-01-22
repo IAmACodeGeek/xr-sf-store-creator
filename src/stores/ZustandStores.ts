@@ -128,18 +128,18 @@ const useComponentStore = create<ComponentStore>((set) => ({
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
 }));
 
-// Pointer lock handling
-interface PointerLockStore {
-  isPointerLocked: boolean;
-  lockPointer: () => void;
-  unlockPointer: () => void;
-}
+// // Pointer lock handling
+// interface PointerLockStore {
+//   isPointerLocked: boolean;
+//   lockPointer: () => void;
+//   unlockPointer: () => void;
+// }
 
-const usePointerLockStore = create<PointerLockStore>((set) => ({
-  isPointerLocked: false,
-  lockPointer: () => set({ isPointerLocked: true }),
-  unlockPointer: () => set({ isPointerLocked: false }),
-}));
+// const usePointerLockStore = create<PointerLockStore>((set) => ({
+//   isPointerLocked: false,
+//   lockPointer: () => set({ isPointerLocked: true }),
+//   unlockPointer: () => set({ isPointerLocked: false }),
+// }));
 
 // Touch handling
 interface TouchStore {
@@ -230,7 +230,7 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
 
 export {
   useComponentStore,
-  usePointerLockStore,
+  // usePointerLockStore,
   useTouchStore,
   useDriverStore,
   useTourStore,
