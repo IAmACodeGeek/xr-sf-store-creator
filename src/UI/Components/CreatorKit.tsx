@@ -6,6 +6,7 @@ import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
 import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
+import { useGLTF } from "@react-three/drei";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -94,13 +95,19 @@ export const CreatorKit = () => {
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, product: Product) => {
     if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
-      setActiveProductId(product.id);
       setToolType("MEDIA");
+      setMediaType("2D");
+      setActiveProductId(product.id);
+      // Preload its models
+      product.models.forEach((model) => {
+        useGLTF.preload(model.sources?.[0].url || "");
+      });
     }
     else{
       setActiveProductId(null);
       setToolType(null);
     }
+
     const envProduct = {
       id: product.id,
       isEnvironmentProduct: event.target.checked
@@ -380,7 +387,7 @@ export const CreatorKit = () => {
           >
             <Box
               sx={{
-                display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center",
+                display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center",
                 gap: "20px",
                 width: "100%",
                 overflowY: "scroll", scrollbarWidth: 0, "&::-webkit-scrollbar": {display: "none"},
@@ -434,7 +441,7 @@ export const CreatorKit = () => {
                   return (
                     <Box
                       sx={{
-                        width: "100%", aspectRatio: "1 / 1",
+                        width: "80%", aspectRatio: "1 / 1",
                         display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center",
                         backgroundColor: (envProducts[product.id].modelIndex === index)?
                         "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.03)",
@@ -445,7 +452,7 @@ export const CreatorKit = () => {
                     >
                       <ModelViewer
                         style={{
-                          width: "100%", height: "100%",
+                          minWidth: "100%", width: "100%", minHeight: "100%", height: "100%",
                           backgroundColor: "rgb(15, 15, 15)"
                         }}
                         data={modelData}
@@ -457,12 +464,8 @@ export const CreatorKit = () => {
                         environmentImage="neutral" 
                         poster="" 
                         alt="A 3D model of a product"
-                        onArStatus={(event: unknown) => console.log("AR Status:", event)} 
-                        onLoad={() => console.log("Model loaded")} 
                       />
                       <FullWideButton text="Use This Model" onClick={() => {
-                        console.log("pressed");
-                        console.log(index);
                         setActiveProductId(product.id);
                         setMediaItem("MODEL_3D", index);
                       }}/>

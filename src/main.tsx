@@ -64,22 +64,6 @@ function CanvasWrapper() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Preload models
-  const preloadModels = (products: Product[]) => {
-    for (const product of products) {
-      for (const model of product.models) {
-        const url = model.sources?.[0].url || '';
-        if (url) {
-          useGLTF.preload(url);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    preloadModels(products);
-  }, [products]);
-
   return (
     <div id="container">
       <UI/>

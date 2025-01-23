@@ -115,7 +115,6 @@ const DraggableContainer = ({
     
     // Adjust position to account for scaled center offset
     const newPosition = positionVector.clone().sub(boxCenter.clone());
-    console.log(newPosition);
     return {
       computedPositionForModel: [newPosition.x, newPosition.y, newPosition.z],
       boxCenter: boxCenter
