@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { CapsuleCollider, RigidBody } from "@react-three/rapier";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect } from "react";
 import { usePersonControls } from "@/hooks.js";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useActiveProductStore, useComponentStore, useTouchStore } from "../stores/ZustandStores";
+import { useComponentStore, usePivotStore, useTouchStore } from "../stores/ZustandStores";
 import { CameraController } from "./CameraController";
 import { ProductGSAPUtil } from "./ProductGSAPUtil";
 
@@ -19,7 +19,7 @@ const START_POSITION = new THREE.Vector3(0, 7, -5);
 
 export const Player = () => {
   const playerRef = useRef();
-
+  
   const previousMousePosition = useRef(null);
   const [isMouseDown, setMouseDown] = useState(false);
 
@@ -35,9 +35,9 @@ export const Player = () => {
     isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, isProductSearcherOpen,
   } = useComponentStore();
 
+  const {isPivotActive} = usePivotStore();
   const { isTouchEnabled, enableTouch } = useTouchStore();
 
-  const {isActiveProduct} = useActiveProductStore();
 
   const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003};
 

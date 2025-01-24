@@ -41,3 +41,13 @@ canvas {
     z-index: 2;
     pointer-events: none;
 }
+
+// hide number input up down arrows
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}

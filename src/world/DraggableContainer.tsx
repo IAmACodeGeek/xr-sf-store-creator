@@ -1,4 +1,4 @@
-import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore, usePivotStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +24,7 @@ const DraggableContainer = ({
   const {activeProductId} = useActiveProductStore();
   const {toolType} = useToolStore();
   const {modifyEnvProduct} = useEnvProductStore();
+  const {setPivotActive} = usePivotStore();
 
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
@@ -241,11 +242,11 @@ const DraggableContainer = ({
       const euler = new Euler();
       euler.setFromQuaternion(quaternion);
   
-      const pos = [position.x, position.y, position.z];
+      const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       const rot =  [
-        euler.x * 180 / Math.PI,
-        euler.y * 180 / Math.PI,
-        euler.z * 180 / Math.PI
+        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
       ];
       
       const newEnvProduct: EnvProduct = {
@@ -271,11 +272,11 @@ const DraggableContainer = ({
       const euler = new Euler();
       euler.setFromQuaternion(quaternion);
   
-      const pos = [position.x, position.y, position.z];
+      const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       const rot =  [
-        euler.x * 180 / Math.PI,
-        euler.y * 180 / Math.PI,
-        euler.z * 180 / Math.PI
+        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
       ];
       
       const newEnvProduct: EnvProduct = {
@@ -289,6 +290,10 @@ const DraggableContainer = ({
     }
   };
 
+  useEffect(() => {
+    if(toolType === "3DPARAMS") handleObjectMove();
+  }, [toolType]);
+
   return (
     <RigidBody type="fixed">
       <group
@@ -297,10 +302,11 @@ const DraggableContainer = ({
       >
         <PivotControls
           anchor={[0, 0, 0]}
-          scale={1.25}
+          scale={1.25 * scale}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
-          onDragEnd={() => {handleObjectMove();}}
+          onDragStart={() => {setPivotActive(true)}}
+          onDragEnd={() => {handleObjectMove(); setPivotActive(false);}}
           disableScaling
         >
           {envProduct.type === "MODEL_3D" && memoizedModelScene &&

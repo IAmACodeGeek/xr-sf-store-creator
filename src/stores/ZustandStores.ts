@@ -235,6 +235,16 @@ const useToolStore = create<ToolStore>((set) => ({
   setToolType: (value: "MEDIA" | "3DPARAMS" | null) => set({toolType: value})
 }));
 
+interface PivotStore {
+  isPivotActive: boolean,
+  setPivotActive: (value: boolean) => void;
+}
+
+const usePivotStore = create<PivotStore>((set) => ({
+  isPivotActive: false,
+  setPivotActive: (value: boolean) => set({isPivotActive: value})
+}));
+
 export {
   useComponentStore,
   useTouchStore,
@@ -243,6 +253,7 @@ export {
   useSearchStore,
   useEnvProductStore,
   useActiveProductStore,
-  useToolStore
+  useToolStore,
+  usePivotStore
 };  
 export type { EnvProduct };
