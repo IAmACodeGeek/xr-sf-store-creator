@@ -277,58 +277,6 @@ const DraggableContainer = ({
       modifyEnvProduct(newEnvProduct.id, newEnvProduct);
     }
   };
-  const handleObjectRotate = () => {
-    if(envProduct.type === "MODEL_3D"){
-      if(!modelRef.current) return;
-  
-      modelRef.current.updateMatrixWorld();
-  
-      const quaternion = new Quaternion();
-      modelRef.current.getWorldQuaternion(quaternion);
-  
-      let euler = new Euler();
-      euler.setFromQuaternion(quaternion);
-
-      const rot =  [
-        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
-        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
-        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
-      ];
-      
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
-        rotation: rot,
-        isEnvironmentProduct: true
-      };
-
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
-    }
-    else if(envProduct.type === "PHOTO"){
-      if(!meshRef.current) return;
-  
-      meshRef.current.updateMatrixWorld();
-  
-      const quaternion = new Quaternion();
-      meshRef.current.getWorldQuaternion(quaternion);
-  
-      let euler = new Euler();
-      euler.setFromQuaternion(quaternion);
-  
-      const rot =  [
-        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
-        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
-        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
-      ];
-      
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
-        rotation: rot,
-        isEnvironmentProduct: true
-      };
-
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
-    }
-  };
 
   const handleObjectMove = () => {
     if(envProduct.type === "MODEL_3D"){
@@ -348,6 +296,7 @@ const DraggableContainer = ({
   
       const euler = new Euler();
       euler.setFromQuaternion(quaternion);
+      euler.reorder('YZX');
   
       const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       const rot =  [
@@ -378,6 +327,7 @@ const DraggableContainer = ({
   
       const euler = new Euler();
       euler.setFromQuaternion(quaternion);
+      euler.reorder('YZX');
   
       const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       const rot =  [
