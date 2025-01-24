@@ -467,7 +467,7 @@ export const CreatorKit = () => {
         };
 
         const ThreeParamsEditor = () => {
-          const getValue = useCallback((parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
+          const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
             if(parameter === "POSITION" && axis){
               if(axis.toUpperCase() === "X") return envProduct?.position?.[0];
               else if(axis.toUpperCase() === "Y") return envProduct?.position?.[1];
@@ -482,9 +482,9 @@ export const CreatorKit = () => {
               return envProduct?.scale;
             }
             return null;
-          }, [envProduct]);
+          };
 
-          const setValue = useCallback((parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
+          const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
             if(!envProduct) return;
 
             const newEnvProduct: EnvProduct = {
@@ -519,7 +519,7 @@ export const CreatorKit = () => {
             }
 
             modifyEnvProduct(envProduct.id, newEnvProduct);
-          }, [envProduct]);
+          };
 
           const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
             return (

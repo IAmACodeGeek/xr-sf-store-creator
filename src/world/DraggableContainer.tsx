@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
+import { cameraPosition } from "three/src/nodes/TSL.js";
 
 interface DraggableContainerProps {
   position?: [number, number, number] | undefined;
@@ -15,7 +16,7 @@ interface DraggableContainerProps {
 
 const DraggableContainer = ({
   position = undefined,
-  rotation = [0, 0, 0],
+  rotation = undefined,
   scale = 1,
   envProduct
 }: DraggableContainerProps) => {
@@ -73,13 +74,24 @@ const DraggableContainer = ({
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
-    const rotArray = rotation || [0, 0, 0];
+    const rotArray = [0, 0, 0];
+    console.log(position);
+    if(!rotation){
+      const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
+      const direction = new Vector3().subVectors(cameraPosition, new Vector3(...(position || [0, 0, 0]))).normalize();
+      direction.y = 0;
+      const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
+      rotArray[1] = angle - direction.z > 0 ? 180: 0;
+    }
+    else{
+      rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];
+    }
     return new Euler(
       rotArray[0] * Math.PI / 180,
       rotArray[1] * Math.PI / 180,
       rotArray[2] * Math.PI / 180
-    )
-  }, [rotation]);
+    );
+  }, [rotation, position]);
   
   // Manually compute scale such that object has unit height
   const computedScaleForModel = useMemo(() => {
@@ -223,6 +235,103 @@ const DraggableContainer = ({
     }
   };
 
+  const handleObjectTranslate = () => {
+    if(envProduct.type === "MODEL_3D"){
+      if(!modelRef.current) return;
+  
+      modelRef.current.updateMatrixWorld();
+  
+      const position = new Vector3();
+      modelRef.current.getWorldPosition(position);
+      
+      if(boxCenter){ // Neutralize the auto generated offset
+        position.add(boxCenter);
+      }
+  
+      const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
+      
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        position: pos,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+    }
+    else if(envProduct.type === "PHOTO"){
+      if(!meshRef.current) return;
+  
+      meshRef.current.updateMatrixWorld();
+  
+      const position = new Vector3();
+      meshRef.current.getWorldPosition(position);
+  
+      const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
+      
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        position: pos,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+    }
+  };
+  const handleObjectRotate = () => {
+    if(envProduct.type === "MODEL_3D"){
+      if(!modelRef.current) return;
+  
+      modelRef.current.updateMatrixWorld();
+  
+      const quaternion = new Quaternion();
+      modelRef.current.getWorldQuaternion(quaternion);
+  
+      let euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+      euler = euler.reorder('YZX');
+
+      const rot =  [
+        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
+      ];
+      
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        rotation: rot,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+    }
+    else if(envProduct.type === "PHOTO"){
+      if(!meshRef.current) return;
+  
+      meshRef.current.updateMatrixWorld();
+  
+      const quaternion = new Quaternion();
+      meshRef.current.getWorldQuaternion(quaternion);
+  
+      let euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+      euler = euler.reorder('YZX');
+  
+      const rot =  [
+        Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.y * 180 / Math.PI * 1000) / 1000,
+        Math.round(euler.z * 180 / Math.PI * 1000) / 1000
+      ];
+      
+      const newEnvProduct: EnvProduct = {
+        id: envProduct.id,
+        rotation: rot,
+        isEnvironmentProduct: true
+      };
+
+      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+    }
+  };
+
   const handleObjectMove = () => {
     if(envProduct.type === "MODEL_3D"){
       if(!modelRef.current) return;
@@ -289,6 +398,10 @@ const DraggableContainer = ({
       modifyEnvProduct(newEnvProduct.id, newEnvProduct);
     }
   };
+
+  useEffect(() => {
+    handleObjectTranslate();
+  }, [envProduct.imageIndex, envProduct.modelIndex]);
 
   useEffect(() => {
     if(toolType === "3DPARAMS") handleObjectMove();
