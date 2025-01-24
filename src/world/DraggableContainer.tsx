@@ -81,7 +81,7 @@ const DraggableContainer = ({
       const direction = new Vector3().subVectors(cameraPosition, new Vector3(...(position || [0, 0, 0]))).normalize();
       direction.y = 0;
       const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
-      rotArray[1] = angle - direction.z > 0 ? 180: 0;
+      rotArray[1] = angle - (direction.z < 0 ? 180: 0);
     }
     else{
       rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];
@@ -288,7 +288,6 @@ const DraggableContainer = ({
   
       let euler = new Euler();
       euler.setFromQuaternion(quaternion);
-      euler = euler.reorder('YZX');
 
       const rot =  [
         Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
@@ -314,7 +313,6 @@ const DraggableContainer = ({
   
       let euler = new Euler();
       euler.setFromQuaternion(quaternion);
-      euler = euler.reorder('YZX');
   
       const rot =  [
         Math.round(euler.x * 180 / Math.PI * 1000) / 1000,
