@@ -43,39 +43,63 @@ export const Player = () => {
 
   useEffect(() => {
     if (!playerRef.current || initialTourComplete.current) return;
-
-    const startPosition = new THREE.Vector3(-3, 55, 80);
+  
+    // Set initial position off-screen
+    const startPosition = new THREE.Vector3(40, 5, 0);
     playerRef.current.setTranslation(startPosition);
     camera.position.copy(startPosition);
-
+    camera.rotation.set(0, -Math.PI / 2, 0); 
+  
+    // Single smooth transition to spawn point
     const timeline = gsap.timeline({
       onComplete: () => {
         initialTourComplete.current = true;
         enableTouch();
-
+  
+        // Reset physics state
         playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
         playerRef.current.setAngvel({ x: 0, y: 0, z: 0 });
       },
     });
-
-    timeline.to(camera.position, {
-      duration: 3,
-      x: START_POSITION.x,
-      y: START_POSITION.y,
-      z: START_POSITION.z,
+  
+    // Add 360-degree spin around the current position
+    timeline.to(camera.rotation, {
+      duration: 5, // Time to complete the 360-degree rotation
+      y: camera.rotation.y + Math.PI * 2, // A full 360-degree rotation
       ease: "power2.inOut",
+      onUpdate: () => {
+        // Sync player position to the camera's during rotation
+        if (playerRef.current) {
+          playerRef.current.setTranslation(camera.position);
+        }
+      },
     });
-
-    const updatePhysicsBody = () => {
+  
+    // Transition to (0, 0, 0) after the spin
+    timeline.to(camera.position, {
+      duration: 1,
+      x: 0,
+      y: 2,
+      z: 0,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        // Sync physics body with camera
+        if (playerRef.current) {
+          playerRef.current.setTranslation(camera.position);
+          playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
+        }
+      },
+    });
+  
+  
+    const animationFrameId = setInterval(() => {
       if (!playerRef.current || initialTourComplete.current) return;
-
+  
       playerRef.current.wakeUp();
       playerRef.current.setTranslation(camera.position);
       playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
-    };
-
-    const animationFrameId = setInterval(updatePhysicsBody, 1000 / 60);
-
+    }, 1000 / 60);
+  
     return () => {
       timeline.kill();
       clearInterval(animationFrameId);
@@ -193,7 +217,6 @@ export const Player = () => {
 
   return (
     <RigidBody
-      colliders={false}
       mass={1}
       ref={playerRef}
       lockRotations
@@ -202,7 +225,7 @@ export const Player = () => {
       <ProductGSAPUtil setAnimating={setAnimating} playerRef={playerRef} />
       <CameraController setAnimating={setAnimating} playerRef={playerRef} />
       <mesh castShadow>
-        <CapsuleCollider args={[1.2, 1]} />
+        <CapsuleCollider args={[2, 1]} />
       </mesh>
     </RigidBody>
   );

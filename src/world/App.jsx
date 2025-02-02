@@ -48,12 +48,12 @@ export const App = () => {
           <Player />
         </Suspense>
         <Products />
-        <Television
+        {/* <Television
           videoPath="/media/backhome.mp4"
           scale={[0.9, 0.9, 0.9]}
           position={[-4.5, 11, -91]}
           rotation={[0, -82.79, 0]}
-        />
+        /> */}
 
         {/*May crash if external website*/}
         {/* <WebPlane

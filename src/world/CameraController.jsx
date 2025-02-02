@@ -1,6 +1,6 @@
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useTourStore } from "../stores/ZustandStores";
+import { useTourStore } from "../stores/ZustandStores"
 import { useEffect } from "react";
 
 export const CameraController = ({ setAnimating, playerRef }) => {
@@ -12,11 +12,12 @@ export const CameraController = ({ setAnimating, playerRef }) => {
       setAnimating(true);
 
       const targetPosition = {
-        x: 0.5,
-        y: -4 + 1.95,
-        z: -64
+        x: 3.25,
+        y: 0.3,
+        z: 0,
       };
-      
+
+      // Create a timeline for sequential animations
       const timeline = gsap.timeline({
         onComplete: () => {
           if (playerRef.current) {
@@ -30,15 +31,16 @@ export const CameraController = ({ setAnimating, playerRef }) => {
         }
       });
 
-    
+      // First reset rotation
       timeline.to(camera.rotation, {
         x: 0,
-        y: 0,
+        y: - Math.PI/2,
         z: 0,
         duration: 2,
         ease: "power2.inOut"
       });
 
+      // Then move to target position
       timeline.to(camera.position, {
         x: targetPosition.x,
         y: targetPosition.y,
