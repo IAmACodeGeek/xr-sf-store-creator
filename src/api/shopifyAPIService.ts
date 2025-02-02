@@ -1,7 +1,7 @@
 import Variant from '@/Types/Variant';
 import Product from '../Types/Product';
 
-const BASE_URL = "https://strategy-fox-go-bked.com/api/shopify";
+const BASE_URL = "https://us-central1-global-road-449105-e7.cloudfunctions.net/function-2";
 
 async function fetchData<T>(method: "GET", endpoint: string): Promise<T> {
   try {
