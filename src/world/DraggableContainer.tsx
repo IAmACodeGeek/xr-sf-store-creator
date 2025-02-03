@@ -5,19 +5,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
-import { cameraPosition } from "three/src/nodes/TSL.js";
+import placeHolderData from "../data/PlaceHolderData";
 
 interface DraggableContainerProps {
-  position?: [number, number, number] | undefined;
-  rotation?: [number, number, number];
-  scale?: number;
+  placeHolderId?: number | undefined;
+  envPosition?: [number, number, number];
+  envRotation?: [number, number, number];
+  envScale?: number;
   envProduct: EnvProduct;
 }
 
 const DraggableContainer = ({
-  position = undefined,
-  rotation = undefined,
-  scale = 1,
+  placeHolderId = undefined,
+  envPosition = undefined,
+  envRotation = undefined,
+  envScale = 1,
   envProduct
 }: DraggableContainerProps) => {
   const { products, setSelectedProduct } = useComponentStore();
@@ -72,10 +74,32 @@ const DraggableContainer = ({
     return clonedScene;
   }, [scene]);
 
+  // Fetch position, rotation & scale from placeholder
+  const position = useMemo(() => {
+    if(placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.position || envPosition;
+    }
+    return envPosition;
+  }, [placeHolderId, envPosition]);
+  const rotation = useMemo(() => {
+    if(placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.rotation || envRotation;
+    }
+    return envRotation;
+  }, [placeHolderId, envRotation]);
+  const scale = useMemo(() => {
+    if(placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.scale || envScale;
+    }
+    return envScale;
+  }, [placeHolderId, envScale]);
+
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
     const rotArray = [0, 0, 0];
-    console.log(position);
     if(!rotation){
       const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
       const direction = new Vector3().subVectors(cameraPosition, new Vector3(...(position || [0, 0, 0]))).normalize();

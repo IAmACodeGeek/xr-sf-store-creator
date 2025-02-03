@@ -41,6 +41,7 @@ function CanvasWrapper() {
         const envProduct: EnvProduct = {
           id: product.id,
           type: "PHOTO",
+          placeHolderId: undefined,
           imageIndex: undefined,
           modelIndex: undefined,
           position: undefined,

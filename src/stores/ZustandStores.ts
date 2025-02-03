@@ -202,6 +202,7 @@ interface EnvProduct {
   type?: string;
   imageIndex?: number | undefined;
   modelIndex?: number | undefined;
+  placeHolderId?: number | undefined;
   position?: number[];
   rotation?: number[];
   scale?: number;
