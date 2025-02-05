@@ -3,7 +3,7 @@ import { RigidBody } from '@react-three/rapier';
 import { useGLTFWithKTX2 } from './useGTLFwithKTX';
 
 export function Ground() {
-  const { nodes, materials } = useGLTFWithKTX2('/BigRoomH.glb');
+  const { nodes, materials } = useGLTFWithKTX2('/models/BigRoomH.glb');
 
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedMaterials = useMemo(() => materials, [materials]);
