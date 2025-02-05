@@ -246,6 +246,17 @@ const usePivotStore = create<PivotStore>((set) => ({
   setPivotActive: (value: boolean) => set({isPivotActive: value})
 }));
 
+// Dynamic Loading of Environment
+interface EnvironmentStore {
+  environmentType: string | undefined;
+  setEnvironmentType: (value: string) => void;
+}
+
+const useEnvironmentStore = create<EnvironmentStore>((set) => ({
+  environmentType: undefined,
+  setEnvironmentType: (value: string) =>  set({environmentType: value})
+}));
+
 export {
   useComponentStore,
   useTouchStore,
@@ -255,6 +266,7 @@ export {
   useEnvProductStore,
   useActiveProductStore,
   useToolStore,
-  usePivotStore
+  usePivotStore,
+  useEnvironmentStore
 };  
 export type { EnvProduct };

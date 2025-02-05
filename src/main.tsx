@@ -1,38 +1,45 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
-import { Html, useGLTF, useProgress } from "@react-three/drei";
+import { useProgress } from "@react-three/drei";
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
-import { EnvProduct, useComponentStore, useEnvProductStore } from "./stores/ZustandStores";
-import Product from "./Types/Product.js";
+import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore } from "./stores/ZustandStores";
+import environmentData from "./data/environment/EnvironmentData.js";
 
 function CanvasWrapper() {
-  const { products, setProducts, setSelectedProduct } = useComponentStore();
+  // Set the environment type
+  const { setEnvironmentType } = useEnvironmentStore();
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const envParam = queryParams.get('env');
+
+    if(envParam && environmentData[envParam.toUpperCase()]){
+      setEnvironmentType(envParam.toUpperCase());
+    }
+    else{
+      setEnvironmentType(Object.keys(environmentData)[0]);
+    }
+  }, []);
+
+  const { products, setProducts } = useComponentStore();
   const { progress } = useProgress();
   const { setEnvProducts } = useEnvProductStore();
 
-  async function fetchProducts() {
-    try {
-      const response = await ProductService.getAllProducts();
-      setProducts(response);
-      sessionStorage.setItem("Products", JSON.stringify(response));
-      console.log(sessionStorage.getItem("Products"));
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   useEffect(() => {
-    const productsFromSessionStorage = sessionStorage.getItem("Products");
-    if(productsFromSessionStorage){
-      setProducts(JSON.parse(productsFromSessionStorage));
-    }else{
-      fetchProducts();
+    async function fetchProducts() {
+      try {
+        const response = await ProductService.getAllProducts();
+        setProducts(response);
+      } catch (err) {
+        console.error(err);
+      }
     }
+
+    fetchProducts();
   }, []);
 
   useEffect(() => {

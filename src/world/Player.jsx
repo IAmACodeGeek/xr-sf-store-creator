@@ -4,11 +4,10 @@ import { useRef, useState, useEffect } from "react";
 import { usePersonControls } from "@/hooks.js";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useComponentStore, usePivotStore, useTouchStore } from "../stores/ZustandStores";
+import { useComponentStore, useTouchStore, useEnvironmentStore } from "../stores/ZustandStores";
 import { CameraController } from "./CameraController";
 import { ProductGSAPUtil } from "./ProductGSAPUtil";
-
-const MOVE_SPEED = 12;
+import environmentData from "@/data/environment/EnvironmentData";
 
 const direction = new THREE.Vector3();
 const frontVector = new THREE.Vector3();
@@ -18,6 +17,13 @@ const RESPAWN_HEIGHT = -5;
 const START_POSITION = new THREE.Vector3(0, 7, -5);
 
 export const Player = () => {
+  // Set player speed based on environment
+  const [moveSpeed, setMoveSpeed] = useState(0);
+  const {environmentType} = useEnvironmentStore();
+  useEffect(() => {
+    setMoveSpeed(environmentData[environmentType].playerSpeed);
+  }, [environmentType]);
+
   const playerRef = useRef();
   
   const previousMousePosition = useRef(null);
@@ -35,22 +41,33 @@ export const Player = () => {
     isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, isProductSearcherOpen,
   } = useComponentStore();
 
-  const {isPivotActive} = usePivotStore();
   const { isTouchEnabled, enableTouch } = useTouchStore();
 
 
   const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003};
 
+  // useEffect(() => {
+  //     console.log(camera.position);
+  // }, [camera.position.x, camera.position.y, camera.position.z])
+
+
+  // Initial Tour of the environment
   useEffect(() => {
     if (!playerRef.current || initialTourComplete.current) return;
-  
-    // Set initial position off-screen
-    const startPosition = new THREE.Vector3(40, 5, 0);
+    
+    // Set initial position & rotation
+    const startPosition = new THREE.Vector3(...environmentData[environmentType].initialGSAP.start.position);
+    const startRotation = [
+      environmentData[environmentType].initialGSAP.start.rotation[0] * Math.PI / 180,
+      environmentData[environmentType].initialGSAP.start.rotation[1] * Math.PI / 180,
+      environmentData[environmentType].initialGSAP.start.rotation[2] * Math.PI / 180,
+    ];
     playerRef.current.setTranslation(startPosition);
     camera.position.copy(startPosition);
-    camera.rotation.set(0, -Math.PI / 2, 0); 
+    camera.rotation.set(...startRotation, 'YZX');
+    camera.rotation.order = 'YZX';
   
-    // Single smooth transition to spawn point
+    // Create a timeline handler
     const timeline = gsap.timeline({
       onComplete: () => {
         initialTourComplete.current = true;
@@ -61,50 +78,37 @@ export const Player = () => {
         playerRef.current.setAngvel({ x: 0, y: 0, z: 0 });
       },
     });
-  
-    // Add 360-degree spin around the current position
-    timeline.to(camera.rotation, {
-      duration: 5, // Time to complete the 360-degree rotation
-      y: camera.rotation.y + Math.PI * 2, // A full 360-degree rotation
-      ease: "power2.inOut",
-      onUpdate: () => {
-        // Sync player position to the camera's during rotation
-        if (playerRef.current) {
-          playerRef.current.setTranslation(camera.position);
-        }
-      },
-    });
-  
-    // Transition to (0, 0, 0) after the spin
-    timeline.to(camera.position, {
-      duration: 1,
-      x: 0,
-      y: 2,
-      z: 0,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        // Sync physics body with camera
-        if (playerRef.current) {
-          playerRef.current.setTranslation(camera.position);
-          playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
-        }
-      },
-    });
-  
-  
-    const animationFrameId = setInterval(() => {
-      if (!playerRef.current || initialTourComplete.current) return;
-  
-      playerRef.current.wakeUp();
-      playerRef.current.setTranslation(camera.position);
-      playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
-    }, 1000 / 60);
+    
+    let transform = {
+      posX: camera.position.x, posY: camera.position.y, posZ: camera.position.z,
+      rotX: camera.rotation.x, rotY: camera.rotation.y, rotZ: camera.rotation.z
+    };
+    for(let target of environmentData[environmentType].initialGSAP.update){
+      timeline.to(transform, {
+        duration: target.duration,
+        posX: target.position[0],
+        posY: target.position[1],
+        posZ: target.position[2],
+        rotX: target.rotation[0] * Math.PI / 180,
+        rotY: target.rotation[1] * Math.PI / 180,
+        rotZ: target.rotation[2] * Math.PI / 180,
+        ease: target.ease? target.ease : "power2.inOut",
+        onUpdate: () => {
+          camera.position.copy(new THREE.Vector3(transform.posX, transform.posY, transform.posZ));
+          camera.rotation.set(transform.rotX, transform.rotY, transform.rotZ, 'YZX');
+          camera.updateMatrixWorld();
+          if(playerRef.current){
+            playerRef.current.setTranslation(camera.position);
+            playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
+          }
+        },
+      });
+    }
   
     return () => {
       timeline.kill();
-      clearInterval(animationFrameId);
     };
-  }, [camera]);
+  }, [camera, environmentType]);
 
   useEffect(() => {
     const handleMouseDown = (e) => {
@@ -135,7 +139,7 @@ export const Player = () => {
       };
     };
 
-    const handleMouseUp = (e) => {
+    const handleMouseUp = () => {
       if (!isTouchEnabled) return;
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
       
@@ -180,7 +184,7 @@ export const Player = () => {
         .copy(combinedInput)
         .applyQuaternion(state.camera.quaternion)
         .normalize()
-        .multiplyScalar(MOVE_SPEED);
+        .multiplyScalar(moveSpeed);
 
 
       playerRef.current.wakeUp();

@@ -61,13 +61,13 @@ export const App = () => {
           position={[-5, 0, 5.1]}
           rotation={[0, 162.5, 0]}
         /> */}
-        <BrandPoster
+        {/* <BrandPoster
           imageUrl="https://th.bing.com/th/id/OIP.SNik-SOwvsExn4HNF47l2gHaEK?rs=1&pid=ImgDetMain"
           width={192 * 4}
           height={108 * 4}
           position={[-2.2, 3.2, -55.35]}
           rotation={[0, 90, 1]}
-        />
+        /> */}
       </Physics>
     </>
   );
