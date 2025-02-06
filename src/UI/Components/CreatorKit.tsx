@@ -700,7 +700,7 @@ export const CreatorKit = () => {
                       <Typography
                         sx={{
                           background: "transparent",
-                          color: "rgb(255, 255, 255)",
+                          color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
                           padding: 0,
                           borderRadius: 0,
                         }}
@@ -718,6 +718,7 @@ export const CreatorKit = () => {
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
+                          paddingLeft: "10px",
                         }}
                       >
                         {products.find((product) => product.id === placeHolderEnvProduct?.id)?.title || ". . . . . ."}
