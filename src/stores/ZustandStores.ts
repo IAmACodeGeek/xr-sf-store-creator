@@ -236,16 +236,6 @@ const useToolStore = create<ToolStore>((set) => ({
   setToolType: (value: "MEDIA" | "3DPARAMS" | null) => set({toolType: value})
 }));
 
-interface PivotStore {
-  isPivotActive: boolean,
-  setPivotActive: (value: boolean) => void;
-}
-
-const usePivotStore = create<PivotStore>((set) => ({
-  isPivotActive: false,
-  setPivotActive: (value: boolean) => set({isPivotActive: value})
-}));
-
 // Dynamic Loading of Environment
 interface EnvironmentStore {
   environmentType: string | undefined;
@@ -266,7 +256,6 @@ export {
   useEnvProductStore,
   useActiveProductStore,
   useToolStore,
-  usePivotStore,
   useEnvironmentStore
 };  
 export type { EnvProduct };

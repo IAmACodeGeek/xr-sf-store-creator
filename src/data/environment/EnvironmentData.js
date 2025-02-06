@@ -1,19 +1,22 @@
 import BigRoomModel from "./environmentModel/BigRoom";
 import CastleModel from "./environmentModel/Castle";
+import bigRoomPlaceHolderData from "./placeHolderData/BigRoom";
+import castlePlaceHolderData from "./placeHolderData/Castle";
 
 const environmentData = {
   "BIGROOM": {
     environmentModel: BigRoomModel,
     playerSpeed: 10,
+    placeHolderData: bigRoomPlaceHolderData,
     initialGSAP: {
       start: {
-        position: [40, 5, 0],
+        position: [40, 4, 0],
         rotation: [0, -90, 0],
         duration: 0
       },
       update: [
         {
-          position: [40, 5, 0],
+          position: [40, 4, 0],
           rotation: [0, 270, 0],
           duration: 5
         },
@@ -29,6 +32,7 @@ const environmentData = {
   "CASTLE": {
     environmentModel: CastleModel,
     playerSpeed: 17,
+    placeHolderData: castlePlaceHolderData,
     initialGSAP: {
       start: {
         position: [-150, 100, 200],

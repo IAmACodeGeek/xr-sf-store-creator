@@ -7,7 +7,7 @@ import Product from "@/Types/Product";
 import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
 import { useGLTF } from "@react-three/drei";
-import placeHolderData from "@/data/PlaceHolderData";
+import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -474,7 +474,8 @@ export const CreatorKit = () => {
             sx={{
               display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
               width: "100%", height: "100px", gap: "25px",
-              padding: "30px", boxSizing: "border-box"
+              padding: "30px", boxSizing: "border-box",
+              backgroundColor: "rgb(5, 5, 5)"
             }}
             className="ParamsTypeButtons"
           >
@@ -492,7 +493,14 @@ export const CreatorKit = () => {
                 }
               }}
               onClick={() => {
+                if(!envProduct) return;
                 if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
+                const newEnvProduct: EnvProduct = {
+                  id: envProduct.id,
+                  placeHolderId: undefined,
+                  isEnvironmentProduct: true
+                };
+                modifyEnvProduct(envProduct.id, newEnvProduct);
               }}
               className="CustomButton"
             >
@@ -671,117 +679,75 @@ export const CreatorKit = () => {
               className="PlaceHolderEditor"
             >
               {placeHolderData.map((placeHolderItem) => {
+                const placeHolderEnvProduct = Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id);
                 return (
                   <span 
                     key={placeHolderItem.id}
                     ref={el => placeHolderItemRefs.current[placeHolderItem.id] = el}
                     style={{
-                      width: "100%"
-                  }}>
+                      width: "100%",
+                    }}
+                  >
                     <Box
                       sx={{
                         width: "100%", gap: "5%", minHeight: "80px", height: "80px",
                         display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
-                        backgroundColor: "rgb(10, 10, 10)",
-                        padding: "0 15px 0 15px", boxSizing: "border-box"
+                        backgroundColor: envProduct?.placeHolderId === placeHolderItem.id ? "rgb(10, 10, 10)" : "rgb(5, 5, 5)",
+                        padding: "0 30px 0 30px", boxSizing: "border-box"
                       }}
-                      className="ProductItem"
+                      className="PlaceHolderBox"
                     >
                       <Typography
                         sx={{
                           background: "transparent",
-                          color: "rgb(56, 56, 56)",
+                          color: "rgb(255, 255, 255)",
                           padding: 0,
                           borderRadius: 0,
                         }}
                       >
                         {placeHolderItem.id}
                       </Typography>
-                      {/* <Box
-                        component="img"
-                        src={product.images[0]?.src}
-                        sx={{
-                          height: "60px",
-                          width: "60px",
-                          minWidth: "60px",
-                          backgroundColor: "rgb(255, 255, 255)",
-                          objectFit: "contain",
-                          opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.5
-                        }}
-                      />
                       <Typography
                         sx={{
                           flexGrow: 1,
                           fontSize: { xs: "16px", },
                           fontFamily: "'Poppins', sans-serif",
                           fontWeight: "normal",
-                          color: (envProducts[product.id]?.isEnvironmentProduct) ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
+                          color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
                           textAlign: "left",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                         }}
                       >
-                        {product.title}
+                        {products.find((product) => product.id === placeHolderEnvProduct?.id)?.title || ". . . . . ."}
                       </Typography>
-                      <Box
-                        component="img"
-                        src="icons/Attach.svg"
+                      <Button
                         sx={{
-                          width: "20px", height: "20px",
-                          opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
+                          width: "30%", height: "40px",
+                          padding: "10px", boxSizing: "border-box",
+                          borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+                          fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+                          color: "white",
+                          backgroundColor: "rgb(77, 177, 255)",
                           "&:hover": {
-                            opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
-                            cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
+                            backgroundColor: "rgb(109, 192, 255)",
                           }
                         }}
+                        disabled={placeHolderEnvProduct !== undefined}
                         onClick={() => {
-                          if(envProducts[product.id]?.isEnvironmentProduct){
-                            if(product.id === activeProductId){
-                              if(toolType === "3DPARAMS"){
-                                setToolType("MEDIA");
-                              }
-                              else{
-                                setActiveProductId(null);
-                                setToolType(null);
-                              }
-                            }
-                            else{
-                              setActiveProductId(product.id);
-                              setToolType("MEDIA");
-                            }
+                          if(!envProduct) return;
+                          const newEnvProduct: EnvProduct = {
+                            id: envProduct.id,
+                            isEnvironmentProduct: true,
+                            placeHolderId: placeHolderItem.id
                           }
+                          modifyEnvProduct(envProduct?.id, newEnvProduct);
                         }}
-                      />
-                      <Box
-                        component="img"
-                        src="icons/Cube.svg"
-                        sx={{
-                          width: "30px", height: "30px",
-                          opacity: (product.id === activeProductId && toolType === "3DPARAMS") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
-                          "&:hover": {
-                            opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
-                            cursor: (envProducts[product.id]?.isEnvironmentProduct) ? "pointer" : "arrow"
-                          }
-                        }}
-                        onClick={() => {
-                          if(envProducts[product.id]?.isEnvironmentProduct){
-                            if(product.id === activeProductId){
-                              if(toolType === "MEDIA"){
-                                setToolType("3DPARAMS");
-                              }
-                              else{
-                                setActiveProductId(null);
-                                setToolType(null);
-                              }
-                            }
-                            else{
-                              setActiveProductId(product.id);
-                              setToolType("3DPARAMS");
-                            }
-                          }
-                        }}
-                      /> */}
+                        className="UsePlaceHolderButton"
+                      >
+                        {placeHolderEnvProduct === undefined ? "Use" : "In Use"}
+                      </Button>
                     </Box>
                   </span>
                 );

@@ -46,11 +46,6 @@ export const Player = () => {
 
   const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003};
 
-  // useEffect(() => {
-  //     console.log(camera.position);
-  // }, [camera.position.x, camera.position.y, camera.position.z])
-
-
   // Initial Tour of the environment
   useEffect(() => {
     if (!playerRef.current || initialTourComplete.current) return;

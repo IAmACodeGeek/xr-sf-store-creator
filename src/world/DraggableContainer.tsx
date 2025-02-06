@@ -1,11 +1,11 @@
-import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore, usePivotStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
-import placeHolderData from "../data/PlaceHolderData";
+import placeHolderData from "../data/environment/placeHolderData/BigRoom";
 
 interface DraggableContainerProps {
   placeHolderId?: number | undefined;
@@ -27,7 +27,6 @@ const DraggableContainer = ({
   const {activeProductId} = useActiveProductStore();
   const {toolType} = useToolStore();
   const {modifyEnvProduct} = useEnvProductStore();
-  const {setPivotActive} = usePivotStore();
 
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
@@ -36,8 +35,8 @@ const DraggableContainer = ({
 
   // To show axes when selected
   const isActive = useMemo(() => {
-    return activeProductId === envProduct.id && toolType === "3DPARAMS";
-  }, [activeProductId, envProduct.id, toolType]);
+    return activeProductId === envProduct.id && toolType === "3DPARAMS" && envProduct.placeHolderId === undefined;
+  }, [activeProductId, envProduct.id, envProduct.placeHolderId, toolType]);
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
@@ -390,8 +389,7 @@ const DraggableContainer = ({
           scale={1.25 * scale}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
-          onDragStart={() => {setPivotActive(true)}}
-          onDragEnd={() => {handleObjectMove(); setPivotActive(false);}}
+          onDragEnd={handleObjectMove}
           disableScaling
         >
           {envProduct.type === "MODEL_3D" && memoizedModelScene &&
