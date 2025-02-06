@@ -724,7 +724,7 @@ export const CreatorKit = () => {
                       </Typography>
                       <Button
                         sx={{
-                          width: "30%", height: "40px",
+                          minWidth: "30%", height: "40px",
                           padding: "10px", boxSizing: "border-box",
                           borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                           fontFamily: "'Poppins', sans-serif", fontSize: "14px",
