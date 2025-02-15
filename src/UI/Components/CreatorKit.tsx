@@ -1,13 +1,15 @@
-import { Box, Button, Checkbox, Typography } from "@mui/material";
-
+import { Box, Button, Card, CardContent, Checkbox, Typography, Input } from "@mui/material";
+import {UploadFile} from "@mui/icons-material";
 import { EnvProduct, useActiveProductStore, useComponentStore, useEnvProductStore, useToolStore } from "../../stores/ZustandStores";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
 import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
 import { useGLTF } from "@react-three/drei";
 import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
+import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
+import { ALLOWED_MIME_TYPES, uploadAssetFiles } from "@/api/assetService";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -144,11 +146,6 @@ export const CreatorKit = () => {
       productListRef.current.scrollTop = productListScroll.current;
     }
   }, [activeProductId]);
-
-  interface ProductListProps {
-    products: Product[],
-    envProducts: {[id: number]: EnvProduct}
-  }
 
   const ProductList = () => {
     return ( !activeProductId &&
@@ -294,7 +291,7 @@ export const CreatorKit = () => {
       const [productPaneHeight, setProductPaneHeight] = useState<number>(0);
       useEffect(() => {
         setProductPaneHeight((productEditorRef.current?.clientHeight || 0) - (productItemRef.current?.clientHeight || 0));
-      }, [productEditorRef.current?.clientHeight]);
+      }, []);
       if(!activeProductId) return null;
 
       const MediaTypeButtons = () => {
@@ -495,11 +492,19 @@ export const CreatorKit = () => {
               onClick={() => {
                 if(!envProduct) return;
                 if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
+                
                 const newEnvProduct: EnvProduct = {
                   id: envProduct.id,
                   placeHolderId: undefined,
                   isEnvironmentProduct: true
                 };
+
+                if(envProduct.placeHolderId){
+                  const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envProduct.placeHolderId);
+                  newEnvProduct.position = placeHolderData?.position;
+                  newEnvProduct.rotation = placeHolderData?.rotation;
+                  newEnvProduct.scale = placeHolderData?.scale;
+                }
                 modifyEnvProduct(envProduct.id, newEnvProduct);
               }}
               className="CustomButton"
@@ -912,6 +917,124 @@ export const CreatorKit = () => {
         <ProductPane/>
       </Box>
     );
+  };
+
+  const FileSelector = () => {
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const handleClick = () => {
+      fileInputRef.current?.click();
+    };
+
+    const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(true);
+    };
+  
+    const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(false);
+    };
+  
+    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(false);
+  
+      const droppedFiles = Array.from(event.dataTransfer.files || []);
+      const validFiles = droppedFiles.filter((file: File) => ALLOWED_MIME_TYPES.includes(file.type));
+      if(validFiles.length !== droppedFiles.length){
+        console.error('Invalid Files Present');
+        return;
+      }
+      await uploadAssetFiles(validFiles);
+    };
+    
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFiles = Array.from(event.target.files || []);
+      const validFiles = selectedFiles.filter((file: File) => ALLOWED_MIME_TYPES.includes(file.type));
+      
+      if (validFiles.length !== selectedFiles.length) {
+        console.error('Invalid Files Present');
+        return;
+      }
+      
+      await uploadAssetFiles(validFiles);
+      
+      // Clear the input value to allow selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+
+    return (
+      <Box
+        sx={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          width: "calc(100% - 60px)", marginLeft: "30px", marginRight: "30px",
+          height: "220px",
+          border: "4px dashed rgb(77, 177, 255)",
+          '&:hover': {
+            cursor: "pointer"
+          }
+        }}
+        onClick={handleClick}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept={ALLOWED_MIME_TYPES.join(',')}
+          multiple
+          style={{ display: 'none' }}
+        />
+        <Box
+          component="img"
+          src="icons/Upload.svg"
+          sx={{
+            width: "100px",
+            opacity: 0.3,
+          }}
+        >
+        </Box>
+        <Typography
+          sx={{
+            color: "rgb(77, 177, 255)"
+          }}
+        >
+          Upload Files
+        </Typography>
+        <Typography
+          sx={{
+            color: "rgba(255, 255, 255, 0.39)",
+            fontSize: "14px",
+          }}
+        >
+          {"(.jpg, .jpeg, .png, .svg, .glb)"}
+        </Typography>
+      </Box>
+    );
+  };
+
+  // Assets List
+  const assetListRef = useRef<HTMLDivElement>(null);
+  const assetListItemRef = useRef<{[id: number]: HTMLSpanElement | null}>({});
+  const AssetList = () => {
+    return (
+      null
+    );
   }
 
   return (
@@ -929,6 +1052,8 @@ export const CreatorKit = () => {
       <ProductOrAssetButtons/>
       {entityType === "PRODUCT" && <ProductList/>}
       {entityType === "PRODUCT" && <ProductEditor/>}
+      {entityType === "ASSET" && <FileSelector/>}
+      {entityType === "ASSET" && <AssetList/>}
       {!activeProductId && <FullWideButton text={"Save Store"}/>}
       {activeProductId && 
         <FullWideButton text={"Done"} 
