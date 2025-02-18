@@ -7,6 +7,7 @@ import "@/index.scss";
 import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
+import { importAssetFiles } from "./api/assetService.js";
 import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore } from "./stores/ZustandStores";
 import environmentData from "./data/environment/EnvironmentData.js";
 
@@ -34,6 +35,9 @@ function CanvasWrapper() {
       try {
         const response = await ProductService.getAllProducts();
         setProducts(response);
+
+        const assets = await importAssetFiles('deltaxrstore.myshopify.com');
+        console.log(assets);
       } catch (err) {
         console.error(err);
       }

@@ -199,7 +199,7 @@ const useSearchStore = create<SearchStore>((set) => ({
 // Environment Product Handling
 interface EnvProduct {
   id: number;
-  type?: string;
+  type?: "MODEL_3D" | "PHOTO";
   imageIndex?: number | undefined;
   modelIndex?: number | undefined;
   placeHolderId?: number | undefined;
@@ -223,6 +223,33 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
       ...state.envProducts,
       [id]: { ...state.envProducts[id], ...envProduct },
     },
+  }))
+}));
+
+interface EnvAsset {
+  id: number;
+  type: "MODEL_3D" | "PHOTO";
+  position?: number[];
+  rotation?: number[];
+  scale?: number;
+  src: string;
+  isEnvironmentAsset: boolean;
+}
+
+interface EnvAssetStore {
+  envAssets: {[id: number]: EnvAsset};
+  setEnvAssets: (envAssets: {[id: number]: EnvAsset}) => void;
+  modifyEnvAsset: (id: number, envAsset: EnvAsset) => void;
+}
+
+const useEnvAssetStore = create<EnvAssetStore>((set) => ({
+  envAssets: {},
+  setEnvAssets: (envAssets: {[id: number]: EnvAsset}) => set({envAssets: envAssets}),
+  modifyEnvAsset: (id: number, envAsset: EnvAsset) => set((state: {envAssets: {[id: number]: EnvAsset}}) => ({
+    envAssets: {
+      ...state.envAssets,
+      [id]: {...state.envAssets[id], ...envAsset}
+    }
   }))
 }));
 
@@ -254,8 +281,9 @@ export {
   useTourStore,
   useSearchStore,
   useEnvProductStore,
+  useEnvAssetStore,
   useActiveProductStore,
   useToolStore,
-  useEnvironmentStore
+  useEnvironmentStore,
 };  
-export type { EnvProduct };
+export type { EnvProduct, EnvAsset };

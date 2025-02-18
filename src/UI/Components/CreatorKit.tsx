@@ -350,7 +350,7 @@ export const CreatorKit = () => {
         );
       }
 
-      const setMediaItem = (type: string, index: number) => {
+      const setMediaItem = (type: "MODEL_3D" | "PHOTO", index: number) => {
         if(!product) return;
 
         const envProduct: EnvProduct = {
@@ -955,7 +955,7 @@ export const CreatorKit = () => {
         console.error('Invalid Files Present');
         return;
       }
-      await uploadAssetFiles(validFiles);
+      await uploadAssetFiles('deltaxrstore.myshopify.com', validFiles);
     };
     
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -967,7 +967,7 @@ export const CreatorKit = () => {
         return;
       }
       
-      await uploadAssetFiles(validFiles);
+      await uploadAssetFiles('deltaxrstore.myshopify.com', validFiles);
       
       // Clear the input value to allow selecting the same file again
       if (fileInputRef.current) {
