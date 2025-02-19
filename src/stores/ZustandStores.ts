@@ -128,6 +128,7 @@ const useComponentStore = create<ComponentStore>((set) => ({
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
 }));
 
+// Active Product
 interface ActiveProductStore {
   activeProductId: number | null;
   setActiveProductId: (value: number | null) => void;
@@ -136,6 +137,17 @@ interface ActiveProductStore {
 const useActiveProductStore = create<ActiveProductStore>((set) => ({
   activeProductId: null,
   setActiveProductId: (value: number | null) => set({activeProductId: value})
+}));
+
+// Active Asset
+interface ActiveAssetStore {
+  activeAssetId: string | null;
+  setActiveAssetId: (value: string | null) => void;
+}
+
+const useActiveAssetStore = create<ActiveAssetStore>((set) => ({
+  activeAssetId: null,
+  setActiveAssetId: (value: string | null) => set({activeAssetId: value})
 }));  
 
 // Touch handling
@@ -227,25 +239,28 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
 }));
 
 interface EnvAsset {
-  id: number;
+  id: string;
   type: "MODEL_3D" | "PHOTO";
+  status: 'SUCCESS' | 'FAILURE';
+  placeHolderId?: number | undefined;
   position?: number[];
   rotation?: number[];
   scale?: number;
   src: string;
+  name: string;
   isEnvironmentAsset: boolean;
 }
 
 interface EnvAssetStore {
-  envAssets: {[id: number]: EnvAsset};
-  setEnvAssets: (envAssets: {[id: number]: EnvAsset}) => void;
-  modifyEnvAsset: (id: number, envAsset: EnvAsset) => void;
+  envAssets: {[id: string]: EnvAsset};
+  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => void;
+  modifyEnvAsset: (id: string, envAsset: EnvAsset) => void;
 }
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   envAssets: {},
-  setEnvAssets: (envAssets: {[id: number]: EnvAsset}) => set({envAssets: envAssets}),
-  modifyEnvAsset: (id: number, envAsset: EnvAsset) => set((state: {envAssets: {[id: number]: EnvAsset}}) => ({
+  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => set({envAssets: envAssets}),
+  modifyEnvAsset: (id: string, envAsset: EnvAsset) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
     envAssets: {
       ...state.envAssets,
       [id]: {...state.envAssets[id], ...envAsset}
@@ -283,6 +298,7 @@ export {
   useEnvProductStore,
   useEnvAssetStore,
   useActiveProductStore,
+  useActiveAssetStore,
   useToolStore,
   useEnvironmentStore,
 };  

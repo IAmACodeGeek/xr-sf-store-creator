@@ -7,13 +7,15 @@ import "@/index.scss";
 import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
-import { importAssetFiles } from "./api/assetService.js";
-import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore } from "./stores/ZustandStores";
+import { AssetService } from "./api/assetService.js";
+import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore } from "./stores/ZustandStores";
 import environmentData from "./data/environment/EnvironmentData.js";
 
 function CanvasWrapper() {
   // Set the environment type
   const { setEnvironmentType } = useEnvironmentStore();
+  const { setEnvAssets } = useEnvAssetStore();
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const envParam = queryParams.get('env');
@@ -33,11 +35,8 @@ function CanvasWrapper() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await ProductService.getAllProducts();
-        setProducts(response);
-
-        const assets = await importAssetFiles('deltaxrstore.myshopify.com');
-        console.log(assets);
+        ProductService.getAllProducts().then((response) => setProducts(response));
+        AssetService.importAssetFiles('deltaxrstore.myshopify.com').then((response) => setEnvAssets(response));
       } catch (err) {
         console.error(err);
       }
