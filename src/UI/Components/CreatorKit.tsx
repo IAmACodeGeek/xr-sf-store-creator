@@ -937,7 +937,6 @@ export const CreatorKit = () => {
   };
   
   const FileSelector = () => {
-    const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     const handleClick = () => {
@@ -947,13 +946,11 @@ export const CreatorKit = () => {
     const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      setIsDragging(true);
     };
   
     const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      setIsDragging(false);
     };
   
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -964,7 +961,6 @@ export const CreatorKit = () => {
     const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      setIsDragging(false);
   
       const droppedFiles = Array.from(event.dataTransfer.files || []);
       const validFiles = droppedFiles.filter((file: File) => ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.glb'));

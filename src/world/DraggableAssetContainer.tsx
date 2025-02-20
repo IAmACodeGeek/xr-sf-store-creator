@@ -1,56 +1,45 @@
-import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
-import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
+import { EnvAsset, useToolStore, useEnvAssetStore, useActiveAssetStore } from "@/stores/ZustandStores";
+import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import placeHolderData from "../data/environment/placeHolderData/BigRoom";
+import { text } from "stream/consumers";
 
 interface DraggableProductContainerProps {
   placeHolderId?: number | undefined;
   envPosition?: [number, number, number];
   envRotation?: [number, number, number];
   envScale?: number;
-  envProduct: EnvProduct;
+  envAsset: EnvAsset;
 }
 
-const DraggableProductContainer = ({
+const DraggableAssetContainer = ({
   placeHolderId = undefined,
   envPosition = undefined,
   envRotation = undefined,
   envScale = 1,
-  envProduct
+  envAsset
 }: DraggableProductContainerProps) => {
-  const { products, setSelectedProduct } = useComponentStore();
   const {camera} = useThree();
-  const {activeProductId} = useActiveProductStore();
+  const {activeAssetId} = useActiveAssetStore();
   const {toolType} = useToolStore();
-  const {modifyEnvProduct} = useEnvProductStore();
-
-  // Find the corresponding product for the envProduct
-  const product = useMemo(() => {
-    return products.find((p: Product) => p.id === envProduct.id);
-  }, [products, envProduct.id]);
+  const {modifyEnvAsset} = useEnvAssetStore();
 
   // To show axes when selected
   const isActive = useMemo(() => {
-    return activeProductId === envProduct.id && toolType === "3DPARAMS" && envProduct.placeHolderId === undefined;
-  }, [activeProductId, envProduct.id, envProduct.placeHolderId, toolType]);
+    return activeAssetId === envAsset.id && envAsset.placeHolderId === undefined;
+  }, [activeAssetId, envAsset.id, envAsset.placeHolderId]);
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
-    if (envProduct.type !== "MODEL_3D" || !product?.models || envProduct.modelIndex === undefined) {
+    if (envAsset.type !== "MODEL_3D") {
       return null;
     }
 
-    const model = product.models[envProduct.modelIndex];
-    if (!model?.sources?.[0]?.url) {
-      return null;
-    }
-    
-    return model.sources[0].url;
-  }, [product, envProduct.modelIndex, envProduct.type]);
+    return envAsset.src;
+  }, [envAsset.type, envAsset.src]);
 
   // Load the GLTF model
   const model = useMemo(() => {
@@ -161,7 +150,7 @@ const DraggableProductContainer = ({
   const modelRef = useRef<Object3D>(null);
   const meshRef = useRef<Mesh>(null);
   useEffect(() => {
-    if(!modelRef.current || envProduct.type !== "MODEL_3D") return;
+    if(!modelRef.current || envAsset.type !== "MODEL_3D") return;
 
     // Position
     const worldPosition = new Vector3(...(computedPositionForModel || [0, 0, 0]));
@@ -186,10 +175,10 @@ const DraggableProductContainer = ({
     }
     modelRef.current.setRotationFromQuaternion(quaternion);
 
-  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, modelRef]);
+  }, [position, computedPositionForModel, envAsset.type, computedRotation, camera, modelRef]);
 
   useEffect(() => {
-    if(!meshRef.current || envProduct.type !== "PHOTO") return;
+    if(!meshRef.current || envAsset.type !== "PHOTO") return;
 
     // Position
     const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
@@ -219,17 +208,20 @@ const DraggableProductContainer = ({
     }
     meshRef.current.setRotationFromQuaternion(quaternion);
 
-  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, meshRef]);
+  }, [position, computedPositionForModel, envAsset.type, computedRotation, camera, meshRef]);
 
   const imageUrl = useMemo(() => {
-    if((envProduct.imageIndex === undefined) || envProduct.type !== "PHOTO") return null;
-    return product?.images[envProduct.imageIndex].src || "";
-  }, [envProduct.type, envProduct.imageIndex, product?.images]);
+    if(envAsset.type !== "PHOTO") return null;
+    return envAsset.src;
+  }, [envAsset.type, envAsset.src]);
 
   const imageTexture = useMemo(() => {
     if(!imageUrl) return null;
+
+    const textureLoader = new TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useLoader(TextureLoader, imageUrl);
+    return useLoader(TextureLoader, "https://storage.googleapis.com/xr-store-assets/deltaxrstore.myshopify.com/1740060511555-velliangiri%20hills%20in%20coimbatore.jpg");
   }, [imageUrl]);
 
   const computedSizeForImage = useMemo(() => {
@@ -252,7 +244,7 @@ const DraggableProductContainer = ({
   }, [imageTexture, scale]);
 
   const handleObjectTranslate = () => {
-    if(envProduct.type === "MODEL_3D"){
+    if(envAsset.type === "MODEL_3D"){
       if(!modelRef.current) return;
   
       modelRef.current.updateMatrixWorld();
@@ -266,15 +258,21 @@ const DraggableProductContainer = ({
   
       const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+
+        status: "SUCCESS",
+        type: envAsset.type,
+        src: envAsset.src,
+        
         position: pos,
-        isEnvironmentProduct: true
+        isEnvironmentAsset: true
       };
 
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
     }
-    else if(envProduct.type === "PHOTO"){
+    else if(envAsset.type === "PHOTO"){
       if(!meshRef.current) return;
   
       meshRef.current.updateMatrixWorld();
@@ -284,18 +282,24 @@ const DraggableProductContainer = ({
   
       const pos = [Math.round(position.x * 1000) / 1000, Math.round(position.y * 1000) / 1000, Math.round(position.z * 1000) / 1000];
       
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+
+        status: envAsset.status,
+
+        type: envAsset.type,
+        src: envAsset.src,
         position: pos,
-        isEnvironmentProduct: true
+        isEnvironmentAsset: true
       };
 
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
     }
   };
 
   const handleObjectMove = () => {
-    if(envProduct.type === "MODEL_3D"){
+    if(envAsset.type === "MODEL_3D"){
       if(!modelRef.current) return;
   
       modelRef.current.updateMatrixWorld();
@@ -321,16 +325,22 @@ const DraggableProductContainer = ({
         Math.round(euler.z * 180 / Math.PI * 1000) / 1000
       ];
       
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+
+        status: envAsset.status,
+
+        type: envAsset.type,
+        src: envAsset.src,
         position: pos,
         rotation: rot,
-        isEnvironmentProduct: true
+        isEnvironmentAsset: true
       };
 
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
     }
-    else if(envProduct.type === "PHOTO"){
+    else if(envAsset.type === "PHOTO"){
       if(!meshRef.current) return;
   
       meshRef.current.updateMatrixWorld();
@@ -352,20 +362,25 @@ const DraggableProductContainer = ({
         Math.round(euler.z * 180 / Math.PI * 1000) / 1000
       ];
       
-      const newEnvProduct: EnvProduct = {
-        id: envProduct.id,
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+
+        status: envAsset.status,
+
+        type: envAsset.type,
+        src: envAsset.src,
         position: pos,
-        rotation: rot,
-        isEnvironmentProduct: true
+        isEnvironmentAsset: true
       };
 
-      modifyEnvProduct(newEnvProduct.id, newEnvProduct);
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
     }
   };
 
   useEffect(() => {
     handleObjectTranslate();
-  }, [envProduct.imageIndex, envProduct.modelIndex]);
+  }, []);
 
   useEffect(() => {
     if(toolType === "3DPARAMS") handleObjectMove();
@@ -385,7 +400,7 @@ const DraggableProductContainer = ({
           onDragEnd={handleObjectMove}
           disableScaling
         >
-          {envProduct.type === "MODEL_3D" && memoizedModelScene &&
+          {envAsset.type === "MODEL_3D" && memoizedModelScene &&
             <primitive
               ref={modelRef}
               object={memoizedModelScene}
@@ -394,7 +409,7 @@ const DraggableProductContainer = ({
               receiveShadow
             />
           }
-          {envProduct.type === "PHOTO" && computedSizeForImage &&
+          {envAsset.type === "PHOTO" && computedSizeForImage &&
             <mesh
               rotation={computedRotation}
               ref={meshRef}
@@ -412,4 +427,4 @@ const DraggableProductContainer = ({
   );
 };
 
-export default DraggableProductContainer;
+export default DraggableAssetContainer;
