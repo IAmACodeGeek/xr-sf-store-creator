@@ -112,7 +112,8 @@ const DraggableProductContainer = ({
     return new Euler(
       rotArray[0] * Math.PI / 180,
       rotArray[1] * Math.PI / 180,
-      rotArray[2] * Math.PI / 180
+      rotArray[2] * Math.PI / 180,
+      'YZX'
     );
   }, [rotation, position]);
   
@@ -375,7 +376,7 @@ const DraggableProductContainer = ({
     <RigidBody type="fixed">
       <group
         position={[0, 0, 0]}
-        rotation={new Euler(0, 0, 0)}
+        rotation={new Euler(0, 0, 0, 'YZX')}
       >
         <PivotControls
           anchor={[0, 0, 0]}

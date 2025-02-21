@@ -371,6 +371,7 @@ const DraggableAssetContainer = ({
         type: envAsset.type,
         src: envAsset.src,
         position: pos,
+        rotation: rot,
         isEnvironmentAsset: true
       };
 
