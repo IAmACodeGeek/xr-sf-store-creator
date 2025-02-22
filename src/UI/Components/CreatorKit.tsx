@@ -22,6 +22,20 @@ export const CreatorKit = () => {
   const [mediaType, setMediaType] = useState<"2D" | "3D">("2D");
   const [paramsType, setParamsType] = useState<"CUSTOM" | "PLACEHOLDER">("CUSTOM");
 
+  const [envProduct, setEnvProduct] = useState<EnvProduct | undefined>(undefined); 
+  const [envAsset, setEnvAsset] = useState<EnvAsset | undefined>(undefined);
+
+  useEffect(() => {
+    if(entityType === "PRODUCT" && activeProductId !== null) {
+      setEnvProduct(envProducts[activeProductId]);
+      setEnvAsset(undefined);
+    }
+    else if(entityType === "ASSET" && activeAssetId !== null) {
+      setEnvAsset(envAssets[activeAssetId]);
+      setEnvProduct(undefined);
+    }
+  }, [activeAssetId, activeProductId, entityType, envAssets, envProducts]);
+
   const FullWideButton: React.FC<{text: string, onClick?: () => void}> = ({text, onClick = () => {}}) => {
     return (
       <Button
@@ -100,42 +114,452 @@ export const CreatorKit = () => {
     );
   };
 
-  const handleProductCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, product: Product) => {
-    if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
-      setToolType("MEDIA");
-      setMediaType("2D");
-      setActiveProductId(product.id);
-      // Preload its models
-      product.models.forEach((model) => {
-        useGLTF.preload(model.sources?.[0].url || "");
-      });
-    }
-    else{
-      setActiveProductId(null);
-      setToolType(null);
-    }
-
-    const envProduct = {
-      id: product.id,
-      isEnvironmentProduct: event.target.checked
-    };
-    modifyEnvProduct(product.id, envProduct);
-  };
-  
-  const handleAssetCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, envAsset: EnvAsset) => {
-    if(event.target.checked){
-      setActiveAssetId(envAsset.id);
-      // Preload its models
-      if(envAsset.type === 'MODEL_3D'){
-        useGLTF.preload(envAsset.src);
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, parameters: {productId?: number, assetId?: string}) => {
+    if(entityType === "PRODUCT"){
+      const product: Product | undefined = products.find((product) => product.id === parameters.productId);
+      if(!product) return;
+      if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
+        setToolType("MEDIA");
+        setMediaType("2D");
+        setActiveProductId(product.id);
+        // Preload its models
+        product.models.forEach((model) => {
+          useGLTF.preload(model.sources?.[0].url || "");
+        });
       }
+      else{
+        setActiveProductId(null);
+        setToolType(null);
+      }
+  
+      const envProduct: EnvProduct = {
+        id: product.id,
+        isEnvironmentProduct: event.target.checked
+      };
+      modifyEnvProduct(product.id, envProduct);
     }
-    else{
-      setActiveAssetId(null);
+    else if(entityType === "ASSET"){
+      const envAsset = envAssets[parameters.assetId || -1];
+      if(event.target.checked){
+        setActiveAssetId(envAsset.id);
+        // Preload its models
+        if(envAsset.type === 'MODEL_3D'){
+          useGLTF.preload(envAsset.src);
+        }
+      }
+      else{
+        setActiveAssetId(null);
+      }
+  
+      envAsset.isEnvironmentAsset = event.target.checked;
+      modifyEnvAsset(envAsset.id, envAsset);
+    }
+  }
+
+  const ParamsTypeButtons = () => {
+    return (
+      <Box
+        sx={{
+          display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
+          width: "100%", height: "100px", gap: "25px",
+          padding: "30px", boxSizing: "border-box",
+          backgroundColor: "rgb(5, 5, 5)"
+        }}
+        className="ParamsTypeButtons"
+      >
+        <Button
+          sx={{
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+            fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+            color: paramsType === "CUSTOM" ? "white" : "rgb(77, 177, 255)",
+            backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "transparent",
+            "&:hover": {
+              backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
+            }
+          }}
+          onClick={() => {
+            if(entityType === "PRODUCT" && envProduct){
+              if(!envProduct) return;
+              if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
+              
+              const newEnvProduct: EnvProduct = {
+                id: envProduct.id,
+                placeHolderId: undefined,
+                isEnvironmentProduct: true
+              };
+  
+              if(envProduct.placeHolderId){
+                const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envProduct.placeHolderId);
+                newEnvProduct.position = placeHolderData?.position;
+                newEnvProduct.rotation = placeHolderData?.rotation;
+                newEnvProduct.scale = placeHolderData?.scale;
+              }
+              modifyEnvProduct(envProduct.id, newEnvProduct);
+            }
+          }}
+          className="CustomButton"
+        >
+          Custom
+        </Button>
+        <Button
+          sx={{
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+            fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+            color: paramsType === "PLACEHOLDER" ? "white" : "rgb(77, 177, 255)",
+            backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "transparent",
+            "&:hover": {
+              backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
+            }
+          }}
+          onClick={() => {
+            if(paramsType !== "PLACEHOLDER") setParamsType("PLACEHOLDER");
+          }}
+          className="PlaceHolderButton"
+        >
+          PlaceHolder
+        </Button>
+      </Box>
+    );
+  }
+
+  // 3D positioning of assets and products
+  const ThreeParamsEditor = () => {
+    // Detect Enter key press for inputs
+    useEffect(() => {
+      const handleEnterEvent = (event: Event) => {
+        if((event as KeyboardEvent).key === "Enter" && document.activeElement){
+          (document.activeElement as HTMLInputElement).blur()
+        }
+      };
+
+      document.getElementsByClassName("CreatorKit")[0].addEventListener('keydown', handleEnterEvent);
+      
+      return () => {
+        document.getElementsByClassName("CreatorKit")[0].removeEventListener('keydown', handleEnterEvent);
+      }
+    }, []);
+
+    if(activeAssetId === null && activeProductId === null) return null;
+
+    const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
+      if(entityType === "PRODUCT"){
+        if(parameter === "POSITION" && axis){
+          if(axis.toUpperCase() === "X") return envProduct?.position?.[0];
+          else if(axis.toUpperCase() === "Y") return envProduct?.position?.[1];
+          else if(axis.toUpperCase() === "Z") return envProduct?.position?.[2];
+        }
+        else if(parameter === "ROTATION" && axis){
+          if(axis.toUpperCase() === "X") return envProduct?.rotation?.[0];
+          else if(axis.toUpperCase() === "Y") return envProduct?.rotation?.[1];
+          else if(axis.toUpperCase() === "Z") return envProduct?.rotation?.[2];
+        }
+        else if(parameter === "SCALE"){
+          return envProduct?.scale;
+        }
+      }
+      else if(entityType === "ASSET"){
+        if(parameter === "POSITION" && axis){
+          if(axis.toUpperCase() === "X") return envAsset?.position?.[0];
+          else if(axis.toUpperCase() === "Y") return envAsset?.position?.[1];
+          else if(axis.toUpperCase() === "Z") return envAsset?.position?.[2];
+        }
+        else if(parameter === "ROTATION" && axis){
+          if(axis.toUpperCase() === "X") return envAsset?.rotation?.[0];
+          else if(axis.toUpperCase() === "Y") return envAsset?.rotation?.[1];
+          else if(axis.toUpperCase() === "Z") return envAsset?.rotation?.[2];
+        }
+        else if(parameter === "SCALE"){
+          return envAsset?.scale;
+        }
+      }
+      return null;
+    };
+
+    const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
+      if(entityType === "PRODUCT" && envProduct){
+        const newEnvProduct: EnvProduct = {
+          id: envProduct.id,
+          isEnvironmentProduct: true
+        };
+  
+        if(parameter === "POSITION" && axis && envProduct.position){
+          if(axis.toUpperCase() === "X") {
+            newEnvProduct.position = [value, envProduct.position[1], envProduct.position[2]];
+          }
+          else if(axis.toUpperCase() === "Y") {
+            newEnvProduct.position = [envProduct.position[0], value, envProduct.position[2]];
+          }
+          else if(axis.toUpperCase() === "Z") {
+            newEnvProduct.position = [envProduct.position[0], envProduct.position[1], value];
+          }
+        }
+        else if(parameter === "ROTATION" && axis && envProduct.rotation){
+          if(axis.toUpperCase() === "X") {
+            newEnvProduct.rotation = [value, envProduct.rotation[1], envProduct.rotation[2]];
+          }
+          else if(axis.toUpperCase() === "Y") {
+            newEnvProduct.rotation = [envProduct.rotation[0], value, envProduct.rotation[2]];
+          }
+          else if(axis.toUpperCase() === "Z") {
+            newEnvProduct.rotation = [envProduct.rotation[0], envProduct.rotation[1], value];
+          }
+        }
+        else if(parameter === "SCALE"){
+          newEnvProduct.scale = value;
+        }
+  
+        modifyEnvProduct(envProduct.id, newEnvProduct);
+      }
+      else if(entityType === "ASSET" && envAsset){
+        const newEnvAsset: EnvAsset = {
+          id: envAsset.id,
+          isEnvironmentAsset: true,
+          type: envAsset.type,
+          status: envAsset.status,
+          src: envAsset.src,
+          name: envAsset.name
+        };
+  
+        if(parameter === "POSITION" && axis && envAsset.position){
+          if(axis.toUpperCase() === "X") {
+            newEnvAsset.position = [value, envAsset.position[1], envAsset.position[2]];
+          }
+          else if(axis.toUpperCase() === "Y") {
+            newEnvAsset.position = [envAsset.position[0], value, envAsset.position[2]];
+          }
+          else if(axis.toUpperCase() === "Z") {
+            newEnvAsset.position = [envAsset.position[0], envAsset.position[1], value];
+          }
+        }
+        else if(parameter === "ROTATION" && axis && envAsset.rotation){
+          if(axis.toUpperCase() === "X") {
+            newEnvAsset.rotation = [value, envAsset.rotation[1], envAsset.rotation[2]];
+          }
+          else if(axis.toUpperCase() === "Y") {
+            newEnvAsset.rotation = [envAsset.rotation[0], value, envAsset.rotation[2]];
+          }
+          else if(axis.toUpperCase() === "Z") {
+            newEnvAsset.rotation = [envAsset.rotation[0], envAsset.rotation[1], value];
+          }
+        }
+        else if(parameter === "SCALE"){
+          newEnvAsset.scale = value;
+        }
+  
+        modifyEnvAsset(envAsset.id, newEnvAsset);
+      }
+    };
+
+    const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
+      return (
+        <Box
+          sx={{
+            display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start"
+          }}
+          key={type+axis}
+        >
+          <Typography
+            sx={{
+              fontSize: "20px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
+              color: "white",
+              textAlign: "left",
+              marginRight: "20px",
+            }}
+          >
+            {axis} :
+          </Typography>
+          <input type="number"
+            className="ParameterInput"
+            defaultValue={defaultValue}
+            style={{
+              height: "40px", padding: "5px", boxSizing: "border-box",
+              fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
+              background: "transparent", color: "white",
+              border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
+            }}
+            onFocus={(e) => {
+              e.target.style.outline = 'none';
+              e.target.style.border = '2px solid #41cbff';
+            }}
+            onBlur={(e) => {setValue(type, Math.round(Number(e.target.value) * 1000) / 1000, axis)}}
+          />
+        </Box>
+      );
+    };
+
+    const ThreeAxisParameterBox = (type: "POSITION" | "ROTATION" | "SCALE") => {
+      return (
+        <Box
+          sx={{
+            width: "100%", padding: "0 30px 0 30px", boxSizing: "border-box",
+            display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "20px",
+          }}
+          className={type}
+        >
+          <Typography
+            sx={{
+              width: "100%",
+              fontSize: { xs: "20px", }, fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
+              color: "white",
+              textAlign: "left"
+            }}
+          >
+            {type}
+          </Typography>
+          {type !== "SCALE" &&
+            ["X", "Y", "Z"].map((axis: string) => {
+              return ParameterEntry(type, getValue(type, axis) || 0, axis);
+            })
+          }
+          {type === "SCALE" &&
+            ParameterEntry(type, getValue("SCALE") || 1, "U")
+          }
+        </Box> 
+      );
+    };
+
+    const CustomParamterEntries = () => {
+      return (
+        <Box
+          sx={{
+            width: "100%",  
+            display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "40px",
+          }}
+          className="Parameters"
+        >
+          {ThreeAxisParameterBox("POSITION")}
+          {ThreeAxisParameterBox("ROTATION")}
+          {ThreeAxisParameterBox("SCALE")}
+        </Box>
+      );
+    };
+
+    const PlaceHolderEditor = () => {
+      const placeHolderItemRefs = useRef<{[id: number]: HTMLSpanElement | null}>({});
+      return (
+        <Box
+          sx={{
+            display: "flex", flexDirection: "column",
+            width: "100%"
+          }}
+          className="PlaceHolderEditor"
+        >
+          {placeHolderData.map((placeHolderItem) => {
+            const placeHolderEntity = 
+              Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id) ||
+              Object.values(envAssets).find((envAsset: EnvAsset) => envAsset.placeHolderId === placeHolderItem.id);
+            return (
+              <span 
+                key={placeHolderItem.id}
+                ref={el => placeHolderItemRefs.current[placeHolderItem.id] = el}
+                style={{
+                  width: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: "100%", gap: "5%", minHeight: "80px", height: "80px",
+                    display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
+                    backgroundColor: envProduct?.placeHolderId === placeHolderItem.id ? "rgb(10, 10, 10)" : "rgb(5, 5, 5)",
+                    padding: "0 30px 0 30px", boxSizing: "border-box"
+                  }}
+                  className="PlaceHolderBox"
+                >
+                  <Typography
+                    sx={{
+                      background: "transparent",
+                      color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
+                      padding: 0,
+                      borderRadius: 0,
+                    }}
+                  >
+                    {placeHolderItem.id}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      flexGrow: 1,
+                      fontSize: { xs: "16px", },
+                      fontFamily: "'Poppins', sans-serif",
+                      fontWeight: "normal",
+                      color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
+                      textAlign: "left",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      paddingLeft: "10px",
+                    }}
+                  >
+                    {products.find((product) => product.id === placeHolderEntity?.id)?.title || envAssets[placeHolderEntity?.id || '']?.name || ". . . . . ."}
+                  </Typography>
+                  <Button
+                    sx={{
+                      minWidth: "30%", height: "40px",
+                      padding: "10px", boxSizing: "border-box",
+                      borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+                      fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+                      color: "white",
+                      backgroundColor: "rgb(77, 177, 255)",
+                      "&:hover": {
+                        backgroundColor: "rgb(109, 192, 255)",
+                      }
+                    }}
+                    disabled={placeHolderEntity !== undefined}
+                    onClick={() => {
+                      if(entityType === "PRODUCT" && envProduct){
+                        const newEnvProduct: EnvProduct = {
+                          id: envProduct.id,
+                          isEnvironmentProduct: true,
+                          placeHolderId: placeHolderItem.id
+                        }
+                        modifyEnvProduct(envProduct?.id, newEnvProduct);
+                      }
+                      else if(entityType == "ASSET" && envAsset){
+                        const newEnvAsset: EnvAsset = {
+                          id: envAsset.id,
+                          isEnvironmentAsset: true,
+                          type: envAsset.type,
+                          status: envAsset.status,
+                          src: envAsset.src,
+                          name: envAsset.name,
+                          placeHolderId: placeHolderItem.id
+                        };
+                        modifyEnvAsset(envAsset.id, newEnvAsset);
+                      }
+                    }}
+                    className="UsePlaceHolderButton"
+                  >
+                    {placeHolderEntity === undefined ? "Use" : "In Use"}
+                  </Button>
+                </Box>
+              </span>
+            );
+          })}
+        </Box>
+      );
     }
 
-    envAsset.isEnvironmentAsset = event.target.checked;
-    modifyEnvAsset(envAsset.id, envAsset);
+    return (
+      <Box
+        sx={{
+          width: "100%", display: "flex", flexDirection: "column",
+          paddingBottom: "30px"
+        }}
+        className="ThreeParamsContainer"
+      >
+        { paramsType === "CUSTOM" &&
+          <CustomParamterEntries/>
+        }
+        { paramsType === "PLACEHOLDER" &&
+          <PlaceHolderEditor/>
+        }
+      </Box>
+    );
   };
 
   // Product List
@@ -203,7 +627,7 @@ export const CreatorKit = () => {
                     borderRadius: 0,
                   }}
                   checked={envProducts[product.id]?.isEnvironmentProduct || false}
-                  onChange={(event) => {handleProductCheckboxChange(event, product)}}
+                  onChange={(event) => {handleCheckboxChange(event, {productId: product.id})}}
                   color={"primary"}
                 />
                 <Box
@@ -483,343 +907,6 @@ export const CreatorKit = () => {
           </Box>
         );
       };
-
-      const ParamsTypeButtons = () => {
-        return (
-          <Box
-            sx={{
-              display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
-              width: "100%", height: "100px", gap: "25px",
-              padding: "30px", boxSizing: "border-box",
-              backgroundColor: "rgb(5, 5, 5)"
-            }}
-            className="ParamsTypeButtons"
-          >
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                color: paramsType === "CUSTOM" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(!envProduct) return;
-                if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
-                
-                const newEnvProduct: EnvProduct = {
-                  id: envProduct.id,
-                  placeHolderId: undefined,
-                  isEnvironmentProduct: true
-                };
-
-                if(envProduct.placeHolderId){
-                  const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envProduct.placeHolderId);
-                  newEnvProduct.position = placeHolderData?.position;
-                  newEnvProduct.rotation = placeHolderData?.rotation;
-                  newEnvProduct.scale = placeHolderData?.scale;
-                }
-                modifyEnvProduct(envProduct.id, newEnvProduct);
-              }}
-              className="CustomButton"
-            >
-              Custom
-            </Button>
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                color: paramsType === "PLACEHOLDER" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(paramsType !== "PLACEHOLDER") setParamsType("PLACEHOLDER");
-              }}
-              className="PlaceHolderButton"
-            >
-              PlaceHolder
-            </Button>
-          </Box>
-        );
-      }
-
-      const ThreeParamsEditor = () => {
-        // Detect Enter key press for inputs
-        useEffect(() => {
-          const enterPressEvent = (event: KeyboardEvent) => {
-              if(event.key === "Enter"){
-                (event.target as HTMLInputElement).blur();
-              }
-          }
-
-          document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
-            const input = inputElement as HTMLInputElement;
-            input.addEventListener('keydown', enterPressEvent);
-          });
-
-          return () => {
-            document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
-              const input = inputElement as HTMLInputElement;
-              input.removeEventListener('keydown', enterPressEvent);
-            });
-          }
-        }, []);
-
-        const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
-          if(parameter === "POSITION" && axis){
-            if(axis.toUpperCase() === "X") return envProduct?.position?.[0];
-            else if(axis.toUpperCase() === "Y") return envProduct?.position?.[1];
-            else if(axis.toUpperCase() === "Z") return envProduct?.position?.[2];
-          }
-          else if(parameter === "ROTATION" && axis){
-            if(axis.toUpperCase() === "X") return envProduct?.rotation?.[0];
-            else if(axis.toUpperCase() === "Y") return envProduct?.rotation?.[1];
-            else if(axis.toUpperCase() === "Z") return envProduct?.rotation?.[2];
-          }
-          else if(parameter === "SCALE"){
-            return envProduct?.scale;
-          }
-          return null;
-        };
-
-        const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
-          if(!envProduct) return;
-
-          const newEnvProduct: EnvProduct = {
-            id: envProduct.id,
-            isEnvironmentProduct: true
-          };
-
-          if(parameter === "POSITION" && axis && envProduct.position){
-            if(axis.toUpperCase() === "X") {
-              newEnvProduct.position = [value, envProduct.position[1], envProduct.position[2]];
-            }
-            else if(axis.toUpperCase() === "Y") {
-              newEnvProduct.position = [envProduct.position[0], value, envProduct.position[2]];
-            }
-            else if(axis.toUpperCase() === "Z") {
-              newEnvProduct.position = [envProduct.position[0], envProduct.position[1], value];
-            }
-          }
-          else if(parameter === "ROTATION" && axis && envProduct.rotation){
-            if(axis.toUpperCase() === "X") {
-              newEnvProduct.rotation = [value, envProduct.rotation[1], envProduct.rotation[2]];
-            }
-            else if(axis.toUpperCase() === "Y") {
-              newEnvProduct.rotation = [envProduct.rotation[0], value, envProduct.rotation[2]];
-            }
-            else if(axis.toUpperCase() === "Z") {
-              newEnvProduct.rotation = [envProduct.rotation[0], envProduct.rotation[1], value];
-            }
-          }
-          else if(parameter === "SCALE"){
-            newEnvProduct.scale = value;
-          }
-
-          modifyEnvProduct(envProduct.id, newEnvProduct);
-        };
-
-        const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
-          return (
-            <Box
-              sx={{
-                display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start"
-              }}
-              key={type+axis}
-            >
-              <Typography
-                sx={{
-                  fontSize: "20px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  color: "white",
-                  textAlign: "left",
-                  marginRight: "20px",
-                }}
-              >
-                {axis} :
-              </Typography>
-              <input type="number"
-                className="ParameterInput"
-                defaultValue={defaultValue}
-                style={{
-                  height: "40px", padding: "5px", boxSizing: "border-box",
-                  fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  background: "transparent", color: "white",
-                  border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
-                }}
-                onFocus={(e) => {
-                  e.target.style.outline = 'none';
-                  e.target.style.border = '2px solid #41cbff';
-                }}
-                onBlur={(e) => {setValue(type, Math.round(Number(e.target.value) * 1000) / 1000, axis)}}
-              />
-            </Box>
-          );
-        };
-
-        const ThreeAxisParameterBox = (type: "POSITION" | "ROTATION" | "SCALE") => {
-          return (
-            <Box
-              sx={{
-                width: "100%", padding: "0 30px 0 30px", boxSizing: "border-box",
-                display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "20px",
-              }}
-              className={type}
-            >
-              <Typography
-                sx={{
-                  width: "100%",
-                  fontSize: { xs: "20px", }, fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  color: "white",
-                  textAlign: "left"
-                }}
-              >
-                {type}
-              </Typography>
-              {type !== "SCALE" &&
-                ["X", "Y", "Z"].map((axis: string) => {
-                  return ParameterEntry(type, getValue(type, axis) || 0, axis);
-                })
-              }
-              {type === "SCALE" &&
-                ParameterEntry(type, getValue("SCALE") || 1, "U")
-              }
-            </Box> 
-          );
-        };
-
-        const CustomParamterEntries = () => {
-          return (
-            <Box
-              sx={{
-                width: "100%",  
-                display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "40px",
-              }}
-              className="Parameters"
-            >
-              {ThreeAxisParameterBox("POSITION")}
-              {ThreeAxisParameterBox("ROTATION")}
-              {ThreeAxisParameterBox("SCALE")}
-            </Box>
-          );
-        };
-
-        const PlaceHolderEditor = () => {
-          const placeHolderItemRefs = useRef<{[id: number]: HTMLSpanElement | null}>({});
-          return (
-            <Box
-              sx={{
-                display: "flex", flexDirection: "column",
-                width: "100%"
-              }}
-              className="PlaceHolderEditor"
-            >
-              {placeHolderData.map((placeHolderItem) => {
-                const placeHolderEnvProduct = Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id);
-                return (
-                  <span 
-                    key={placeHolderItem.id}
-                    ref={el => placeHolderItemRefs.current[placeHolderItem.id] = el}
-                    style={{
-                      width: "100%",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: "100%", gap: "5%", minHeight: "80px", height: "80px",
-                        display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
-                        backgroundColor: envProduct?.placeHolderId === placeHolderItem.id ? "rgb(10, 10, 10)" : "rgb(5, 5, 5)",
-                        padding: "0 30px 0 30px", boxSizing: "border-box"
-                      }}
-                      className="PlaceHolderBox"
-                    >
-                      <Typography
-                        sx={{
-                          background: "transparent",
-                          color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
-                          padding: 0,
-                          borderRadius: 0,
-                        }}
-                      >
-                        {placeHolderItem.id}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          flexGrow: 1,
-                          fontSize: { xs: "16px", },
-                          fontFamily: "'Poppins', sans-serif",
-                          fontWeight: "normal",
-                          color: envProduct?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
-                          textAlign: "left",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          paddingLeft: "10px",
-                        }}
-                      >
-                        {products.find((product) => product.id === placeHolderEnvProduct?.id)?.title || ". . . . . ."}
-                      </Typography>
-                      <Button
-                        sx={{
-                          minWidth: "30%", height: "40px",
-                          padding: "10px", boxSizing: "border-box",
-                          borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                          fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                          color: "white",
-                          backgroundColor: "rgb(77, 177, 255)",
-                          "&:hover": {
-                            backgroundColor: "rgb(109, 192, 255)",
-                          }
-                        }}
-                        disabled={placeHolderEnvProduct !== undefined}
-                        onClick={() => {
-                          if(!envProduct) return;
-                          const newEnvProduct: EnvProduct = {
-                            id: envProduct.id,
-                            isEnvironmentProduct: true,
-                            placeHolderId: placeHolderItem.id
-                          }
-                          modifyEnvProduct(envProduct?.id, newEnvProduct);
-                        }}
-                        className="UsePlaceHolderButton"
-                      >
-                        {placeHolderEnvProduct === undefined ? "Use" : "In Use"}
-                      </Button>
-                    </Box>
-                  </span>
-                );
-              })}
-            </Box>
-          );
-        }
-
-        return (
-          <Box
-            sx={{
-              width: "100%", display: "flex", flexDirection: "column",
-              paddingBottom: "30px"
-            }}
-            className="ThreeParamsContainer"
-          >
-            { paramsType === "CUSTOM" &&
-              <CustomParamterEntries/>
-            }
-            { paramsType === "PLACEHOLDER" &&
-              <PlaceHolderEditor/>
-            }
-          </Box>
-        );
-      };
       
       return (
         <Box
@@ -873,7 +960,7 @@ export const CreatorKit = () => {
               borderRadius: 0,
             }}
             checked={envProduct?.isEnvironmentProduct || false}
-            onChange={(event) => {handleProductCheckboxChange(event, product)}}
+            onChange={(event) => {handleCheckboxChange(event, {productId: product.id})}}
             color={"primary"}
           />
           <Box
@@ -1132,7 +1219,7 @@ export const CreatorKit = () => {
                     borderRadius: 0,
                   }}
                   checked={envAssets[assetId]?.isEnvironmentAsset || false}
-                  onChange={(event) => {handleAssetCheckboxChange(event, envAsset)}}
+                  onChange={(event) => {handleCheckboxChange(event, {assetId: assetId})}}
                   color={"primary"}
                 />
                 <Box
@@ -1256,282 +1343,6 @@ export const CreatorKit = () => {
           </Box>
         );
       }
-
-      const ThreeParamsEditor = () => {
-        // Detect Enter key press for inputs
-        useEffect(() => {
-          const enterPressEvent = (event: KeyboardEvent) => {
-              if(event.key === "Enter"){
-                (event.target as HTMLInputElement).blur();
-              }
-          }
-          
-          document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
-            const input = inputElement as HTMLInputElement;
-            input.addEventListener('keydown', enterPressEvent);
-          });
-
-          return () => {
-            document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
-              const input = inputElement as HTMLInputElement;
-              input.removeEventListener('keydown', enterPressEvent);
-            });
-          }
-        }, []);
-
-        const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
-          if(parameter === "POSITION" && axis){
-            if(axis.toUpperCase() === "X") return envAsset?.position?.[0];
-            else if(axis.toUpperCase() === "Y") return envAsset?.position?.[1];
-            else if(axis.toUpperCase() === "Z") return envAsset?.position?.[2];
-          }
-          else if(parameter === "ROTATION" && axis){
-            if(axis.toUpperCase() === "X") return envAsset?.rotation?.[0];
-            else if(axis.toUpperCase() === "Y") return envAsset?.rotation?.[1];
-            else if(axis.toUpperCase() === "Z") return envAsset?.rotation?.[2];
-          }
-          else if(parameter === "SCALE"){
-            return envAsset?.scale;
-          }
-          return null;
-        };
-
-        const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
-          if(!envAsset) return;
-
-          const newEnvAsset: EnvAsset = {
-            id: envAsset.id,
-            placeHolderId: undefined,
-            isEnvironmentAsset: true,
-            type: envAsset.type,
-            status: envAsset.status,
-            src: envAsset.src,
-            name: envAsset.name
-          };
-
-          if(parameter === "POSITION" && axis && envAsset.position){
-            if(axis.toUpperCase() === "X") {
-              newEnvAsset.position = [value, envAsset.position[1], envAsset.position[2]];
-            }
-            else if(axis.toUpperCase() === "Y") {
-              newEnvAsset.position = [envAsset.position[0], value, envAsset.position[2]];
-            }
-            else if(axis.toUpperCase() === "Z") {
-              newEnvAsset.position = [envAsset.position[0], envAsset.position[1], value];
-            }
-          }
-          else if(parameter === "ROTATION" && axis && envAsset.rotation){
-            if(axis.toUpperCase() === "X") {
-              newEnvAsset.rotation = [value, envAsset.rotation[1], envAsset.rotation[2]];
-            }
-            else if(axis.toUpperCase() === "Y") {
-              newEnvAsset.rotation = [envAsset.rotation[0], value, envAsset.rotation[2]];
-            }
-            else if(axis.toUpperCase() === "Z") {
-              newEnvAsset.rotation = [envAsset.rotation[0], envAsset.rotation[1], value];
-            }
-          }
-          else if(parameter === "SCALE"){
-            newEnvAsset.scale = value;
-          }
-
-          modifyEnvAsset(envAsset.id, newEnvAsset);
-        };
-
-        const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
-          return (
-            <Box
-              sx={{
-                display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start"
-              }}
-              key={type+axis}
-            >
-              <Typography
-                sx={{
-                  fontSize: "20px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  color: "white",
-                  textAlign: "left",
-                  marginRight: "20px",
-                }}
-              >
-                {axis} :
-              </Typography>
-              <input type="number"
-                className="ParameterInput"
-                defaultValue={defaultValue}
-                style={{
-                  height: "40px", padding: "5px", boxSizing: "border-box",
-                  fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  background: "transparent", color: "white",
-                  border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
-                }}
-                onFocus={(e) => {
-                  e.target.style.outline = 'none';
-                  e.target.style.border = '2px solid #41cbff';
-                }}
-                onBlur={(e) => {setValue(type, Math.round(Number(e.target.value) * 1000) / 1000, axis)}}
-              />
-            </Box>
-          );
-        };
-
-        const ThreeAxisParameterBox = (type: "POSITION" | "ROTATION" | "SCALE") => {
-          return (
-            <Box
-              sx={{
-                width: "100%", padding: "0 30px 0 30px", boxSizing: "border-box",
-                display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "20px",
-              }}
-              className={type}
-            >
-              <Typography
-                sx={{
-                  width: "100%",
-                  fontSize: { xs: "20px", }, fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-                  color: "white",
-                  textAlign: "left"
-                }}
-              >
-                {type}
-              </Typography>
-              {type !== "SCALE" &&
-                ["X", "Y", "Z"].map((axis: string) => {
-                  return ParameterEntry(type, getValue(type, axis) || 0, axis);
-                })
-              }
-              {type === "SCALE" &&
-                ParameterEntry(type, getValue("SCALE") || 1, "U")
-              }
-            </Box> 
-          );
-        };
-
-        const CustomParamterEntries = () => {
-          return (
-            <Box
-              sx={{
-                width: "100%",  
-                display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center", gap: "40px",
-              }}
-              className="Parameters"
-            >
-              {ThreeAxisParameterBox("POSITION")}
-              {ThreeAxisParameterBox("ROTATION")}
-              {ThreeAxisParameterBox("SCALE")}
-            </Box>
-          );
-        };
-
-        const PlaceHolderEditor = () => {
-          const placeHolderItemRefs = useRef<{[id: number]: HTMLSpanElement | null}>({});
-          return (
-            <Box
-              sx={{
-                display: "flex", flexDirection: "column",
-                width: "100%"
-              }}
-              className="PlaceHolderEditor"
-            >
-              {placeHolderData.map((placeHolderItem) => {
-                const placeHolderEnvAsset = Object.values(envAssets).find((envAsset: EnvAsset) => envAsset.placeHolderId === placeHolderItem.id);
-                return (
-                  <span 
-                    key={placeHolderItem.id}
-                    ref={el => placeHolderItemRefs.current[placeHolderItem.id] = el}
-                    style={{
-                      width: "100%",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: "100%", gap: "5%", minHeight: "80px", height: "80px",
-                        display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center",
-                        backgroundColor: envAsset?.placeHolderId === placeHolderItem.id ? "rgb(10, 10, 10)" : "rgb(5, 5, 5)",
-                        padding: "0 30px 0 30px", boxSizing: "border-box"
-                      }}
-                      className="PlaceHolderBox"
-                    >
-                      <Typography
-                        sx={{
-                          background: "transparent",
-                          color: envAsset?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
-                          padding: 0,
-                          borderRadius: 0,
-                        }}
-                      >
-                        {placeHolderItem.id}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          flexGrow: 1,
-                          fontSize: { xs: "16px", },
-                          fontFamily: "'Poppins', sans-serif",
-                          fontWeight: "normal",
-                          color: envAsset?.placeHolderId === placeHolderItem.id ? "rgba(255, 255, 255, 0.83)" : "rgba(255, 255, 255, 0.25)",
-                          textAlign: "left",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          paddingLeft: "10px",
-                        }}
-                      >
-                        {Object.values(envAssets).find((envAsset) => envAsset.placeHolderId === placeHolderItem?.id)?.name || ". . . . . ."}
-                      </Typography>
-                      <Button
-                        sx={{
-                          minWidth: "30%", height: "40px",
-                          padding: "10px", boxSizing: "border-box",
-                          borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                          fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                          color: "white",
-                          backgroundColor: "rgb(77, 177, 255)",
-                          "&:hover": {
-                            backgroundColor: "rgb(109, 192, 255)",
-                          }
-                        }}
-                        disabled={placeHolderEnvAsset !== undefined}
-                        onClick={() => {
-                          if(!envAsset) return;
-                          const newEnvAsset: EnvAsset = {
-                            id: envAsset.id,
-                            isEnvironmentAsset: true,
-                            type: envAsset.type,
-                            status: envAsset.status,
-                            src: envAsset.src,
-                            name: envAsset.name,
-                            placeHolderId: placeHolderItem.id
-                          }
-                          modifyEnvAsset(envAsset?.id, newEnvAsset);
-                        }}
-                        className="UsePlaceHolderButton"
-                      >
-                        {placeHolderEnvAsset === undefined ? "Use" : "In Use"}
-                      </Button>
-                    </Box>
-                  </span>
-                );
-              })}
-            </Box>
-          );
-        }
-
-        return (
-          <Box
-            sx={{
-              width: "100%", display: "flex", flexDirection: "column",
-              paddingBottom: "30px"
-            }}
-            className="ThreeParamsContainer"
-          >
-            { paramsType === "CUSTOM" &&
-              <CustomParamterEntries/>
-            }
-            { paramsType === "PLACEHOLDER" &&
-              <PlaceHolderEditor/>
-            }
-          </Box>
-        );
-      };
       
       return (
         <Box
@@ -1574,8 +1385,8 @@ export const CreatorKit = () => {
               padding: 0,
               borderRadius: 0,
             }}
-            checked={envAsset?.isEnvironmentAsset || false}
-            onChange={(event) => {handleAssetCheckboxChange(event, envAsset)}}
+            checked={envAsset.isEnvironmentAsset || false}
+            onChange={(event) => {handleCheckboxChange(event, {assetId: envAsset.id})}}
             color={"primary"}
           />
           <Box
