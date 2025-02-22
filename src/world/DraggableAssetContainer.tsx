@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import placeHolderData from "../data/environment/placeHolderData/BigRoom";
-import { text } from "stream/consumers";
 
 interface DraggableProductContainerProps {
   placeHolderId?: number | undefined;
@@ -221,7 +220,7 @@ const DraggableAssetContainer = ({
     const textureLoader = new TextureLoader();
     textureLoader.crossOrigin = 'anonymous';
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useLoader(TextureLoader, "https://storage.googleapis.com/xr-store-assets/deltaxrstore.myshopify.com/1740060511555-velliangiri%20hills%20in%20coimbatore.jpg");
+    return useLoader(TextureLoader, envAsset.src);
   }, [imageUrl]);
 
   const computedSizeForImage = useMemo(() => {

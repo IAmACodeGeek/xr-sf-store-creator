@@ -67,6 +67,7 @@ export const CreatorKit = () => {
             }
           }}
           onClick={() => {
+            if(activeAssetId !== null) setActiveAssetId(null);
             if(entityType !== "PRODUCT") setEntityType("PRODUCT");
           }}
           className="ProductButton"
@@ -88,6 +89,7 @@ export const CreatorKit = () => {
             }
           }}
           onClick={() => {
+            if(activeProductId !== null) setActiveProductId(null); 
             if(entityType !== "ASSET") setEntityType("ASSET");
           }}
           className="AssetButton"
@@ -553,6 +555,27 @@ export const CreatorKit = () => {
       }
 
       const ThreeParamsEditor = () => {
+        // Detect Enter key press for inputs
+        useEffect(() => {
+          const enterPressEvent = (event: KeyboardEvent) => {
+              if(event.key === "Enter"){
+                (event.target as HTMLInputElement).blur();
+              }
+          }
+
+          document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
+            const input = inputElement as HTMLInputElement;
+            input.addEventListener('keydown', enterPressEvent);
+          });
+
+          return () => {
+            document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
+              const input = inputElement as HTMLInputElement;
+              input.removeEventListener('keydown', enterPressEvent);
+            });
+          }
+        }, []);
+
         const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
           if(parameter === "POSITION" && axis){
             if(axis.toUpperCase() === "X") return envProduct?.position?.[0];
@@ -626,6 +649,7 @@ export const CreatorKit = () => {
                 {axis} :
               </Typography>
               <input type="number"
+                className="ParameterInput"
                 defaultValue={defaultValue}
                 style={{
                   height: "40px", padding: "5px", boxSizing: "border-box",
@@ -1234,6 +1258,27 @@ export const CreatorKit = () => {
       }
 
       const ThreeParamsEditor = () => {
+        // Detect Enter key press for inputs
+        useEffect(() => {
+          const enterPressEvent = (event: KeyboardEvent) => {
+              if(event.key === "Enter"){
+                (event.target as HTMLInputElement).blur();
+              }
+          }
+          
+          document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
+            const input = inputElement as HTMLInputElement;
+            input.addEventListener('keydown', enterPressEvent);
+          });
+
+          return () => {
+            document.querySelectorAll('.ParameterInput').forEach((inputElement) => {
+              const input = inputElement as HTMLInputElement;
+              input.removeEventListener('keydown', enterPressEvent);
+            });
+          }
+        }, []);
+
         const getValue = (parameter: "POSITION" | "ROTATION" | "SCALE", axis?: string) => {
           if(parameter === "POSITION" && axis){
             if(axis.toUpperCase() === "X") return envAsset?.position?.[0];
@@ -1312,6 +1357,7 @@ export const CreatorKit = () => {
                 {axis} :
               </Typography>
               <input type="number"
+                className="ParameterInput"
                 defaultValue={defaultValue}
                 style={{
                   height: "40px", padding: "5px", boxSizing: "border-box",

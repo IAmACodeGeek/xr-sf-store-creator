@@ -33,7 +33,7 @@ const Products = () => {
           );
         })
       }
-      {/* {
+      {
         Object.keys(envAssets).map((id) => {
           return ( envAssets[id].isEnvironmentAsset &&
             <LazyDraggableAssetContainer
@@ -46,7 +46,7 @@ const Products = () => {
             />
           );
         })
-      } */}
+      }
     </Suspense>
   );
 };
