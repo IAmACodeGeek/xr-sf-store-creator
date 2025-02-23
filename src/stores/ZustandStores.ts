@@ -12,6 +12,10 @@ interface ComponentStore {
   selectedProduct: Product | undefined;
   setProducts: (products: Product[]) => void;
   setSelectedProduct: (productId: number | null) => void;
+  productsLoading: boolean;
+  productsLoaded: boolean;
+  setProductsLoading: (value: boolean) => void;
+  setProductsLoaded: (value: boolean) => void;
 
   // Creator Kit handling
   isCreatorKitOpen: boolean;
@@ -64,6 +68,10 @@ const useComponentStore = create<ComponentStore>((set) => ({
       return { ...state, selectedProduct: finalProduct };
     });
   },
+  productsLoading: false,
+  setProductsLoading: (value: boolean) => set({productsLoading: value}),
+  productsLoaded: false,
+  setProductsLoaded: (value: boolean) => set({productsLoaded: value}),
 
   // Creator Kit handling
   isCreatorKitOpen: false,
@@ -127,28 +135,6 @@ const useComponentStore = create<ComponentStore>((set) => ({
   openProductSearcher: () => set({ isProductSearcherOpen: true }),
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
 }));
-
-// Active Product
-interface ActiveProductStore {
-  activeProductId: number | null;
-  setActiveProductId: (value: number | null) => void;
-}
-
-const useActiveProductStore = create<ActiveProductStore>((set) => ({
-  activeProductId: null,
-  setActiveProductId: (value: number | null) => set({activeProductId: value})
-}));
-
-// Active Asset
-interface ActiveAssetStore {
-  activeAssetId: string | null;
-  setActiveAssetId: (value: string | null) => void;
-}
-
-const useActiveAssetStore = create<ActiveAssetStore>((set) => ({
-  activeAssetId: null,
-  setActiveAssetId: (value: string | null) => set({activeAssetId: value})
-}));  
 
 // Touch handling
 interface TouchStore {
@@ -225,6 +211,9 @@ interface EnvProductStore {
   envProducts: {[id: number]: EnvProduct};
   setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => void;
   modifyEnvProduct: (id: number, envProduct: EnvProduct) => void;
+
+  activeProductId: number | null,
+  setActiveProductId: (value: number | null) => void
 }
 
 const useEnvProductStore = create<EnvProductStore>((set) => ({
@@ -235,7 +224,10 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
       ...state.envProducts,
       [id]: { ...state.envProducts[id], ...envProduct },
     },
-  }))
+  })),
+
+  activeProductId: null,
+  setActiveProductId: (value: number | null) => set({activeProductId: value})
 }));
 
 interface EnvAsset {
@@ -255,6 +247,14 @@ interface EnvAssetStore {
   envAssets: {[id: string]: EnvAsset};
   setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => void;
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => void;
+
+  assetsLoading: boolean;
+  setAssetsLoading: (value: boolean) => void;
+  assetsLoaded: boolean;
+  setAssetsLoaded: (value: boolean) => void;
+
+  activeAssetId: string | null;
+  setActiveAssetId: (value: string | null) => void;
 }
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
@@ -265,7 +265,15 @@ const useEnvAssetStore = create<EnvAssetStore>((set) => ({
       ...state.envAssets,
       [id]: {...state.envAssets[id], ...envAsset}
     }
-  }))
+  })),
+  
+  assetsLoading: false,
+  setAssetsLoading: (value: boolean) => set({assetsLoading: value}),
+  assetsLoaded: false,
+  setAssetsLoaded: (value: boolean) => set({assetsLoaded: value}),
+
+  activeAssetId: null,
+  setActiveAssetId: (value: string | null) => set({activeAssetId: value})
 }));
 
 interface ToolStore {
@@ -297,8 +305,6 @@ export {
   useSearchStore,
   useEnvProductStore,
   useEnvAssetStore,
-  useActiveProductStore,
-  useActiveAssetStore,
   useToolStore,
   useEnvironmentStore,
 };  

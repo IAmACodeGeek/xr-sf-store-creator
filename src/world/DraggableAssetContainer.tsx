@@ -1,11 +1,10 @@
-import { useComponentStore, EnvAsset, useActiveProductStore, useToolStore, useEnvProductStore, useActiveAssetStore, useEnvAssetStore } from "@/stores/ZustandStores";
+import { EnvAsset, useToolStore, useEnvAssetStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef } from "react";
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import placeHolderData from "../data/environment/placeHolderData/BigRoom";
-import { env } from "process";
 
 interface DraggableAssetContainerProps {
   placeHolderId?: number | undefined;
@@ -23,9 +22,8 @@ const DraggableAssetContainer = ({
   envAsset
 }: DraggableAssetContainerProps) => {
   const {camera} = useThree();
-  const {activeAssetId} = useActiveAssetStore();
   const {toolType} = useToolStore();
-  const {modifyEnvAsset} = useEnvAssetStore();
+  const {modifyEnvAsset, activeAssetId} = useEnvAssetStore();
 
   // To show axes when selected
   const isActive = useMemo(() => {
@@ -42,16 +40,18 @@ const DraggableAssetContainer = ({
   }, [envAsset.type, envAsset.src]);
 
   // Load the GLTF model
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const gltf = modelUrl? useGLTF(modelUrl) : null;
   const model = useMemo(() => {
     if (!modelUrl) return null;
     try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      return useGLTF(modelUrl);
+      return gltf;
     } catch (error) {
       console.error('Error loading model:', error);
       return null;
     }
-  }, [modelUrl]);
+  }, [modelUrl, gltf]);
 
   const scene = model?.scene;
 

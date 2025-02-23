@@ -75,7 +75,7 @@ const AssetService = {
       const resultJSON: Response = await response.json();
   
       const result: {[id: string]: EnvAsset} = {};
-      console.log(resultJSON);
+      
       resultJSON.files.forEach((fileResponse) => {
         result[fileResponse.name] = {
           id: fileResponse.name,

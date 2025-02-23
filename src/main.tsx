@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
-import { useProgress } from "@react-three/drei";
+import { useGLTF, useProgress } from "@react-three/drei";
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
@@ -14,7 +14,7 @@ import environmentData from "./data/environment/EnvironmentData.js";
 function CanvasWrapper() {
   // Set the environment type
   const { setEnvironmentType } = useEnvironmentStore();
-  const { setEnvAssets } = useEnvAssetStore();
+  const { envAssets, setEnvAssets, assetsLoaded, setAssetsLoaded, assetsLoading, setAssetsLoading } = useEnvAssetStore();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -28,23 +28,61 @@ function CanvasWrapper() {
     }
   }, []);
 
-  const { products, setProducts } = useComponentStore();
+  const { products, setProducts, productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useComponentStore();
   const { progress } = useProgress();
   const { setEnvProducts } = useEnvProductStore();
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        ProductService.getAllProducts().then((response) => setProducts(response));
-        AssetService.importAssetFiles('deltaxrstore.myshopify.com').then((response) => setEnvAssets(response));
+        if (!productsLoaded && !productsLoading) {
+          setProductsLoading(true);
+          const response = await ProductService.getAllProducts();
+          setProducts(response);
+          setProductsLoaded(true);
+          console.log('Products:', response);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Products error:', err);
       }
     }
+  
+    async function fetchAssets() {
+      try {
+        if (!assetsLoaded && !assetsLoading) {
+          setAssetsLoading(true);
+          const response = await AssetService.importAssetFiles('deltaxrstore.myshopify.com');
+          setEnvAssets(response);
+          setAssetsLoaded(true);
+          console.log('Assets:', response);
 
-    fetchProducts();
-  }, []);
-
+          // Preload asset models
+          Object.keys(envAssets).forEach((envAsset) => {
+            if(envAssets[envAsset].type === "MODEL_3D")
+              useGLTF.preload(envAssets[envAsset].src);
+          });
+        }
+      } catch (err) {
+        console.error('Assets error:', err);
+      }
+    }
+  
+    let mounted = true;
+  
+    Promise.all([fetchProducts(), fetchAssets()])
+      .finally(() => {
+        if (!mounted) {
+          // Clean up if component unmounted
+          setProductsLoading(false);
+          setAssetsLoading(false);
+        }
+      });
+  
+    return () => {
+      mounted = false;
+    };
+  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading]);
+  
   useEffect(() => {
     setEnvProducts(
       products.map((product) => {

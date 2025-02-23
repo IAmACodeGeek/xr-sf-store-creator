@@ -1,4 +1,4 @@
-import { useComponentStore, EnvProduct, useActiveProductStore, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -22,11 +22,10 @@ const DraggableProductContainer = ({
   envScale = 1,
   envProduct
 }: DraggableProductContainerProps) => {
-  const { products, setSelectedProduct } = useComponentStore();
+  const { products } = useComponentStore();
   const {camera} = useThree();
-  const {activeProductId} = useActiveProductStore();
   const {toolType} = useToolStore();
-  const {modifyEnvProduct} = useEnvProductStore();
+  const {modifyEnvProduct, activeProductId} = useEnvProductStore();
 
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {

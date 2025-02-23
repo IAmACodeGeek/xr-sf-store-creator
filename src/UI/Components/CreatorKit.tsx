@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Typography } from "@mui/material";
-import { EnvProduct, useActiveProductStore, useActiveAssetStore, useComponentStore, useEnvProductStore, useToolStore, useEnvAssetStore, EnvAsset } from "../../stores/ZustandStores";
+import { EnvProduct, useComponentStore, useEnvProductStore, useToolStore, useEnvAssetStore, EnvAsset } from "../../stores/ZustandStores";
 import React, { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
@@ -12,10 +12,8 @@ import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
-  const {envAssets, modifyEnvAsset} = useEnvAssetStore();
-  const { envProducts, modifyEnvProduct } = useEnvProductStore();
-  const {activeProductId, setActiveProductId} = useActiveProductStore();
-  const {activeAssetId, setActiveAssetId} = useActiveAssetStore();
+  const {envAssets, modifyEnvAsset, activeAssetId, setActiveAssetId} = useEnvAssetStore();
+  const { envProducts, modifyEnvProduct, activeProductId, setActiveProductId } = useEnvProductStore();
   const {toolType, setToolType} = useToolStore();
 
   const [ entityType, setEntityType ] = useState<"PRODUCT" | "ASSET">("PRODUCT");
