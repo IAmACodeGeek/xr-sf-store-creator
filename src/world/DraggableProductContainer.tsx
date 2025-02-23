@@ -1,7 +1,7 @@
 import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
 import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { act, useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
@@ -269,6 +269,7 @@ const DraggableProductContainer = ({
       const newEnvProduct: EnvProduct = {
         id: envProduct.id,
         position: pos,
+        scale: envScale,
         isEnvironmentProduct: true
       };
 
@@ -287,6 +288,7 @@ const DraggableProductContainer = ({
       const newEnvProduct: EnvProduct = {
         id: envProduct.id,
         position: pos,
+        scale: envScale,
         isEnvironmentProduct: true
       };
 
@@ -325,6 +327,7 @@ const DraggableProductContainer = ({
         id: envProduct.id,
         position: pos,
         rotation: rot,
+        scale: envScale,
         isEnvironmentProduct: true
       };
 
@@ -356,6 +359,7 @@ const DraggableProductContainer = ({
         id: envProduct.id,
         position: pos,
         rotation: rot,
+        scale: envScale,
         isEnvironmentProduct: true
       };
 
@@ -368,8 +372,8 @@ const DraggableProductContainer = ({
   }, [envProduct.imageIndex, envProduct.modelIndex]);
 
   useEffect(() => {
-    if(toolType === "3DPARAMS") handleObjectMove();
-  }, [toolType]);
+    handleObjectMove();
+  }, [activeProductId]);
 
   return (
     <RigidBody type="fixed">

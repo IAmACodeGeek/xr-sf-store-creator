@@ -9,6 +9,7 @@ import { useGLTF } from "@react-three/drei";
 import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
 import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
+import EnvStoreService from "@/api/envStoreService";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -1394,7 +1395,15 @@ export const CreatorKit = () => {
       {entityType === "ASSET" && !activeAssetId && <FileSelector/>}
       {entityType === "ASSET" && <AssetList/>}
       {entityType === "ASSET" && <AssetEditor/>}
-      {!activeProductId && !activeAssetId && <FullWideButton text={"Save Store"}/>}
+      {!activeProductId && !activeAssetId && <FullWideButton text={"Save Store"} onClick={
+        async () => {
+          await EnvStoreService.storeEnvData(
+            'deltaxrstore.myshopify.com', 
+            Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
+            Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
+          );
+        }
+      }/>}
       {entityType === "PRODUCT" && activeProductId && 
         <FullWideButton text={"Done"} 
           onClick={() => {

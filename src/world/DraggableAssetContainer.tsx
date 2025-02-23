@@ -265,7 +265,8 @@ const DraggableAssetContainer = ({
         src: envAsset.src,
         isEnvironmentAsset: true,
         status: envAsset.status,
-        position: pos
+        position: pos,
+        scale: envScale
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -287,7 +288,8 @@ const DraggableAssetContainer = ({
         src: envAsset.src,
         isEnvironmentAsset: true,
         status: envAsset.status,
-        position: pos
+        position: pos,
+        scale: envScale
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -329,7 +331,8 @@ const DraggableAssetContainer = ({
         isEnvironmentAsset: true,
         status: envAsset.status,
         position: pos,
-        rotation: rot
+        rotation: rot,
+        scale: envScale
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -364,7 +367,8 @@ const DraggableAssetContainer = ({
         isEnvironmentAsset: true,
         status: envAsset.status,
         position: pos,
-        rotation: rot
+        rotation: rot,
+        scale: envScale
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -376,8 +380,8 @@ const DraggableAssetContainer = ({
   }, [envAsset.src]);
 
   useEffect(() => {
-    if(toolType === "3DPARAMS") handleObjectMove();
-  }, [toolType]);
+    handleObjectMove();
+  }, [activeAssetId]);
 
   return (
     <RigidBody type="fixed">
