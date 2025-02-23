@@ -7,10 +7,11 @@ const ALLOWED_MIME_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/svg+x
 
 interface FileResponse {
   name: string;
+  originalName: string;
   type: string;
   size: number;
-  url: string;
-  path: string;
+  uploadTime: number;
+  src: string;
 }
 
 interface Response {
@@ -22,7 +23,7 @@ interface Response {
 }
 
 const AssetService = {
-  uploadAssetFiles: async function (shopifyDomain: string, files: File[]): Promise<unknown> {
+  uploadAssetFiles: async function (shopifyDomain: string, files: File[]): Promise<{[id: string]: EnvAsset} | undefined> {
     const validFiles = files.filter((file) => ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.glb'));
     if(validFiles.length === 0){
       console.error('No Valid Files');
@@ -43,8 +44,18 @@ const AssetService = {
         body: formData
       });
   
-      const result = await response.json();
-      console.log(result);
+      const resultJSON = await response.json();
+      const result: {[id: string]: EnvAsset} = {};
+      resultJSON.uploadedFiles.forEach((fileResponse: FileResponse) => {
+        result[fileResponse.name] = {
+          id: fileResponse.name,
+          name: fileResponse.originalName,
+          type: (fileResponse.type === 'model/gltf-binary' || fileResponse.originalName.endsWith('.glb')) ? 'MODEL_3D' : 'PHOTO',
+          src: fileResponse.src,
+          isEnvironmentAsset: false,
+          status: 'SUCCESS'
+        };
+      });
       return result;
     }
     catch(error){
@@ -62,15 +73,15 @@ const AssetService = {
       });
   
       const resultJSON: Response = await response.json();
-      console.log(resultJSON);
   
       const result: {[id: string]: EnvAsset} = {};
+      console.log(resultJSON);
       resultJSON.files.forEach((fileResponse) => {
-        result[fileResponse.path] = {
-          id: fileResponse.path,
-          name: fileResponse.name,
-          type: (fileResponse.type === 'model/gltf-binary' || fileResponse.name.endsWith('.glb')) ? 'MODEL_3D' : 'PHOTO',
-          src: fileResponse.url,
+        result[fileResponse.name] = {
+          id: fileResponse.name,
+          name: fileResponse.originalName,
+          type: (fileResponse.type === 'model/gltf-binary' || fileResponse.originalName.endsWith('.glb')) ? 'MODEL_3D' : 'PHOTO',
+          src: fileResponse.src,
           isEnvironmentAsset: false,
           status: 'SUCCESS'
         };

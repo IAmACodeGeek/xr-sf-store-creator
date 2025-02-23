@@ -1080,7 +1080,12 @@ export const CreatorKit = () => {
         console.error('Invalid Files Present');
         return;
       }
-      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles);
+      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles).then((result) => {
+        if(!result) return;
+        Object.keys(result).forEach((id) => {
+          modifyEnvAsset(id, result[id]);
+        });
+      });
     };
     
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1092,7 +1097,12 @@ export const CreatorKit = () => {
         return;
       }
       
-      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles);
+      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles).then((result) => {
+        if(!result) return;
+        Object.keys(result).forEach((id) => {
+          modifyEnvAsset(id, result[id]);
+        });
+      });
       
       // Clear the input value to allow selecting the same file again
       if (fileInputRef.current) {
@@ -1391,12 +1401,12 @@ export const CreatorKit = () => {
           />
           <Box
             component="img"
-            src={envAsset.src}
+            src={(envAsset.type === "PHOTO") ? envAsset.src : 'icons/Cube.svg'}
             sx={{
               height: "60px",
               width: "60px",
               minWidth: "60px",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: (envAsset.type === "PHOTO") ? "rgba(255, 255, 255, 0.2)" : "transparent",
               objectFit: "contain",
               opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.5
             }}
