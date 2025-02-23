@@ -182,7 +182,6 @@ export const CreatorKit = () => {
           }}
           onClick={() => {
             if(entityType === "PRODUCT" && envProduct){
-              if(!envProduct) return;
               if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
               
               const newEnvProduct: EnvProduct = {
@@ -191,13 +190,34 @@ export const CreatorKit = () => {
                 isEnvironmentProduct: true
               };
   
-              if(envProduct.placeHolderId){
+              if(envProduct.placeHolderId !== undefined){
                 const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envProduct.placeHolderId);
                 newEnvProduct.position = placeHolderData?.position;
                 newEnvProduct.rotation = placeHolderData?.rotation;
                 newEnvProduct.scale = placeHolderData?.scale;
               }
               modifyEnvProduct(envProduct.id, newEnvProduct);
+            }
+            else if(entityType === "ASSET" && envAsset){
+              if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
+              
+              const newEnvAsset: EnvAsset = {
+                id: envAsset.id,
+                name: envAsset.name,
+                type: envAsset.type,
+                src: envAsset.src,
+                isEnvironmentAsset: true,
+                status: envAsset.status,
+                placeHolderId: undefined
+              };
+  
+              if(envAsset.placeHolderId !== undefined){
+                const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envAsset.placeHolderId);
+                newEnvAsset.position = placeHolderData?.position;
+                newEnvAsset.rotation = placeHolderData?.rotation;
+                newEnvAsset.scale = placeHolderData?.scale;
+              }
+              modifyEnvAsset(envAsset.id, newEnvAsset);
             }
           }}
           className="CustomButton"
@@ -1279,80 +1299,6 @@ export const CreatorKit = () => {
         setAssetPaneHeight((assetEditorRef.current?.clientHeight || 0) - (assetItemRef.current?.clientHeight || 0));
       }, []);
       if(!activeAssetId) return null;
-
-      const ParamsTypeButtons = () => {
-        return (
-          <Box
-            sx={{
-              display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
-              width: "100%", height: "100px", gap: "25px",
-              padding: "30px", boxSizing: "border-box",
-              backgroundColor: "rgb(5, 5, 5)"
-            }}
-            className="ParamsTypeButtons"
-          >
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                color: paramsType === "CUSTOM" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(!envAsset) return;
-                if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
-                
-                const newEnvAsset: EnvAsset = {
-                  id: envAsset.id,
-                  placeHolderId: undefined,
-                  isEnvironmentAsset: true,
-                  type: envAsset.type,
-                  status: envAsset.status,
-                  src: envAsset.src,
-                  name: envAsset.name
-                };
-
-                if(envAsset.placeHolderId){
-                  const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envAsset.placeHolderId);
-                  newEnvAsset.position = placeHolderData?.position;
-                  newEnvAsset.rotation = placeHolderData?.rotation;
-                  newEnvAsset.scale = placeHolderData?.scale;
-                }
-                modifyEnvAsset(envAsset.id, newEnvAsset);
-              }}
-              className="CustomButton"
-            >
-              Custom
-            </Button>
-            <Button
-              sx={{
-                width: "40%", height: "100%", flexGrow: 1,
-                padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
-                fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                color: paramsType === "PLACEHOLDER" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "transparent",
-                "&:hover": {
-                  backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
-                  color: "white"
-                }
-              }}
-              onClick={() => {
-                if(paramsType !== "PLACEHOLDER") setParamsType("PLACEHOLDER");
-              }}
-              className="PlaceHolderButton"
-            >
-              PlaceHolder
-            </Button>
-          </Box>
-        );
-      }
       
       return (
         <Box

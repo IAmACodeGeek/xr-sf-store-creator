@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { useEnvAssetStore, useEnvProductStore } from "@/stores/ZustandStores";
 
 const LazyDraggableProductContainer = React.lazy(() => 
-  import("./DraggableContainer").then(module => ({ 
+  import("./DraggableProductContainer").then(module => ({ 
     default: module.default || module 
   }))
 );

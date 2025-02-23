@@ -1,12 +1,13 @@
-import { EnvAsset, useToolStore, useEnvAssetStore, useActiveAssetStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvAsset, useActiveProductStore, useToolStore, useEnvProductStore, useActiveAssetStore, useEnvAssetStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import placeHolderData from "../data/environment/placeHolderData/BigRoom";
+import { env } from "process";
 
-interface DraggableProductContainerProps {
+interface DraggableAssetContainerProps {
   placeHolderId?: number | undefined;
   envPosition?: [number, number, number];
   envRotation?: [number, number, number];
@@ -20,7 +21,7 @@ const DraggableAssetContainer = ({
   envRotation = undefined,
   envScale = 1,
   envAsset
-}: DraggableProductContainerProps) => {
+}: DraggableAssetContainerProps) => {
   const {camera} = useThree();
   const {activeAssetId} = useActiveAssetStore();
   const {toolType} = useToolStore();
@@ -33,10 +34,10 @@ const DraggableAssetContainer = ({
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
-    if (envAsset.type !== "MODEL_3D") {
+    if (envAsset.type !== "MODEL_3D" || !envAsset.src) {
       return null;
     }
-
+    
     return envAsset.src;
   }, [envAsset.type, envAsset.src]);
 
@@ -69,6 +70,7 @@ const DraggableAssetContainer = ({
     }
     return envPosition;
   }, [placeHolderId, envPosition]);
+
   const rotation = useMemo(() => {
     if(placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
@@ -76,6 +78,7 @@ const DraggableAssetContainer = ({
     }
     return envRotation;
   }, [placeHolderId, envRotation]);
+
   const scale = useMemo(() => {
     if(placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
@@ -100,7 +103,8 @@ const DraggableAssetContainer = ({
     return new Euler(
       rotArray[0] * Math.PI / 180,
       rotArray[1] * Math.PI / 180,
-      rotArray[2] * Math.PI / 180
+      rotArray[2] * Math.PI / 180,
+      'YZX'
     );
   }, [rotation, position]);
   
@@ -210,17 +214,14 @@ const DraggableAssetContainer = ({
   }, [position, computedPositionForModel, envAsset.type, computedRotation, camera, meshRef]);
 
   const imageUrl = useMemo(() => {
-    if(envAsset.type !== "PHOTO") return null;
+    if(envAsset.type !== "PHOTO" || !envAsset.src) return null;
     return envAsset.src;
   }, [envAsset.type, envAsset.src]);
 
   const imageTexture = useMemo(() => {
     if(!imageUrl) return null;
-
-    const textureLoader = new TextureLoader();
-    textureLoader.crossOrigin = 'anonymous';
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useLoader(TextureLoader, envAsset.src);
+    return useLoader(TextureLoader, imageUrl);
   }, [imageUrl]);
 
   const computedSizeForImage = useMemo(() => {
@@ -260,13 +261,11 @@ const DraggableAssetContainer = ({
       const newEnvAsset: EnvAsset = {
         id: envAsset.id,
         name: envAsset.name,
-
-        status: "SUCCESS",
         type: envAsset.type,
         src: envAsset.src,
-        
-        position: pos,
-        isEnvironmentAsset: true
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -284,13 +283,11 @@ const DraggableAssetContainer = ({
       const newEnvAsset: EnvAsset = {
         id: envAsset.id,
         name: envAsset.name,
-
-        status: envAsset.status,
-
         type: envAsset.type,
         src: envAsset.src,
-        position: pos,
-        isEnvironmentAsset: true
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -327,14 +324,12 @@ const DraggableAssetContainer = ({
       const newEnvAsset: EnvAsset = {
         id: envAsset.id,
         name: envAsset.name,
-
-        status: envAsset.status,
-
         type: envAsset.type,
         src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
         position: pos,
-        rotation: rot,
-        isEnvironmentAsset: true
+        rotation: rot
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -364,14 +359,12 @@ const DraggableAssetContainer = ({
       const newEnvAsset: EnvAsset = {
         id: envAsset.id,
         name: envAsset.name,
-
-        status: envAsset.status,
-
         type: envAsset.type,
         src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
         position: pos,
-        rotation: rot,
-        isEnvironmentAsset: true
+        rotation: rot
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -380,7 +373,7 @@ const DraggableAssetContainer = ({
 
   useEffect(() => {
     handleObjectTranslate();
-  }, []);
+  }, [envAsset.src]);
 
   useEffect(() => {
     if(toolType === "3DPARAMS") handleObjectMove();
@@ -390,7 +383,7 @@ const DraggableAssetContainer = ({
     <RigidBody type="fixed">
       <group
         position={[0, 0, 0]}
-        rotation={new Euler(0, 0, 0)}
+        rotation={new Euler(0, 0, 0, 'YZX')}
       >
         <PivotControls
           anchor={[0, 0, 0]}
