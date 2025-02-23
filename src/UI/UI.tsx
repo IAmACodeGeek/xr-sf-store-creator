@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { driver, Driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import styles from "@/UI/UI.module.scss";
-import { useComponentStore, useDriverStore, useSearchStore, useTourStore } from "../stores/ZustandStores";
+import { useComponentStore, useDriverStore, useTourStore } from "../stores/ZustandStores";
 import InfoModal from "@/UI/Components/InfoModal";
 import SettingsModal from "@/UI/Components/SettingsModal";
 import TermsConditionsModal from "@/UI/Components/TermsModal";
@@ -44,17 +44,9 @@ const customDriverStyles = `
   }
 `;
 
-const shopifyConfig = {
-  storeDomain: "gsv01y-gx.myshopify.com", 
-  storefrontToken: "b148c0911287ca8a6f23a6d7bab23110",
-  storefrontApiVersion: "2024-10",
-};
-
 const UI = () => {
   const {
-    crosshairVisible, hideCrosshair,
-    isCreatorKitOpen,
-    isInfoModalOpen, openInfoModal, closeInfoModal,
+    isInfoModalOpen, closeInfoModal,
     isSettingsModalOpen , openSettingsModal, closeSettingsModal,
     isAudioPlaying,
     isTermsModalOpen,isContactModalOpen,
