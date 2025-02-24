@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Typography } from "@mui/material";
-import { EnvProduct, useComponentStore, useEnvProductStore, useToolStore, useEnvAssetStore, EnvAsset } from "../../stores/ZustandStores";
+import { EnvProduct, useComponentStore, useEnvProductStore, useToolStore, useEnvAssetStore, EnvAsset, useBrandStore } from "../../stores/ZustandStores";
 import React, { useEffect, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
@@ -16,6 +16,7 @@ export const CreatorKit = () => {
   const {envAssets, modifyEnvAsset, activeAssetId, setActiveAssetId} = useEnvAssetStore();
   const { envProducts, modifyEnvProduct, activeProductId, setActiveProductId } = useEnvProductStore();
   const {toolType, setToolType} = useToolStore();
+  const {brandData} = useBrandStore();
 
   const [ entityType, setEntityType ] = useState<"PRODUCT" | "ASSET">("PRODUCT");
   const [mediaType, setMediaType] = useState<"2D" | "3D">("2D");
@@ -1397,8 +1398,10 @@ export const CreatorKit = () => {
       {entityType === "ASSET" && <AssetEditor/>}
       {!activeProductId && !activeAssetId && <FullWideButton text={"Save Store"} onClick={
         async () => {
+          if(!brandData) return;
+          console.log(brandData.brand_name),
           await EnvStoreService.storeEnvData(
-            'deltaxrstore.myshopify.com', 
+            brandData.brand_name,
             Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
             Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
           );

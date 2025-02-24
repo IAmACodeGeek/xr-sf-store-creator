@@ -21,6 +21,7 @@ export const Player = () => {
   const [moveSpeed, setMoveSpeed] = useState(0);
   const {environmentType} = useEnvironmentStore();
   useEffect(() => {
+    if(!environmentData[environmentType]) return;
     setMoveSpeed(environmentData[environmentType].playerSpeed);
   }, [environmentType]);
 
@@ -49,7 +50,8 @@ export const Player = () => {
   // Initial Tour of the environment
   useEffect(() => {
     if (!playerRef.current || initialTourComplete.current) return;
-    
+    if (!environmentData[environmentType]) return;
+
     // Set initial position & rotation
     const startPosition = new THREE.Vector3(...environmentData[environmentType].initialGSAP.start.position);
     const startRotation = [

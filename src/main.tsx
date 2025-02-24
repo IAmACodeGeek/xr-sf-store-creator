@@ -8,26 +8,33 @@ import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
 import { AssetService } from "./api/assetService.js";
-import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore } from "./stores/ZustandStores";
-import environmentData from "./data/environment/EnvironmentData.js";
+import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore, useBrandStore } from "./stores/ZustandStores";
+import BrandService from "./api/brandService.js";
 
 function CanvasWrapper() {
-  // Set the environment type
-  const { setEnvironmentType } = useEnvironmentStore();
-  const { envAssets, setEnvAssets, assetsLoaded, setAssetsLoaded, assetsLoading, setAssetsLoading } = useEnvAssetStore();
-
+  // Load brand data
+  const {brandData, setBrandData} = useBrandStore();
+  
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const envParam = queryParams.get('env');
+    const brandName = queryParams.get('brandName');
+    if(!brandName) return;
 
-    if(envParam && environmentData[envParam.toUpperCase()]){
-      setEnvironmentType(envParam.toUpperCase());
-    }
-    else{
-      setEnvironmentType(Object.keys(environmentData)[0]);
-    }
-  }, []);
+    BrandService.fetchBrandData(brandName).then((response) => {
+      console.log(response);
+      setBrandData(response);
+    });
+  }, [setBrandData]);
+  
+  // Set the environment type
+  const { setEnvironmentType } = useEnvironmentStore();
+  useEffect(() => {
+    if(!brandData) return;
+    setEnvironmentType(brandData.environment_name.toUpperCase());
+  }, [brandData, setEnvironmentType]);
 
+  // Set products and assets
+  const { envAssets, setEnvAssets, assetsLoaded, setAssetsLoaded, assetsLoading, setAssetsLoading } = useEnvAssetStore();
   const { products, setProducts, productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useComponentStore();
   const { progress } = useProgress();
   const { setEnvProducts } = useEnvProductStore();

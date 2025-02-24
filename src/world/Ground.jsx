@@ -5,7 +5,7 @@ import { useEnvironmentStore } from '@/stores/ZustandStores';
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
-  return (
+  return (environmentType &&
     <RigidBody type="fixed" colliders="trimesh">
       {environmentType === "BIGROOM" && <BigRoomModel/>}
       {environmentType === "CASTLE" && <CastleModel/>}

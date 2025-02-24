@@ -17,11 +17,6 @@ interface ComponentStore {
   setProductsLoading: (value: boolean) => void;
   setProductsLoaded: (value: boolean) => void;
 
-  // Creator Kit handling
-  isCreatorKitOpen: boolean;
-  openCreatorKit: () => void;
-  closeCreatorKit: () => void;
-
   // Info Handling
   isInfoModalOpen: boolean;
   openInfoModal: () => void;
@@ -72,17 +67,6 @@ const useComponentStore = create<ComponentStore>((set) => ({
   setProductsLoading: (value: boolean) => set({productsLoading: value}),
   productsLoaded: false,
   setProductsLoaded: (value: boolean) => set({productsLoaded: value}),
-
-  // Creator Kit handling
-  isCreatorKitOpen: false,
-  openCreatorKit: () => {
-    set({ crosshairVisible: false });
-    set({ isCreatorKitOpen: true });
-  },
-  closeCreatorKit: () => {
-    set({ crosshairVisible: true });
-    set({ isCreatorKitOpen: false });
-  },
 
   // Info Handling
   isInfoModalOpen: false,
@@ -289,12 +273,37 @@ const useToolStore = create<ToolStore>((set) => ({
 // Dynamic Loading of Environment
 interface EnvironmentStore {
   environmentType: string | undefined;
-  setEnvironmentType: (value: string) => void;
+  setEnvironmentType: (value: string | undefined) => void;
 }
 
 const useEnvironmentStore = create<EnvironmentStore>((set) => ({
   environmentType: undefined,
-  setEnvironmentType: (value: string) =>  set({environmentType: value})
+  setEnvironmentType: (value: string | undefined) =>  set({environmentType: value})
+}));
+
+// Brand Store Handling
+interface BrandData {
+  id: string;
+  brand_name: string;
+  brand_logo_url: string;
+  brand_poster_url: string;
+  brand_video_url: string;
+  environment_name: string;
+  shopify_admin_api_pass: string;
+  shopify_api_key: string;
+  shopify_api_secret: string;
+  shopify_store_name: string;
+  shopify_storefront_access_token: string;
+}
+
+interface BrandStore {
+  brandData: BrandData | null;
+  setBrandData: (data: BrandData) => void;
+}
+
+const useBrandStore = create<BrandStore>((set) => ({
+  brandData: null,
+  setBrandData: (data) => set({ brandData: data }),
 }));
 
 export {
@@ -307,5 +316,6 @@ export {
   useEnvAssetStore,
   useToolStore,
   useEnvironmentStore,
+  useBrandStore
 };  
 export type { EnvProduct, EnvAsset };
