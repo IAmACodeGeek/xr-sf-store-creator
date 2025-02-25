@@ -42,9 +42,9 @@ function CanvasWrapper() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        if (!productsLoaded && !productsLoading) {
+        if (!productsLoaded && !productsLoading && brandData) {
           setProductsLoading(true);
-          const response = await ProductService.getAllProducts();
+          const response = await ProductService.getAllProducts(brandData.brand_name);
           setProducts(response);
           setProductsLoaded(true);
           console.log('Products:', response);

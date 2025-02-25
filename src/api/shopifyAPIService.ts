@@ -1,27 +1,7 @@
 import Variant from '@/Types/Variant';
 import Product from '../Types/Product';
 
-const BASE_URL = "https://us-central1-global-road-449105-e7.cloudfunctions.net/function-2";
-
-async function fetchData<T>(method: "GET", endpoint: string): Promise<T> {
-  try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("API call error:", error);
-    throw error;
-  }
-}
+const BASE_URL = "https://function-14-934416248688.us-central1.run.app?brandname=";
 
 interface ProductResponse {
   data: {
@@ -88,12 +68,11 @@ interface ProductResponse {
 }
 
 export const ProductService = {
-  async getAllProducts(): Promise<Product[]> {
-    const response = await fetchData<ProductResponse>("GET", "/v1/products");
+  async getAllProducts(brandName: string): Promise<Product[]> {
+    const response = await fetch(BASE_URL + brandName);
+    const resultJSON: ProductResponse = await response.json();
 
-    
-    const products: Product[] = response.data.products.edges.map((product) => {
-      
+    const products: Product[] = resultJSON.data.products.edges.map((product) => {
       const productImages: { src: string }[] = product.node.media.edges.filter((edge) =>
         edge.node.mediaContentType.toUpperCase() === "IMAGE" 
         && edge.node.image 
@@ -152,14 +131,5 @@ export const ProductService = {
     });
 
     return products;
-  },
-
-  async getProductById(id: number | string): Promise<Product> {
-    const response = await fetchData<{ product: Product }>("GET", `/products/${id}`);
-    return response.product;
-  },
-
-  async getProductModel(id: number | string): Promise<Product> {
-    return fetchData<Product>("GET", `/products/${id}/model`);
-  },
+  }
 };
