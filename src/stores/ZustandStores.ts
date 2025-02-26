@@ -289,11 +289,7 @@ interface BrandData {
   brand_poster_url: string;
   brand_video_url: string;
   environment_name: string;
-  shopify_admin_api_pass: string;
-  shopify_api_key: string;
-  shopify_api_secret: string;
-  shopify_store_name: string;
-  shopify_storefront_access_token: string;
+  email: string;
 }
 
 interface BrandStore {

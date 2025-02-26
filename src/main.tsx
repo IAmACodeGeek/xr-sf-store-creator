@@ -88,7 +88,7 @@ function CanvasWrapper() {
     return () => {
       mounted = false;
     };
-  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading]);
+  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading, brandData]);
   
   useEffect(() => {
     setEnvProducts(

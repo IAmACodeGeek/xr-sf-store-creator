@@ -15,6 +15,7 @@ const sideVector = new THREE.Vector3();
 
 const RESPAWN_HEIGHT = -5;
 const START_POSITION = new THREE.Vector3(0, 7, -5);
+const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003}
 
 export const Player = () => {
   // Set player speed based on environment
@@ -43,9 +44,6 @@ export const Player = () => {
   } = useComponentStore();
 
   const { isTouchEnabled, enableTouch } = useTouchStore();
-
-
-  const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003};
 
   // Initial Tour of the environment
   useEffect(() => {
