@@ -23,7 +23,7 @@ interface Response {
 }
 
 const AssetService = {
-  uploadAssetFiles: async function (shopifyDomain: string, files: File[]): Promise<{[id: string]: EnvAsset} | undefined> {
+  uploadAssetFiles: async function (brandName: string, files: File[]): Promise<{[id: string]: EnvAsset} | undefined> {
     const validFiles = files.filter((file) => ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.glb'));
     if(validFiles.length === 0){
       console.error('No Valid Files');
@@ -39,7 +39,7 @@ const AssetService = {
       const response = await fetch(UPLOAD_URL, {
         method: 'POST',
         headers: {
-          'x-shopify-domain': shopifyDomain
+          'x-shopify-domain': brandName
         },
         body: formData
       });
@@ -63,12 +63,12 @@ const AssetService = {
     }
   },
   
-  importAssetFiles: async function (shopifyDomain: string): Promise<{[id: string]: EnvAsset}> {
+  importAssetFiles: async function (brandName: string): Promise<{[id: string]: EnvAsset}> {
     try {
       const response = await fetch(IMPORT_URL, {
         method: 'GET',
         headers: {
-          'x-shopify-domain': shopifyDomain
+          'x-shopify-domain': brandName
         }
       });
   
@@ -92,7 +92,7 @@ const AssetService = {
     catch(error){
       console.error(error);
     }
-  
+    
     return {};
   }
 }

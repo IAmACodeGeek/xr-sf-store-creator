@@ -21,6 +21,7 @@ const EnvStoreService = {
     }
     catch(error){
       console.error(error);
+      return undefined;
     }
   }
 };

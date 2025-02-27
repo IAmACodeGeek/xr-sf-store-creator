@@ -1102,7 +1102,8 @@ export const CreatorKit = () => {
         console.error('Invalid Files Present');
         return;
       }
-      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles).then((result) => {
+      if(!brandData) return;
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles).then((result) => {
         if(!result) return;
         Object.keys(result).forEach((id) => {
           modifyEnvAsset(id, result[id]);
@@ -1119,7 +1120,8 @@ export const CreatorKit = () => {
         return;
       }
       
-      await AssetService.uploadAssetFiles('deltaxrstore.myshopify.com', validFiles).then((result) => {
+      if(!brandData) return;
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles).then((result) => {
         if(!result) return;
         Object.keys(result).forEach((id) => {
           modifyEnvAsset(id, result[id]);
@@ -1401,39 +1403,36 @@ export const CreatorKit = () => {
       {!activeProductId && !activeAssetId && <FullWideButton text={"Save Store"} onClick={
         async () => {
           if(!brandData) return;
-          console.log(brandData.brand_name),
-          await EnvStoreService.storeEnvData(
-            brandData.brand_name,
-            Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
-            Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
-          ).then((response) => {
-            console.log(response);
-            if(response.status === 200){
-              Swal.fire({
-                title: "Save Store?",
-                text: "Are you sure you want to save the store?",
-                icon: "question",
-                showConfirmButton: true,
-                showCancelButton: true,
-                allowOutsideClick: false,
-                customClass: {
-                  title: styles.swalTitle,
-                  popup: styles.swalPopup,
-                },
-              }).then(async (result) => {
-                if(result.isConfirmed){
-                  console.log("Deploying");
-                  try{
-                    const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
-                    console.log(cnameResponse);
-                    const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
-                    console.log(netlifyResponse);
-                  }
-                  catch(error){
-                    console.error(error);
-                  }
-                }
-              });
+          Swal.fire({
+            title: "Save Store?",
+            text: "Are you sure you want to save the store?",
+            icon: "question",
+            showConfirmButton: true,
+            showCancelButton: true,
+            allowOutsideClick: false,
+            customClass: {
+              title: styles.swalTitle,
+              popup: styles.swalPopup,
+            },
+          }).then(async (response) => {
+            if(response.isConfirmed){
+              try{
+                const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
+                console.log(cnameResponse);
+                
+                const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
+                console.log(netlifyResponse);
+                
+                const envResponse = await EnvStoreService.storeEnvData(
+                  brandData.brand_name,
+                  Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
+                  Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
+                );
+                console.log(envResponse);
+              }
+              catch(error){
+                console.error(error);
+              } 
             }
           });
         }
