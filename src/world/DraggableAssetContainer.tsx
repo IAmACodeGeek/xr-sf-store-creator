@@ -218,10 +218,18 @@ const DraggableAssetContainer = ({
     return envAsset.src;
   }, [envAsset.type, envAsset.src]);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const texture = imageUrl? useLoader(TextureLoader, imageUrl) : null;
   const imageTexture = useMemo(() => {
     if(!imageUrl) return null;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useLoader(TextureLoader, imageUrl);
+    try{
+      return texture;
+    }
+    catch(error){
+      console.error('Error Loading Asset Image: ', error);
+      return null;
+    }
   }, [imageUrl]);
 
   const computedSizeForImage = useMemo(() => {

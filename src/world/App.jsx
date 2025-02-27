@@ -8,17 +8,14 @@ import BrandPoster from "./BrandPoster";
 import Products from "./Products";
 import { Suspense, useState, useEffect } from "react";
 import Skybox from "./Skybox";
-import {
-  useComponentStore,
-  useDriverStore,
-  useTouchStore
-} from "../stores/ZustandStores";
-
+import environmentData from "@/data/environment/EnvironmentData";
+import { useBrandStore, useEnvironmentStore } from "@/stores/ZustandStores";
 const shadowOffset = 50;
 
 export const App = () => {
   const [isMobile, setIsMobile] = useState(false);
-
+  const {brandData} = useBrandStore();
+  const {environmentType} = useEnvironmentStore();
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
@@ -48,26 +45,37 @@ export const App = () => {
           <Player />
         </Suspense>
         <Products />
-        {/* <Television
-          videoPath="/media/backhome.mp4"
-          scale={[0.9, 0.9, 0.9]}
-          position={[-4.5, 11, -91]}
-          rotation={[0, -82.79, 0]}
-        /> */}
-
-        {/*May crash if external website*/}
-        {/* <WebPlane
-          scale={[0.2, 0.2, 0.1]}
-          position={[-5, 0, 5.1]}
-          rotation={[0, 162.5, 0]}
-        /> */}
-        {/* <BrandPoster
-          imageUrl="https://th.bing.com/th/id/OIP.SNik-SOwvsExn4HNF47l2gHaEK?rs=1&pid=ImgDetMain"
-          width={192 * 4}
-          height={108 * 4}
-          position={[-2.2, 3.2, -55.35]}
-          rotation={[0, 90, 1]}
-        /> */}
+        {brandData && (
+          <>
+            {environmentData[environmentType].televisions && 
+              environmentData[environmentType].televisions.map((television, index) => {
+                return (
+                  <Television
+                    videoPath={brandData.brand_video_url}
+                    scale={television.scale}
+                    position={television.position}
+                    rotation={television.rotation}
+                    key={index}
+                  />
+                );
+              })
+            }
+            {
+              environmentData[environmentType].brandPosters &&
+                environmentData[environmentType].brandPosters.map((brandPoster, index) => {
+                  return (
+                    <BrandPoster
+                      imageUrl={brandData.brand_poster_url}
+                      position={brandPoster.position}
+                      rotation={brandPoster.rotation}
+                      scale={brandPoster.scale}
+                      key={index}
+                    />
+                  );
+                })
+            }
+          </>
+        )}
       </Physics>
     </>
   );

@@ -73,21 +73,8 @@ function CanvasWrapper() {
         console.error('Assets error:', err);
       }
     }
-  
-    let mounted = true;
-  
-    Promise.all([fetchProducts(), fetchAssets()])
-      .finally(() => {
-        if (!mounted) {
-          // Clean up if component unmounted
-          setProductsLoading(false);
-          setAssetsLoading(false);
-        }
-      });
-  
-    return () => {
-      mounted = false;
-    };
+    fetchProducts();
+    fetchAssets();
   }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading, brandData]);
   
   useEffect(() => {
