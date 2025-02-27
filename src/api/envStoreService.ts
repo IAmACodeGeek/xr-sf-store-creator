@@ -6,7 +6,7 @@ const EnvStoreService = {
   storeEnvData: async function (brandName: string, envProducts: EnvProduct[], envAssets: EnvAsset[]) {
     try {
       console.log(envProducts, envAssets);
-      await fetch(UPLOAD_URL, {
+      const response = await fetch(UPLOAD_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -16,7 +16,8 @@ const EnvStoreService = {
           envProducts: envProducts,
           envAssets: envAssets
         })
-      }).then((response) => console.log(response));
+      });
+      return await response.json();
     }
     catch(error){
       console.error(error);

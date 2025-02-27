@@ -47,7 +47,7 @@ export const CreatorKit = () => {
           color: "white",
           backgroundColor: "rgb(77, 177, 255)",
         }}
-        className="SaveStoreButton"
+        className="FullWideButton"
         onClick={onClick}
       >
         {text}
@@ -1404,7 +1404,27 @@ export const CreatorKit = () => {
             brandData.brand_name,
             Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
             Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
-          );
+          ).then((response) => {
+            console.log(response);
+            if(response.status === 200){
+              Swal.fire({
+                title: "Save Store?",
+                text: "Are you sure you want to save the store?",
+                icon: "question",
+                showConfirmButton: true,
+                showCancelButton: true,
+                allowOutsideClick: false,
+                customClass: {
+                  title: styles.swalTitle,
+                  popup: styles.swalPopup,
+                },
+              }).then((result) => {
+                if(result.isConfirmed){
+                  console.log("Deployed");
+                }
+              });
+            }
+          });
         }
       }/>}
       {entityType === "PRODUCT" && activeProductId && 
