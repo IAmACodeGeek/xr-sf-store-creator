@@ -12,7 +12,7 @@ const CNAMERecordService = {
         body: JSON.stringify({
           zone_id: "c0ca3e15d01efc909a0b0bbdf0b37de5",
           name: brandName,
-          content: "xr-sf-r3f-test.netlify.app",
+          content: "xr-sf-deployment-environment.netlify.app",
           proxied: false,
         }),
       });
@@ -20,6 +20,9 @@ const CNAMERecordService = {
       return result;
     } catch (error) {
       console.error(error);
+      return {
+        error: error
+      }
     }
   },
 };

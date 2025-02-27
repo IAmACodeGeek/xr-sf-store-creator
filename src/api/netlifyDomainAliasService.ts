@@ -10,7 +10,7 @@ const NetlifyDomainAliasService = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          netlifyProjectID: "6d75d5a1-68af-49cd-9851-3aeea316179c",
+          netlifyProjectID: "9ef7cead-445a-4617-bcb7-e1b01e812f77",
           new_domain_alias: `${brandName}.strategyfox.in`,
         }),
       });

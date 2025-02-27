@@ -10,6 +10,8 @@ import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
 import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
+import CNAMERecordService from "@/api/cnameRecordService";
+import NetlifyDomainAliasService from "@/api/netlifyDomainAliasService";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -1418,9 +1420,18 @@ export const CreatorKit = () => {
                   title: styles.swalTitle,
                   popup: styles.swalPopup,
                 },
-              }).then((result) => {
+              }).then(async (result) => {
                 if(result.isConfirmed){
-                  console.log("Deployed");
+                  console.log("Deploying");
+                  try{
+                    const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
+                    console.log(cnameResponse);
+                    const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
+                    console.log(netlifyResponse);
+                  }
+                  catch(error){
+                    console.error(error);
+                  }
                 }
               });
             }
