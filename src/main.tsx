@@ -14,14 +14,20 @@ import BrandService from "./api/brandService.js";
 function CanvasWrapper() {
   // Load brand data
   const {brandData, setBrandData} = useBrandStore();
-  
+  const [brandStatus, setBrandStatus] = useState<'LOADING' | 'VALID' | 'INVALID'>('LOADING');
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const brandName = queryParams.get('brandName');
     if(!brandName) return;
 
     BrandService.fetchBrandData(brandName).then((response) => {
+      if(response.status && response.status === 404){
+        setBrandStatus('INVALID');
+        return;
+      }
       console.log(response);
+      setBrandStatus('VALID');
       setBrandData(response);
     });
   }, [setBrandData]);
@@ -29,9 +35,9 @@ function CanvasWrapper() {
   // Set the environment type
   const { setEnvironmentType } = useEnvironmentStore();
   useEffect(() => {
-    if(!brandData) return;
-    setEnvironmentType(brandData.environment_name.toUpperCase());
-  }, [brandData, setEnvironmentType]);
+    if(brandStatus === 'VALID' && brandData)
+      setEnvironmentType(brandData.environment_name.toUpperCase());
+  }, [brandStatus, brandData, setEnvironmentType]);
 
   // Set products and assets
   const { envAssets, setEnvAssets, assetsLoaded, setAssetsLoaded, assetsLoading, setAssetsLoading } = useEnvAssetStore();
@@ -73,9 +79,12 @@ function CanvasWrapper() {
         console.error('Assets error:', err);
       }
     }
-    fetchProducts();
-    fetchAssets();
-  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading, brandData]);
+
+    if(brandStatus === 'VALID' && brandData){
+      fetchProducts();
+      fetchAssets();
+    }
+  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading, , brandStatus]);
   
   useEffect(() => {
     setEnvProducts(
@@ -110,14 +119,16 @@ function CanvasWrapper() {
   return (
     <div id="container">
       <UI/>
-      <Load progress={progress} showLoader={showLoader}/>
-      <div className="canvas-container">
-        <Canvas camera={{ fov: 45 }} shadows>
-          <React.Suspense>
-            <App/>
-          </React.Suspense>
-        </Canvas>
-      </div>
+      <Load progress={progress} displayText={brandStatus === 'LOADING' || brandStatus === 'VALID' ? "Delta XR" : "Brand Not Found"} showLoader={showLoader}/>
+      {!showLoader && brandStatus === 'VALID' && 
+        <div className="canvas-container">
+          <Canvas camera={{ fov: 45 }} shadows>
+            <React.Suspense>
+              <App/>
+            </React.Suspense>
+          </Canvas>
+        </div>
+      }
     </div>
   );
 }

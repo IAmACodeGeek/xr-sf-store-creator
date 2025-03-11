@@ -5,9 +5,10 @@ import "./loading-animation.css";
 interface LoadProps {
   progress: number;
   showLoader: boolean;
+  displayText: string;
 }
 
-const Load: React.FC<LoadProps> = ({ progress, showLoader }) => {
+const Load: React.FC<LoadProps> = ({ progress, showLoader, displayText }) => {
   const prevProgress = useRef<number>(0);
   useEffect(() => {
     prevProgress.current = Math.ceil(Math.max(progress, prevProgress.current));
@@ -28,7 +29,7 @@ const Load: React.FC<LoadProps> = ({ progress, showLoader }) => {
             <div></div>
           </div>
           <div className="loading-text-container">
-            <div className="loading-text typewriter">Delta XR</div>
+            <div className="loading-text typewriter">{displayText}</div>
             <div className="loading-text">{prevProgress.current}%</div>
           </div>
           <img

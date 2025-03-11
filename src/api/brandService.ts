@@ -6,11 +6,16 @@ const BrandService = {
       const response = await fetch(BASE_URL + brandName, {
         method: 'GET'
       });
-      const result = response.json();
-      return result;
+
+      if(response.ok){
+        return response.json();
+      }
+      else {
+        return response;
+      }
     }
     catch(error){
-      console.error(error);
+      console.error(error); 
     }
   }
 };

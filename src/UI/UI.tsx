@@ -163,15 +163,6 @@ const UI = () => {
         <img src="/icons/Help.svg" alt="Help" className={styles.icon} onClick={startTour}/>
       </div>
 
-  
-      {/* <div className={styles.brandLogoContainer}>
-        <img
-          src="/logo.avif"
-          alt="Brand Logo"
-          className={styles.brandLogo}
-        />
-      </div> */}
-
       <CreatorKit/>
       {isInfoModalOpen && (
         <InfoModal></InfoModal>
