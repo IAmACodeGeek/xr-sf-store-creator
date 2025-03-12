@@ -73,7 +73,21 @@ const environmentData = {
           ease: "power2.out"
         }
       ]
-    }
+    },
+    televisions: [
+      {
+        position: [-7.3, 33, -136.5],
+        rotation: [0, 276, 0],
+        scale: 0.8
+      }
+    ],
+    brandPosters: [
+      {
+        position: [-3.2, 10, -84],
+        rotation: [2, 90, 0],
+        scale: 5
+      }
+    ]
   }
 };
 

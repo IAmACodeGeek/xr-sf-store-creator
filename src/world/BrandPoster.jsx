@@ -1,22 +1,25 @@
 import React from 'react';
-import { useLoader, useThree } from '@react-three/fiber';
+import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 
 export default function BrandPoster({
   imageUrl,
-  width = 1920, 
-  height = 1080, 
   position = [0, 0, 0],
   rotation = [0, 0, 0],
+  scale = 1
 }) {
   const texture = useLoader(TextureLoader, imageUrl);
-  const { viewport } = useThree();
 
-  
-  const pixelsToUnits = (pixels) => pixels / 100;
-  
-  const widthInUnits = pixelsToUnits(width);
-  const heightInUnits = pixelsToUnits(height);
+  const computedSize = React.useMemo(() => {
+    const width = texture.image.width;
+    const height = texture.image.height;
+
+    const scaleUpOrDown = scale / height;
+    return {
+      width: width * scaleUpOrDown,
+      height: height * scaleUpOrDown
+    }
+  }, [texture, scale]);
 
   return (
     <group
@@ -24,7 +27,7 @@ export default function BrandPoster({
       rotation={rotation.map((r) => r * (Math.PI / 180))} 
     >
       <mesh>
-        <planeGeometry args={[widthInUnits, heightInUnits]} />
+        <planeGeometry args={[computedSize.width, computedSize.height]} />
         <meshBasicMaterial 
           map={texture}
           transparent={true}
