@@ -1429,6 +1429,19 @@ export const CreatorKit = () => {
                   Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
                 );
                 console.log(envResponse);
+
+                Swal.fire({
+                  title: "XR Store Created",
+                  text: "Your store has been created successfully!",
+                  html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
+                  icon: "success",
+                  allowOutsideClick: false,
+                  customClass: {
+                    title: styles.swalTitle,
+                    popup: styles.swalPopup,
+                    htmlContainer: styles.swalPopup
+                  },
+                });
               }
               catch(error){
                 console.error(error);
