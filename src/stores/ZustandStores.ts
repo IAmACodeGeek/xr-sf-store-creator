@@ -1,6 +1,33 @@
 import Product from "@/Types/Product";
 import { create } from "zustand";
 
+interface ResourceFetchStore {
+  // Products loading
+  productsLoading: boolean;
+  productsLoaded: boolean;
+  setProductsLoading: (value: boolean) => void;
+  setProductsLoaded: (value: boolean) => void;
+
+  envItemsLoaded: boolean;
+  setEnvItemsLoaded: (value: boolean) => void;
+  envItemsLoading: boolean;
+  setEnvItemsLoading: (value: boolean) => void;
+}
+
+const useResourceFetchStore = create<ResourceFetchStore>((set) => ({
+  // Products
+  productsLoading: false,
+  setProductsLoading: (value: boolean) => set({productsLoading: value}),
+  productsLoaded: false,
+  setProductsLoaded: (value: boolean) => set({productsLoaded: value}),
+
+  // EnvAssets and EnvProducts
+  envItemsLoaded: false,
+  setEnvItemsLoaded: (value: boolean) => set({envItemsLoaded: value}),
+  envItemsLoading: false,
+  setEnvItemsLoading: (value: boolean) => set({envItemsLoading: value}),
+}));
+
 interface ComponentStore {
   // Crosshair handling
   crosshairVisible: boolean;
@@ -12,11 +39,7 @@ interface ComponentStore {
   selectedProduct: Product | undefined;
   setProducts: (products: Product[]) => void;
   setSelectedProduct: (productId: number | null) => void;
-  productsLoading: boolean;
-  productsLoaded: boolean;
-  setProductsLoading: (value: boolean) => void;
-  setProductsLoaded: (value: boolean) => void;
-
+  
   // Info Handling
   isInfoModalOpen: boolean;
   openInfoModal: () => void;
@@ -63,11 +86,7 @@ const useComponentStore = create<ComponentStore>((set) => ({
       return { ...state, selectedProduct: finalProduct };
     });
   },
-  productsLoading: false,
-  setProductsLoading: (value: boolean) => set({productsLoading: value}),
-  productsLoaded: false,
-  setProductsLoaded: (value: boolean) => set({productsLoaded: value}),
-
+  
   // Info Handling
   isInfoModalOpen: false,
   openInfoModal: () => {
@@ -202,7 +221,9 @@ interface EnvProductStore {
 
 const useEnvProductStore = create<EnvProductStore>((set) => ({
   envProducts: {},
-  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => set({envProducts: envProducts}),
+  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => set((state: {envProducts: { [id: number]: EnvProduct }}) => ({
+    envProducts: { ...state.envProducts, ...envProducts },
+  })),
   modifyEnvProduct: (id: number, envProduct: EnvProduct) => set((state: { envProducts: { [id: number]: EnvProduct } }) => ({
     envProducts: {
       ...state.envProducts,
@@ -232,18 +253,15 @@ interface EnvAssetStore {
   setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => void;
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => void;
 
-  assetsLoading: boolean;
-  setAssetsLoading: (value: boolean) => void;
-  assetsLoaded: boolean;
-  setAssetsLoaded: (value: boolean) => void;
-
   activeAssetId: string | null;
   setActiveAssetId: (value: string | null) => void;
 }
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   envAssets: {},
-  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => set({envAssets: envAssets}),
+  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
+    envAssets: { ...state.envAssets, ...envAssets },
+  })),
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
     envAssets: {
       ...state.envAssets,
@@ -251,11 +269,6 @@ const useEnvAssetStore = create<EnvAssetStore>((set) => ({
     }
   })),
   
-  assetsLoading: false,
-  setAssetsLoading: (value: boolean) => set({assetsLoading: value}),
-  assetsLoaded: false,
-  setAssetsLoaded: (value: boolean) => set({assetsLoaded: value}),
-
   activeAssetId: null,
   setActiveAssetId: (value: string | null) => set({activeAssetId: value})
 }));
@@ -303,6 +316,7 @@ const useBrandStore = create<BrandStore>((set) => ({
 }));
 
 export {
+  useResourceFetchStore,
   useComponentStore,
   useTouchStore,
   useDriverStore,

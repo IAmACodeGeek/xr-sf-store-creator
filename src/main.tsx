@@ -7,10 +7,11 @@ import "@/index.scss";
 import UI from "@/UI/UI.tsx";
 import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
-import { AssetService } from "./api/assetService.js";
-import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore, useBrandStore } from "./stores/ZustandStores";
+import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore, useBrandStore, useResourceFetchStore, EnvAsset } from "./stores/ZustandStores";
 import BrandService from "./api/brandService.js";
-
+import EnvStoreService
+ from "./api/envStoreService.js";
+import { AssetService } from "./api/assetService.js";
 function CanvasWrapper() {
   // Load brand data
   const {brandData, setBrandData} = useBrandStore();
@@ -40,10 +41,13 @@ function CanvasWrapper() {
   }, [brandStatus, brandData, setEnvironmentType]);
 
   // Set products and assets
-  const { envAssets, setEnvAssets, assetsLoaded, setAssetsLoaded, assetsLoading, setAssetsLoading } = useEnvAssetStore();
-  const { products, setProducts, productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useComponentStore();
+  const { envAssets, setEnvAssets, modifyEnvAsset } = useEnvAssetStore();
+  const { products, setProducts } = useComponentStore();
+  const { envProducts, setEnvProducts, modifyEnvProduct } = useEnvProductStore();
+  const { productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useResourceFetchStore();
+  const {envItemsLoaded, setEnvItemsLoaded, envItemsLoading, setEnvItemsLoading} = useResourceFetchStore();
+
   const { progress } = useProgress();
-  const { setEnvProducts } = useEnvProductStore();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -52,6 +56,22 @@ function CanvasWrapper() {
           setProductsLoading(true);
           const response = await ProductService.getAllProducts(brandData.brand_name);
           setProducts(response);
+
+          const newEnvProducts: {[id: number]: EnvProduct} = {};
+          for(let product of response){
+            newEnvProducts[product.id] = {
+              id: product.id,
+                type: "PHOTO",
+                placeHolderId: undefined,
+                imageIndex: undefined,
+                modelIndex: undefined,
+                position: undefined,
+                rotation: undefined,
+                scale: 1,
+                isEnvironmentProduct: false
+            };
+          }
+          setEnvProducts(newEnvProducts);
           setProductsLoaded(true);
           console.log('Products:', response);
         }
@@ -59,51 +79,81 @@ function CanvasWrapper() {
         console.error('Products error:', err);
       }
     }
-  
+    
     async function fetchAssets() {
       try {
-        if (!assetsLoaded && !assetsLoading) {
-          setAssetsLoading(true);
-          const response = await AssetService.importAssetFiles('deltaxrstore.myshopify.com');
-          setEnvAssets(response);
-          setAssetsLoaded(true);
-          console.log('Assets:', response);
+        if(!brandData) return;
 
-          // Preload asset models
-          Object.keys(envAssets).forEach((envAsset) => {
-            if(envAssets[envAsset].type === "MODEL_3D")
-              useGLTF.preload(envAssets[envAsset].src);
-          });
+        const response = await AssetService.importAssetFiles(brandData.brand_name);
+        const newEnvAssets: {[id: string]: EnvAsset} = {};
+        for(let asset of Object.values(response)){
+          newEnvAssets[asset.id] = {
+            ...asset,
+            isEnvironmentAsset: false
+          };
         }
+        setEnvAssets(newEnvAssets);
+        console.log('Assets:', response);
+
+        // Preload asset models
+        Object.keys(envAssets).forEach((envAsset) => {
+          if(envAssets[envAsset].type === "MODEL_3D")
+            useGLTF.preload(envAssets[envAsset].src);
+        });
       } catch (err) {
         console.error('Assets error:', err);
       }
     }
 
-    if(brandStatus === 'VALID' && brandData){
-      fetchProducts();
-      fetchAssets();
+    async function fetchEnvData() {
+      try {
+        if (!envItemsLoaded && !envItemsLoading && brandData) {
+          setEnvItemsLoading(true);
+          await EnvStoreService.getEnvData(brandData.brand_name).then((response) => {
+
+            const newEnvProducts: {[id: number]: EnvProduct} = {};
+            for(let envProduct of Object.values(response.envProducts)){
+              newEnvProducts[envProduct.id] = {...envProduct, isEnvironmentProduct: true};
+              if(envProduct.type === "MODEL_3D" && envProduct.modelIndex !== undefined){
+                console.log(products.find((product) => product.id === envProduct.id)?.models[envProduct.modelIndex].sources?.[0].url);
+                useGLTF.preload(products.find((product) => product.id === envProduct.id)?.models[envProduct.modelIndex].sources?.[0].url || '');
+              }
+            }
+            
+            const newEnvAssets: {[id: string]: EnvAsset} = {};
+            for(let envAsset of Object.values(response.envAssets)){
+              newEnvAssets[envAsset.id] = {...envAsset, isEnvironmentAsset: true};
+              useGLTF.preload(envAsset.src);
+            }
+            
+            // Preload asset models
+            Object.values(envAssets).forEach((envAsset) => {
+              if(envAsset.type === "MODEL_3D")
+                useGLTF.preload(envAsset.src);
+            });
+
+            async function setResults(){
+              await new Promise(resolve => setTimeout(resolve, 10000));
+              setEnvProducts(newEnvProducts);
+              setEnvAssets(newEnvAssets);
+            }
+
+            setResults().then(() => setEnvItemsLoaded(true));
+          });
+        }
+      } catch (err) {
+        console.error('Env data error:', err);
+      }
     }
-  }, [productsLoaded, productsLoading, assetsLoaded, assetsLoading, , brandStatus]);
-  
-  useEffect(() => {
-    setEnvProducts(
-      products.map((product) => {
-        const envProduct: EnvProduct = {
-          id: product.id,
-          type: "PHOTO",
-          placeHolderId: undefined,
-          imageIndex: undefined,
-          modelIndex: undefined,
-          position: undefined,
-          rotation: undefined,
-          scale: 1,
-          isEnvironmentProduct: false
-        };
-        return envProduct;
-      })
-    );
-  }, [products]);
+
+    if(brandStatus === 'VALID' && brandData){
+      fetchProducts().then(() => {
+        fetchAssets().then(() => {
+          fetchEnvData();
+        });
+      });
+    }
+  }, [productsLoaded, productsLoading, brandStatus]);
 
   // Show loader for minimum of 3 seconds
   const [showLoader, setShowLoader] = useState(true);

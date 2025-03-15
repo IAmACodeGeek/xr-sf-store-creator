@@ -1279,7 +1279,12 @@ export const CreatorKit = () => {
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
+                    "&:hover": {
+                      cursor: envAsset.isEnvironmentAsset? "pointer" : "default",
+                      textDecoration: envAsset.isEnvironmentAsset? "underline": "none"
+                    }
                   }}
+                  onClick={() => {if(envAsset.isEnvironmentAsset) setActiveAssetId(envAsset.id)}}
                 >
                   {envAsset.name}
                 </Typography>
@@ -1417,11 +1422,11 @@ export const CreatorKit = () => {
           }).then(async (response) => {
             if(response.isConfirmed){
               try{
-                const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
-                console.log(cnameResponse);
+                // const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
+                // console.log(cnameResponse);
                 
-                const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
-                console.log(netlifyResponse);
+                // const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
+                // console.log(netlifyResponse);
                 
                 const envResponse = await EnvStoreService.storeEnvData(
                   brandData.brand_name,
@@ -1430,26 +1435,26 @@ export const CreatorKit = () => {
                 );
                 console.log(envResponse);
                 
-                Swal.fire({
-                  title: "XR Store Created",
-                  text: "Your store has been created successfully!",
-                  html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
-                  icon: "success",
-                  allowOutsideClick: false,
-                  customClass: {
-                      title: styles.swalTitle,
-                      popup: styles.swalPopup,
-                      htmlContainer: styles.swalPopup
-                    },
-                  });
-                }
-                catch(error){
-                  console.error(error);
-                } 
+                // Swal.fire({
+                //   title: "XR Store Created",
+                //   text: "Your store has been created successfully!",
+                //   html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
+                //   icon: "success",
+                //   allowOutsideClick: false,
+                //   customClass: {
+                //     title: styles.swalTitle,
+                //     popup: styles.swalPopup,
+                //     htmlContainer: styles.swalPopup
+                //   },
+                // });
               }
-            });
-          }
+              catch(error){
+                console.error(error);
+              } 
+            }
+          });
         }
+      }
       />}
       {entityType === "PRODUCT" && activeProductId && 
         <FullWideButton text={"Done"} 
