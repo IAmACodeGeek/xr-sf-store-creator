@@ -1114,7 +1114,7 @@ export const CreatorKit = () => {
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = Array.from(event.target.files || []);
       const validFiles = selectedFiles.filter((file: File) => ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.glb'));
-      console.log(validFiles[0].name);
+      
       if (validFiles.length !== selectedFiles.length) {
         console.error('Invalid Files Present');
         return;
@@ -1429,7 +1429,7 @@ export const CreatorKit = () => {
                   Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset)
                 );
                 console.log(envResponse);
-
+                
                 Swal.fire({
                   title: "XR Store Created",
                   text: "Your store has been created successfully!",
@@ -1437,19 +1437,20 @@ export const CreatorKit = () => {
                   icon: "success",
                   allowOutsideClick: false,
                   customClass: {
-                    title: styles.swalTitle,
-                    popup: styles.swalPopup,
-                    htmlContainer: styles.swalPopup
-                  },
-                });
+                      title: styles.swalTitle,
+                      popup: styles.swalPopup,
+                      htmlContainer: styles.swalPopup
+                    },
+                  });
+                }
+                catch(error){
+                  console.error(error);
+                } 
               }
-              catch(error){
-                console.error(error);
-              } 
-            }
-          });
+            });
+          }
         }
-      }/>}
+      />}
       {entityType === "PRODUCT" && activeProductId && 
         <FullWideButton text={"Done"} 
           onClick={() => {

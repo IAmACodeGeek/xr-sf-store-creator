@@ -1,7 +1,7 @@
 import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
-import { Billboard, PivotControls, useGLTF, Image as DreiImage } from "@react-three/drei";
+import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { act, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
@@ -99,11 +99,10 @@ const DraggableProductContainer = ({
   const computedRotation = useMemo(() => {
     const rotArray = [0, 0, 0];
     if(!rotation){
-      const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
-      const direction = new Vector3().subVectors(cameraPosition, new Vector3(...(position || [0, 0, 0]))).normalize();
+      const direction = new Vector3(); camera.getWorldDirection(direction);
       direction.y = 0;
       const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
-      rotArray[1] = angle - (direction.z < 0 ? 180: 0);
+      rotArray[1] = angle - (direction.z > 0 ? 180: 0);
     }
     else{
       rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];

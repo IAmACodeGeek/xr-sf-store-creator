@@ -22,7 +22,6 @@ const DraggableAssetContainer = ({
   envAsset
 }: DraggableAssetContainerProps) => {
   const {camera} = useThree();
-  const {toolType} = useToolStore();
   const {modifyEnvAsset, activeAssetId} = useEnvAssetStore();
 
   // To show axes when selected
@@ -91,11 +90,10 @@ const DraggableAssetContainer = ({
   const computedRotation = useMemo(() => {
     const rotArray = [0, 0, 0];
     if(!rotation){
-      const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
-      const direction = new Vector3().subVectors(cameraPosition, new Vector3(...(position || [0, 0, 0]))).normalize();
+      const direction = new Vector3(); camera.getWorldDirection(direction);
       direction.y = 0;
       const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
-      rotArray[1] = angle - (direction.z < 0 ? 180: 0);
+      rotArray[1] = angle - (direction.z > 0 ? 180: 0);
     }
     else{
       rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];
