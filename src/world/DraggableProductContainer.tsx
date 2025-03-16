@@ -55,6 +55,7 @@ const DraggableProductContainer = ({
   const model = useMemo(() => {
     if (!modelUrl) return null;
     try {
+      console.log(modelUrl);
       // eslint-disable-next-line react-hooks/rules-of-hooks
       return useGLTF(modelUrl);
     } catch (error) {

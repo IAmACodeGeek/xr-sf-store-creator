@@ -1,22 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import React from "react";
-import "./loading-animation.css";
+import "./styles/loading-animation.css";
 
 interface LoadProps {
-  progress: number;
-  showLoader: boolean;
-  displayText: string;
+  progress: number; 
 }
 
-const Load: React.FC<LoadProps> = ({ progress, showLoader, displayText }) => {
-  const prevProgress = useRef<number>(0);
-  useEffect(() => {
-    prevProgress.current = Math.ceil(Math.max(progress, prevProgress.current));
-  }, [progress]);
-
+const Load: React.FC<LoadProps> = ({ progress }) => {
   return (
     <div
-      className={"loader-background " + ((prevProgress.current >= 100 && !showLoader) ? "hidden" : "")}
+      className="loader-background"
     >
       <div className="loader-container-container">
         <div className="loader-container" id="loaderContainer">
@@ -29,8 +22,8 @@ const Load: React.FC<LoadProps> = ({ progress, showLoader, displayText }) => {
             <div></div>
           </div>
           <div className="loading-text-container">
-            <div className="loading-text typewriter">{displayText}</div>
-            <div className="loading-text">{prevProgress.current}%</div>
+            <div className="loading-text typewriter">Delta XR</div>
+            <div className="loading-text">{Math.round(progress)}%</div>
           </div>
           <img
             id="powered-by-loader"

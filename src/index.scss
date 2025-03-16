@@ -1,45 +1,52 @@
 * {
-    margin: 0;
-    padding: 0;
-    user-select: none;
+  margin: 0;
+  padding: 0;
+  user-select: none;
 }
 
-html, body, #root, #container {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    position: fixed; 
-    touch-action: none;
-}
-
-.canvas-container{
-  width: 70%; height: 100%;
+html,
+body,
+#root,
+#container {
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
   position: fixed;
-  top: 0; left: 30%;
+  touch-action: none;
+}
+
+.canvas-container {
+  width: 70%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 30%;
   display: block;
   position: absolute;
 }
 
 canvas {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  position: fixed; 
+  position: fixed;
   touch-action: none;
 
   display: block;
-  position: absolute; 
-  top: 0; left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .ui-root {
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 2;
-    pointer-events: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 // hide number input up down arrows
@@ -48,6 +55,89 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.video-loader {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  flex-direction: column;
+  /* Align text and progress bar vertically */
+}
+
+.video-loader video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+}
+
+.loading-text {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: medium;
+  font-family: "Poppins", sans-serif;
+  color: #fff;
+  text-align: center;
+}
+
+.progress-bar {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25%;
+  height: 12px;
+  /* Make the progress bar thicker */
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  /* Outline */
+  border-radius: 12px;
+  /* Rounded edges */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background: #fff;
+  /* Fill color */
+  border-radius: 10px;
+  /* Keep slightly less than the container for the gap */
+  width: 0%;
+  /* Initial width */
+  margin: 2px;
+  /* Create a gap between the fill and the outline */
+  transition: width 0.3s ease-in-out;
+}
+
+/* Media Query for Mobile Devices */
+@media (max-width: 768px) {
+  .loading-text {
+    font-size: 1.2rem;
+    /* Smaller font size for mobile */
+    bottom: 18%;
+    /* Adjust position for better alignment */
+  }
+
+  .progress-bar {
+    width: 50%;
+    /* Wider progress bar for mobile */
+    bottom: 12%;
+    /* Adjust position for better alignment */
+  }
 }
