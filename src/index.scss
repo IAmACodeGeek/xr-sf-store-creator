@@ -60,6 +60,10 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+input {
+  border: none !important;
+}
+
 .video-loader {
   position: relative;
   width: 100%;

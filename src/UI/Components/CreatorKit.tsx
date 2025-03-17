@@ -10,6 +10,7 @@ import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
 import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
+import { div } from "three/src/nodes/TSL.js";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -400,39 +401,66 @@ export const CreatorKit = () => {
       }, [type, axis]);
 
       return (
-        <input
-          autoFocus={autoFocus}
-          type="number"
-          className="ParameterInput"
-          defaultValue={defaultValue}
+        <div
           style={{
             height: "40px", padding: "5px", boxSizing: "border-box",
-            fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-            background: "transparent", color: "white",
-            border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
+            border: "2px solid #41cbff", borderRadius: 0,
+            display: "flex", justifyContent: "space-between", alignItems: "center"
           }}
-          onLoad={(loadEvent) => {
-            console.log('load');
-            if(!threeParamsEntry.current) return;
-            const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
-            if(savedThreeParamsEntry[0] === type){
-              if(type !== 'SCALE' && axis === savedThreeParamsEntry[1]){
-                (loadEvent.target as HTMLInputElement).focus();
+        >
+          <Button
+            style={{
+              height: "34px", minWidth: "34px", width: "34px", padding: 0,
+              fontSize: "24px", fontWeight: "bold", color: "white"
+            }}
+          >
+            -
+          </Button>
+          <input
+            autoFocus={autoFocus}
+            type="number"
+            className="ParameterInput"
+            defaultValue={defaultValue}
+            style={{
+              width: "80%",
+              fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
+              background: "transparent", color: "white",
+              appearance: "none",
+              textAlign: "center",
+              border: "none",
+              outline: "none"
+            }}
+            onLoad={(loadEvent) => {
+              console.log('load');
+              if(!threeParamsEntry.current) return;
+              const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
+              if(savedThreeParamsEntry[0] === type){
+                if(type !== 'SCALE' && axis === savedThreeParamsEntry[1]){
+                  (loadEvent.target as HTMLInputElement).focus();
+                }
+                else if(type === 'SCALE'){
+                  (loadEvent.target as HTMLInputElement).focus();
+                }
               }
-              else if(type === 'SCALE'){
-                (loadEvent.target as HTMLInputElement).focus();
-              }
-            }
-          }}
-          onFocus={(e) => {
-            e.target.style.outline = 'none';
-            e.target.style.border = '2px solid #41cbff';
-            threeParamsEntry.current = `${type} ${axis}`;
-          }}
-          onChange={(event) => {
-            setValue(type, Math.round(Number(event.target.value) * 1000) / 1000, axis);
-          }}
-        />
+            }}
+            onFocus={(e) => {
+              e.target.style.outline = 'none';
+              e.target.style.border = '2px solid #41cbff';
+              threeParamsEntry.current = `${type} ${axis}`;
+            }}
+            onChange={(event) => {
+              setValue(type, Math.round(Number(event.target.value) * 1000) / 1000, axis);
+            }}
+          />
+          <Button
+            style={{
+              height: "34px", minWidth: "34px", width: "34px", padding: 0,
+              fontSize: "22px", fontWeight: "bold", color: "white"
+            }}
+          >
+            +
+          </Button>
+        </div>
       );
     }
 
