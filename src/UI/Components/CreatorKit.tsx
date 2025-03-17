@@ -1421,13 +1421,7 @@ export const CreatorKit = () => {
             },
           }).then(async (response) => {
             if(response.isConfirmed){
-              try{
-                const cnameResponse = await CNAMERecordService.createCNAMERecord(brandData.brand_name);
-                console.log(cnameResponse);
-                
-                const netlifyResponse = await NetlifyDomainAliasService.createDomainAlias(brandData.brand_name);
-                console.log(netlifyResponse);
-                
+              try{                
                 const envResponse = await EnvStoreService.storeEnvData(
                   brandData.brand_name,
                   Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
@@ -1436,8 +1430,8 @@ export const CreatorKit = () => {
                 console.log(envResponse);
                 
                 Swal.fire({
-                  title: "XR Store Created",
-                  text: "Your store has been created successfully!",
+                  title: "XR Store Updated",
+                  text: "Your store has been updated successfully!",
                   html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
                   icon: "success",
                   allowOutsideClick: false,
