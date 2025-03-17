@@ -58,7 +58,7 @@ function CanvasWrapper() {
           setProducts(response);
 
           const newEnvProducts: { [id: number]: EnvProduct } = {};
-          for (let product of response) {
+          for (const product of response) {
             newEnvProducts[product.id] = {
               id: product.id,
               type: "PHOTO",
@@ -85,7 +85,7 @@ function CanvasWrapper() {
         if (brandData && !envItemsLoading && !envItemsLoaded){
           const response = await AssetService.importAssetFiles(brandData.brand_name);
           const newEnvAssets: { [id: string]: EnvAsset } = {};
-          for (let asset of Object.values(response)) {
+          for (const asset of Object.values(response)) {
             newEnvAssets[asset.id] = {
               ...asset,
               isEnvironmentAsset: false
@@ -112,24 +112,29 @@ function CanvasWrapper() {
           await EnvStoreService.getEnvData(brandData.brand_name).then((response) => {
 
             const newEnvProducts: { [id: number]: EnvProduct } = {};
-            for (let envProduct of Object.values(response.envProducts)) {
+            for (const envProduct of Object.values(response.envProducts)) {
               newEnvProducts[envProduct.id] = { ...envProduct, isEnvironmentProduct: true };
               if (envProduct.type === "MODEL_3D" && envProduct.modelIndex !== undefined) {
                 useGLTF.preload(products.find((product) => product.id === envProduct.id)?.models[envProduct.modelIndex].sources?.[0].url || '');
               }
+              if(newEnvProducts[envProduct.id].placeHolderId === -1){
+                newEnvProducts[envProduct.id].placeHolderId = undefined;
+              }
             }
 
             const newEnvAssets: { [id: string]: EnvAsset } = {};
-            for (let envAsset of Object.values(response.envAssets)) {
+            for (const envAsset of Object.values(response.envAssets)) {
               newEnvAssets[envAsset.id] = { ...envAsset, isEnvironmentAsset: true };
-              useGLTF.preload(envAsset.src);
+
+              if(newEnvAssets[envAsset.id].placeHolderId === -1){
+                newEnvAssets[envAsset.id].placeHolderId = undefined;
+              }
             }
 
             console.log("Env Products: ", response.envProducts);
             console.log("Env Assets: ", response.envAssets);
 
             async function setResults() {
-              await new Promise(resolve => setTimeout(resolve, 10000));
               setEnvProducts(newEnvProducts);
               setEnvAssets(newEnvAssets);
             }

@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, Typography } from "@mui/material";
 import { EnvProduct, useComponentStore, useEnvProductStore, useToolStore, useEnvAssetStore, EnvAsset, useBrandStore } from "../../stores/ZustandStores";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ModelViewer } from "@shopify/hydrogen-react";
 import Product from "@/Types/Product";
 import Swal from "sweetalert2";
@@ -10,8 +10,6 @@ import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
 import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
-import CNAMERecordService from "@/api/cnameRecordService";
-import NetlifyDomainAliasService from "@/api/netlifyDomainAliasService";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -21,11 +19,13 @@ export const CreatorKit = () => {
   const {brandData} = useBrandStore();
 
   const [ entityType, setEntityType ] = useState<"PRODUCT" | "ASSET">("PRODUCT");
-  const [mediaType, setMediaType] = useState<"2D" | "3D">("2D");
+  const [mediaType, setMediaType] = useState<"PHOTO" | "MODEL_3D">("PHOTO");
   const [paramsType, setParamsType] = useState<"CUSTOM" | "PLACEHOLDER">("CUSTOM");
 
   const [envProduct, setEnvProduct] = useState<EnvProduct | undefined>(undefined); 
   const [envAsset, setEnvAsset] = useState<EnvAsset | undefined>(undefined);
+
+  const threeParamsEntry = useRef<null | string>(null);
 
   useEffect(() => {
     if(entityType === "PRODUCT" && activeProductId !== null) {
@@ -122,7 +122,7 @@ export const CreatorKit = () => {
       if(!product) return;
       if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
         setToolType("MEDIA");
-        setMediaType("2D");
+        setMediaType("PHOTO");
         setActiveProductId(product.id);
         // Preload its models
         product.models.forEach((model) => {
@@ -256,7 +256,7 @@ export const CreatorKit = () => {
     useEffect(() => {
       const handleEnterEvent = (event: Event) => {
         if((event as KeyboardEvent).key === "Enter" && document.activeElement){
-          (document.activeElement as HTMLInputElement).blur()
+          (document.activeElement as HTMLInputElement).blur();
         }
       };
 
@@ -378,6 +378,64 @@ export const CreatorKit = () => {
       }
     };
 
+    interface ParameterInputProps {
+      type: "POSITION" | "ROTATION" | "SCALE";
+      defaultValue: number;
+      axis?: string;
+    }
+    const ParameterInput = ({type, defaultValue, axis}: ParameterInputProps) => {
+      const autoFocus = useMemo(() => {
+        if(!threeParamsEntry.current) return false;
+        const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
+        if(savedThreeParamsEntry[0] === type){
+          if(type !== 'SCALE' && axis === savedThreeParamsEntry[1]){
+            return true;
+          }
+          else if(type === 'SCALE'){
+            return true;
+          }
+        }
+
+        return; false;
+      }, [type, axis]);
+
+      return (
+        <input
+          autoFocus={autoFocus}
+          type="number"
+          className="ParameterInput"
+          defaultValue={defaultValue}
+          style={{
+            height: "40px", padding: "5px", boxSizing: "border-box",
+            fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
+            background: "transparent", color: "white",
+            border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
+          }}
+          onLoad={(loadEvent) => {
+            console.log('load');
+            if(!threeParamsEntry.current) return;
+            const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
+            if(savedThreeParamsEntry[0] === type){
+              if(type !== 'SCALE' && axis === savedThreeParamsEntry[1]){
+                (loadEvent.target as HTMLInputElement).focus();
+              }
+              else if(type === 'SCALE'){
+                (loadEvent.target as HTMLInputElement).focus();
+              }
+            }
+          }}
+          onFocus={(e) => {
+            e.target.style.outline = 'none';
+            e.target.style.border = '2px solid #41cbff';
+            threeParamsEntry.current = `${type} ${axis}`;
+          }}
+          onChange={(event) => {
+            setValue(type, Math.round(Number(event.target.value) * 1000) / 1000, axis);
+          }}
+        />
+      );
+    }
+
     const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
       return (
         <Box
@@ -396,21 +454,7 @@ export const CreatorKit = () => {
           >
             {axis} :
           </Typography>
-          <input type="number"
-            className="ParameterInput"
-            defaultValue={defaultValue}
-            style={{
-              height: "40px", padding: "5px", boxSizing: "border-box",
-              fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
-              background: "transparent", color: "white",
-              border: "2px solid #41cbff", borderRadius: 0, appearance: "none",
-            }}
-            onFocus={(e) => {
-              e.target.style.outline = 'none';
-              e.target.style.border = '2px solid #41cbff';
-            }}
-            onBlur={(e) => {setValue(type, Math.round(Number(e.target.value) * 1000) / 1000, axis)}}
-          />
+          <ParameterInput type={type} defaultValue={defaultValue} axis={axis}/>
         </Box>
       );
     };
@@ -692,8 +736,9 @@ export const CreatorKit = () => {
                   }}
                   onClick={() => {
                     if(envProducts[product.id]?.isEnvironmentProduct){
+                      setMediaType(envProducts[product.id]?.type || 'PHOTO');
                       if(product.id === activeProductId){
-                        if(toolType === "3DPARAMS"){
+                        if(toolType !== "MEDIA"){
                           setToolType("MEDIA");
                         }
                         else{
@@ -720,9 +765,10 @@ export const CreatorKit = () => {
                     }
                   }}
                   onClick={() => {
-                    if(envProducts[product.id]?.isEnvironmentProduct){
+                    if(envProducts[product.id] && envProducts[product.id].isEnvironmentProduct){
+                      setParamsType(envProducts[product.id].placeHolderId !== undefined ? 'PLACEHOLDER' : 'CUSTOM');
                       if(product.id === activeProductId){
-                        if(toolType === "MEDIA"){
+                        if(toolType !== "3DPARAMS"){
                           setToolType("3DPARAMS");
                         }
                         else{
@@ -776,15 +822,15 @@ export const CreatorKit = () => {
                 borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                 fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
                 textTransform: "none",
-                color: mediaType === "2D" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "transparent",
+                color: mediaType === "PHOTO" ? "white" : "rgb(77, 177, 255)",
+                backgroundColor: mediaType === "PHOTO" ? "rgb(77, 177, 255)" : "transparent",
                 "&:hover": {
-                  backgroundColor: mediaType === "2D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+                  backgroundColor: mediaType === "PHOTO" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
                   color: "white"
                 }
               }}
               onClick={() => {
-                if(mediaType !== "2D") setMediaType("2D");
+                if(mediaType !== "PHOTO") setMediaType("PHOTO");
               }}
               className="2DButton"
             >
@@ -797,15 +843,15 @@ export const CreatorKit = () => {
                 borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                 fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
                 textTransform: "none",
-                color: mediaType === "3D" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "transparent",
+                color: mediaType === "MODEL_3D" ? "white" : "rgb(77, 177, 255)",
+                backgroundColor: mediaType === "MODEL_3D" ? "rgb(77, 177, 255)" : "transparent",
                 "&:hover": {
-                  backgroundColor: mediaType === "3D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+                  backgroundColor: mediaType === "MODEL_3D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
                   color: "white"
                 }
               }}
               onClick={() => {
-                if(mediaType !== "3D") setMediaType("3D");
+                if(mediaType !== "MODEL_3D") setMediaType("MODEL_3D");
               }}
               className="3DButton"
             >
@@ -848,7 +894,7 @@ export const CreatorKit = () => {
               }}
               className="MediaItems"
             >
-              {mediaType === "2D" &&
+              {mediaType === "PHOTO" &&
                 product?.images.map((image, index) => {
                   return (
                     <Box
@@ -882,7 +928,7 @@ export const CreatorKit = () => {
                   );
                 })
               }
-              {mediaType === "3D" &&
+              {mediaType === "MODEL_3D" &&
                 product?.models.map((model, index) => {
                   const modelData = {
                     id: model.id,
@@ -1024,6 +1070,7 @@ export const CreatorKit = () => {
               }
             }}
             onClick={() => {
+              setMediaType(envProducts[product.id]?.type || 'PHOTO');
               if(product.id === activeProductId && toolType !== "MEDIA"){
                 setToolType("MEDIA");
               }
@@ -1042,6 +1089,7 @@ export const CreatorKit = () => {
             }}
             onClick={() => {
               if(envProduct?.isEnvironmentProduct){
+                setParamsType(envProducts[product.id].placeHolderId !== undefined ? 'PLACEHOLDER' : 'CUSTOM');
                 if(product.id === activeProductId && toolType !== "3DPARAMS"){
                   if((envProduct.imageIndex !== undefined) || (envProduct.modelIndex !== undefined)){
                     setToolType("3DPARAMS");
@@ -1318,7 +1366,6 @@ export const CreatorKit = () => {
           }}
           className="AssetPane"
         >
-          <ParamsTypeButtons/>
           <ThreeParamsEditor/>
         </Box>
       );
@@ -1421,7 +1468,7 @@ export const CreatorKit = () => {
             },
           }).then(async (response) => {
             if(response.isConfirmed){
-              try{                
+              try{
                 const envResponse = await EnvStoreService.storeEnvData(
                   brandData.brand_name,
                   Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct),
