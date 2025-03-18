@@ -3,7 +3,40 @@ import CastleModel from "./environmentModel/Castle";
 import bigRoomPlaceHolderData from "./placeHolderData/BigRoom";
 import castlePlaceHolderData from "./placeHolderData/Castle";
 
-const environmentData = {
+import PlaceHolder from "./placeHolderData/PlaceHolder";
+
+interface EnvironmentData {
+  [environment_name: string]: {
+    environmentModel: any;
+    playerSpeed: number;
+    placeHolderData: PlaceHolder[];
+    initialGSAP: {
+      start: {
+        position: [number, number, number];
+        rotation: [number, number, number];
+        duration: number;
+      };
+      update: {
+        position: [number, number, number];
+        rotation: [number, number, number];
+        duration: number;
+        ease?: string;
+      }[];
+    };
+    televisions: {
+      position: [number, number, number];
+      rotation: [number, number, number];
+      scale: number;
+    }[];
+    brandPosters: {
+      position: [number, number, number];
+      rotation: [number, number, number];
+      scale: number;
+    }[];
+  };
+}
+
+const environmentData: EnvironmentData = {
   "BIGROOM": {
     environmentModel: BigRoomModel,
     playerSpeed: 10,

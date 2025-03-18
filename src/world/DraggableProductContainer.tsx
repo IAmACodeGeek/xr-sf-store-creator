@@ -1,11 +1,11 @@
-import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore } from "@/stores/ZustandStores";
+import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore, useBrandStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef } from "react";
 import type Product from '../Types/Product';
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
-import placeHolderData from "../data/environment/placeHolderData/BigRoom";
+import environmentData from "../data/environment/EnvironmentData";
 
 interface DraggableProductContainerProps {
   placeHolderId?: number | undefined;
@@ -26,7 +26,14 @@ const DraggableProductContainer = ({
   const {camera} = useThree();
   const {toolType} = useToolStore();
   const {modifyEnvProduct, activeProductId} = useEnvProductStore();
+  const {brandData} = useBrandStore();
 
+  // Placeholder data
+  const placeHolderData = useMemo(() => {
+    if(!brandData) return null;
+    return environmentData[brandData.brand_name].placeHolderData;
+  }, [brandData]);
+  
   // Find the corresponding product for the envProduct
   const product = useMemo(() => {
     return products.find((p: Product) => p.id === envProduct.id);
@@ -75,26 +82,26 @@ const DraggableProductContainer = ({
 
   // Fetch position, rotation & scale from placeholder
   const position = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.position || envPosition;
     }
     return envPosition;
-  }, [placeHolderId, envPosition]);
+  }, [placeHolderId, envPosition, placeHolderData]);
   const rotation = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.rotation || envRotation;
     }
     return envRotation;
-  }, [placeHolderId, envRotation]);
+  }, [placeHolderId, envRotation, placeHolderData]);
   const scale = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.scale || envScale;
     }
     return envScale;
-  }, [placeHolderId, envScale]);
+  }, [placeHolderId, envScale, placeHolderData]);
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {

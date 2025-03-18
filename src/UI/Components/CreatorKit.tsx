@@ -6,11 +6,9 @@ import Product from "@/Types/Product";
 import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
 import { useGLTF } from "@react-three/drei";
-import placeHolderData from "@/data/environment/placeHolderData/BigRoom";
-import bigRoomPlaceHolderData from "@/data/environment/placeHolderData/BigRoom";
+import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
-import { div } from "three/src/nodes/TSL.js";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -25,6 +23,12 @@ export const CreatorKit = () => {
 
   const [envProduct, setEnvProduct] = useState<EnvProduct | undefined>(undefined); 
   const [envAsset, setEnvAsset] = useState<EnvAsset | undefined>(undefined);
+
+  // Load Placeholder data
+  const placeHolderData = useMemo(() => {
+    if(!brandData) return null;
+    return environmentData[brandData?.brand_name.toUpperCase()].placeHolderData;
+  }, [brandData]);
 
   const threeParamsEntry = useRef<null | string>(null);
 
@@ -193,11 +197,11 @@ export const CreatorKit = () => {
                 isEnvironmentProduct: true
               };
   
-              if(envProduct.placeHolderId !== undefined){
-                const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envProduct.placeHolderId);
-                newEnvProduct.position = placeHolderData?.position;
-                newEnvProduct.rotation = placeHolderData?.rotation;
-                newEnvProduct.scale = placeHolderData?.scale;
+              if(envProduct.placeHolderId !== undefined && placeHolderData){
+                const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === envProduct.placeHolderId);
+                newEnvProduct.position = placeHolder?.position;
+                newEnvProduct.rotation = placeHolder?.rotation;
+                newEnvProduct.scale = placeHolder?.scale;
               }
               modifyEnvProduct(envProduct.id, newEnvProduct);
             }
@@ -214,11 +218,11 @@ export const CreatorKit = () => {
                 placeHolderId: undefined
               };
   
-              if(envAsset.placeHolderId !== undefined){
-                const placeHolderData = bigRoomPlaceHolderData.find((data) => data.id === envAsset.placeHolderId);
-                newEnvAsset.position = placeHolderData?.position;
-                newEnvAsset.rotation = placeHolderData?.rotation;
-                newEnvAsset.scale = placeHolderData?.scale;
+              if(placeHolderData && envAsset.placeHolderId !== undefined){
+                const placeHolder = placeHolderData.find((data) => data.id === envAsset.placeHolderId);
+                newEnvAsset.position = placeHolder?.position;
+                newEnvAsset.rotation = placeHolder?.rotation;
+                newEnvAsset.scale = placeHolder?.scale;
               }
               modifyEnvAsset(envAsset.id, newEnvAsset);
             }
@@ -544,7 +548,7 @@ export const CreatorKit = () => {
           }}
           className="PlaceHolderEditor"
         >
-          {placeHolderData.map((placeHolderItem) => {
+          {placeHolderData && placeHolderData.map((placeHolderItem) => {
             const placeHolderEntity = 
               Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id) ||
               Object.values(envAssets).find((envAsset: EnvAsset) => envAsset.placeHolderId === placeHolderItem.id);

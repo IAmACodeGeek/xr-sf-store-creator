@@ -1,10 +1,10 @@
-import { EnvAsset, useToolStore, useEnvAssetStore } from "@/stores/ZustandStores";
+import { EnvAsset, useToolStore, useEnvAssetStore, useBrandStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef } from "react";
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
-import placeHolderData from "../data/environment/placeHolderData/BigRoom";
+import environmentData from "../data/environment/EnvironmentData";
 
 interface DraggableAssetContainerProps {
   placeHolderId?: number | undefined;
@@ -23,6 +23,13 @@ const DraggableAssetContainer = ({
 }: DraggableAssetContainerProps) => {
   const {camera} = useThree();
   const {modifyEnvAsset, activeAssetId} = useEnvAssetStore();
+  const {brandData} = useBrandStore();
+
+  // Placeholder data
+  const placeHolderData = useMemo(() => {
+    if(!brandData) return null;
+    return environmentData[brandData.brand_name].placeHolderData;
+  }, [brandData]);
 
   // To show axes when selected
   const isActive = useMemo(() => {
@@ -63,28 +70,28 @@ const DraggableAssetContainer = ({
 
   // Fetch position, rotation & scale from placeholder
   const position = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.position || envPosition;
     }
     return envPosition;
-  }, [placeHolderId, envPosition]);
+  }, [placeHolderId, envPosition, placeHolderData]);
 
   const rotation = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.rotation || envRotation;
     }
     return envRotation;
-  }, [placeHolderId, envRotation]);
+  }, [placeHolderId, envRotation, placeHolderData]);
 
   const scale = useMemo(() => {
-    if(placeHolderId !== undefined){
+    if(placeHolderData && placeHolderId !== undefined){
       const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
       return placeHolder?.scale || envScale;
     }
     return envScale;
-  }, [placeHolderId, envScale]);
+  }, [placeHolderId, envScale, placeHolderData]);
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
@@ -228,7 +235,7 @@ const DraggableAssetContainer = ({
       console.error('Error Loading Asset Image: ', error);
       return null;
     }
-  }, [imageUrl]);
+  }, [imageUrl, texture]);
 
   const computedSizeForImage = useMemo(() => {
     if(!imageTexture) return null;
