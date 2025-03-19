@@ -11,7 +11,6 @@ import BrandService from "./api/brandService.js";
 import EnvStoreService
   from "./api/envStoreService.js";
 import { AssetService } from "./api/assetService.js";
-import { resolve } from "path";
 
 function CanvasWrapper() {
   // Load brand data
@@ -22,7 +21,7 @@ function CanvasWrapper() {
     const queryParams = new URLSearchParams(window.location.search);
     const brandName = queryParams.get('brandName');
     
-    if(brandStatus) return;
+    if(brandStatus !== null) return;
     
     async function fetchBrandDetails(){
       try{
