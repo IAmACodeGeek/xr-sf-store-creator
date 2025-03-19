@@ -125,7 +125,8 @@ export const CreatorKit = () => {
     if(entityType === "PRODUCT"){
       const product: Product | undefined = products.find((product) => product.id === parameters.productId);
       if(!product) return;
-      if(event.target.checked && (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined)){
+      const isProductFirstTime = (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined);
+      if(event.target.checked && isProductFirstTime){
         setToolType("MEDIA");
         setMediaType("PHOTO");
         setActiveProductId(product.id);
@@ -141,7 +142,8 @@ export const CreatorKit = () => {
   
       const envProduct: EnvProduct = {
         id: product.id,
-        isEnvironmentProduct: event.target.checked
+        isEnvironmentProduct: event.target.checked,
+        imageIndex: isProductFirstTime? 0 : undefined
       };
       modifyEnvProduct(product.id, envProduct);
     }
@@ -432,7 +434,13 @@ export const CreatorKit = () => {
               threeParamsEntry.current = `${type} ${axis}`;
             }}
             onChange={(event) => {
-              setValue(type, Math.round(Number(event.target.value) * 1000) / 1000, axis);
+              let prevValue = getValue(type, axis);
+              if(!prevValue) prevValue = 0;
+
+              // If the value has changed
+              const newValue = Math.round(Number(event.target.value) * 1000) / 1000;
+              if(prevValue !== newValue)
+                setValue(type, Math.round(Number(event.target.value) * 1000) / 1000, axis);
             }}
           />
           <Button

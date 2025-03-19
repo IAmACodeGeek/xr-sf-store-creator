@@ -6,7 +6,6 @@ import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 't
 import { useLoader, useThree } from "@react-three/fiber";
 
 interface DraggableAssetContainerProps {
-  placeHolderId?: number | undefined;
   envPosition?: [number, number, number];
   envRotation?: [number, number, number];
   envScale?: number;

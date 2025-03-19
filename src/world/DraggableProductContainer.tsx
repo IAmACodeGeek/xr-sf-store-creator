@@ -43,6 +43,51 @@ const DraggableProductContainer = ({
   const isActive = useMemo(() => {
     return activeProductId === envProduct.id && toolType === "3DPARAMS" && envProduct.placeHolderId === undefined;
   }, [activeProductId, envProduct.id, envProduct.placeHolderId, toolType]);
+
+  // Fetch position, rotation & scale from placeholder
+  const position = useMemo(() => {
+    if(placeHolderData && placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.position || envPosition;
+    }
+    return envPosition;
+  }, [placeHolderId, envPosition, placeHolderData]);
+
+  const rotation = useMemo(() => {
+    if(placeHolderData && placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.rotation || envRotation;
+    }
+    return envRotation;
+  }, [placeHolderId, envRotation, placeHolderData]);
+
+  const scale = useMemo(() => {
+    if(placeHolderData && placeHolderId !== undefined){
+      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
+      return placeHolder?.scale || envScale;
+    }
+    return envScale;
+  }, [placeHolderId, envScale, placeHolderData]);
+
+  // Convert rotation from degrees to radians
+  const computedRotation = useMemo(() => {
+    const rotArray = [0, 0, 0];
+    if(!rotation){
+      const direction = new Vector3(); camera.getWorldDirection(direction);
+      direction.y = 0;
+      const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
+      rotArray[1] = angle - (direction.z > 0 ? 180: 0);
+    }
+    else{
+      rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];
+    }
+    return new Euler(
+      rotArray[0] * Math.PI / 180,
+      rotArray[1] * Math.PI / 180,
+      rotArray[2] * Math.PI / 180,
+      'YZX'
+    );
+  }, [rotation, position]);
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
@@ -80,49 +125,6 @@ const DraggableProductContainer = ({
     return clonedScene;
   }, [scene]);
 
-  // Fetch position, rotation & scale from placeholder
-  const position = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.position || envPosition;
-    }
-    return envPosition;
-  }, [placeHolderId, envPosition, placeHolderData]);
-  const rotation = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.rotation || envRotation;
-    }
-    return envRotation;
-  }, [placeHolderId, envRotation, placeHolderData]);
-  const scale = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.scale || envScale;
-    }
-    return envScale;
-  }, [placeHolderId, envScale, placeHolderData]);
-
-  // Convert rotation from degrees to radians
-  const computedRotation = useMemo(() => {
-    const rotArray = [0, 0, 0];
-    if(!rotation){
-      const direction = new Vector3(); camera.getWorldDirection(direction);
-      direction.y = 0;
-      const angle = Math.atan(direction.x / direction.z) * 180 / Math.PI;
-      rotArray[1] = angle - (direction.z > 0 ? 180: 0);
-    }
-    else{
-      rotArray[0] = rotation[0]; rotArray[1] = rotation[1]; rotArray[2] = rotation[2];
-    }
-    return new Euler(
-      rotArray[0] * Math.PI / 180,
-      rotArray[1] * Math.PI / 180,
-      rotArray[2] * Math.PI / 180,
-      'YZX'
-    );
-  }, [rotation, position]);
-  
   // Manually compute scale such that object has unit height
   const computedScaleForModel = useMemo(() => {
     if(!scene) return null;
@@ -381,6 +383,12 @@ const DraggableProductContainer = ({
   useEffect(() => {
     handleObjectMove();
   }, [activeProductId]);
+
+  useEffect(() => {
+    if(activeProductId === envProduct.id){
+      console.log(envProduct);
+    }
+  }, [activeProductId, envProduct]);
 
   return (
     <RigidBody type="fixed">
