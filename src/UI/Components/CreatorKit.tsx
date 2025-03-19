@@ -415,19 +415,6 @@ export const CreatorKit = () => {
               border: "none",
               outline: "none"
             }}
-            onLoad={(loadEvent) => {
-              console.log('load');
-              if(!threeParamsEntry.current) return;
-              const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
-              if(savedThreeParamsEntry[0] === type){
-                if(type !== 'SCALE' && axis === savedThreeParamsEntry[1]){
-                  (loadEvent.target as HTMLInputElement).focus();
-                }
-                else if(type === 'SCALE'){
-                  (loadEvent.target as HTMLInputElement).focus();
-                }
-              }
-            }}
             onFocus={(e) => {
               e.target.style.outline = 'none';
               e.target.style.border = '2px solid #41cbff';

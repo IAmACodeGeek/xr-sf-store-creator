@@ -107,7 +107,6 @@ const DraggableProductContainer = ({
   const model = useMemo(() => {
     if (!modelUrl) return null;
     try {
-      console.log(modelUrl);
       // eslint-disable-next-line react-hooks/rules-of-hooks
       return useGLTF(modelUrl);
     } catch (error) {
@@ -383,12 +382,6 @@ const DraggableProductContainer = ({
   useEffect(() => {
     handleObjectMove();
   }, [activeProductId]);
-
-  useEffect(() => {
-    if(activeProductId === envProduct.id){
-      console.log(envProduct);
-    }
-  }, [activeProductId, envProduct]);
 
   return (
     <RigidBody type="fixed">
