@@ -370,6 +370,7 @@ export const CreatorKit = () => {
       axis?: string;
     }
     const ParameterInput = ({type, defaultValue, axis}: ParameterInputProps) => {
+      const inputRef = useRef<HTMLInputElement>(null);
       const autoFocus = useMemo(() => {
         if(!threeParamsEntry.current) return false;
         const savedThreeParamsEntry = threeParamsEntry.current.split(' ');
@@ -381,8 +382,7 @@ export const CreatorKit = () => {
             return true;
           }
         }
-
-        return; false;
+        return false;
       }, [type, axis]);
 
       return (
@@ -398,10 +398,21 @@ export const CreatorKit = () => {
               height: "34px", minWidth: "34px", width: "34px", padding: 0,
               fontSize: "24px", fontWeight: "bold", color: "white"
             }}
+            onClick={() => {
+              let value = Number((inputRef.current as HTMLInputElement).value);
+              if(type !== 'ROTATION'){
+                value -= 0.1;
+              }
+              else{
+                value -= 1;
+              }
+              setValue(type, Math.round(value * 1000) / 1000, axis);
+            }}
           >
             -
           </Button>
           <input
+            ref={inputRef}
             autoFocus={autoFocus}
             type="number"
             className="ParameterInput"
@@ -420,6 +431,9 @@ export const CreatorKit = () => {
               e.target.style.border = '2px solid #41cbff';
               threeParamsEntry.current = `${type} ${axis}`;
             }}
+            onBlur={() => {
+              threeParamsEntry.current = null;
+            }}
             onChange={(event) => {
               let prevValue = getValue(type, axis);
               if(!prevValue) prevValue = 0;
@@ -434,6 +448,16 @@ export const CreatorKit = () => {
             style={{
               height: "34px", minWidth: "34px", width: "34px", padding: 0,
               fontSize: "22px", fontWeight: "bold", color: "white"
+            }}
+            onClick={() => {
+              let value = Number((inputRef.current as HTMLInputElement).value);
+              if(type !== 'ROTATION'){
+                value += 0.1;
+              }
+              else{
+                value += 1;
+              }
+              setValue(type, Math.round(value * 1000) / 1000, axis);
             }}
           >
             +
