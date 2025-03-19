@@ -1,37 +1,52 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Canvas } from "@react-three/fiber";
-import { useGLTF, useProgress } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
-import Load from "@/UI/Components/Loader";
 import { ProductService } from "./api/shopifyAPIService";
 import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore, useBrandStore, useResourceFetchStore, EnvAsset } from "./stores/ZustandStores";
 import BrandService from "./api/brandService.js";
 import EnvStoreService
   from "./api/envStoreService.js";
 import { AssetService } from "./api/assetService.js";
+import { resolve } from "path";
+
 function CanvasWrapper() {
   // Load brand data
   const { brandData, setBrandData } = useBrandStore();
-  const [brandStatus, setBrandStatus] = useState<'LOADING' | 'VALID' | 'INVALID'>('LOADING');
+  const [brandStatus, setBrandStatus] = useState<'LOADING' | 'VALID' | 'INVALID' | null>(null);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const brandName = queryParams.get('brandName');
-    if (!brandName) return;
+    
+    if(brandStatus) return;
+    
+    async function fetchBrandDetails(){
+      try{
+        if (!brandName) return;
 
-    BrandService.fetchBrandData(brandName).then((response) => {
-      if (response.status && response.status === 404) {
-        setBrandStatus('INVALID');
-        return;
+        setBrandStatus('LOADING');
+        BrandService.fetchBrandData(brandName).then((response) => {
+          if (response.status && response.status === 404) {
+            setBrandStatus('INVALID');
+            return;
+          }
+
+          console.log(response);
+          setBrandStatus('VALID');
+          setBrandData(response);
+        });
       }
-      console.log(response);
-      setBrandStatus('VALID');
-      setBrandData(response);
-    });
-  }, [setBrandData]);
+      catch(error){
+        console.error('Brand Error: ', error);
+      }
+    }
+
+    fetchBrandDetails();
+  }, [setBrandData, brandStatus]);
 
   // Set the environment type
   const { setEnvironmentType } = useEnvironmentStore();
@@ -40,10 +55,10 @@ function CanvasWrapper() {
       setEnvironmentType(brandData.environment_name.toUpperCase());
   }, [brandStatus, brandData, setEnvironmentType]);
 
-  // Set products and assets
-  const { envAssets, setEnvAssets, modifyEnvAsset } = useEnvAssetStore();
+  // Load All resources
+  const { envAssets, setEnvAssets } = useEnvAssetStore();
   const { products, setProducts } = useComponentStore();
-  const { envProducts, setEnvProducts, modifyEnvProduct } = useEnvProductStore();
+  const { envProducts, setEnvProducts } = useEnvProductStore();
   const { productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useResourceFetchStore();
   const { envItemsLoaded, setEnvItemsLoaded, envItemsLoading, setEnvItemsLoading } = useResourceFetchStore();
 
@@ -125,10 +140,6 @@ function CanvasWrapper() {
             const newEnvAssets: { [id: string]: EnvAsset } = {};
             for (const envAsset of Object.values(response.envAssets)) {
               newEnvAssets[envAsset.id] = { ...envAsset, isEnvironmentAsset: true };
-
-              if(newEnvAssets[envAsset.id].placeHolderId === -1){
-                newEnvAssets[envAsset.id].placeHolderId = undefined;
-              }
             }
 
             console.log("Env Products: ", response.envProducts);
@@ -167,7 +178,8 @@ function CanvasWrapper() {
         await fetchProducts(); setProgress(myProgress > 32 ? myProgress : 32);
         await fetchAssets(); setProgress(myProgress > 58 ? myProgress : 58);
         await fetchEnvData(); setProgress(myProgress > 76 ? myProgress : 76);
-        await fetchModels(); setProgress(myProgress > 100 ? myProgress : 100);
+        await fetchModels(); setProgress(myProgress > 99 ? myProgress : 99);
+        await new Promise(() => {setTimeout(() => setProgress(100), 800)}); // Delay to show fully loaded progress bar
       }
     })();
     
@@ -193,13 +205,15 @@ function CanvasWrapper() {
           />
           {videoLoaded && (
             <>
-              <div className="loading-text">Your experience is loading!</div>
-              <div className="progress-bar">
-                <div
-                  className="progress-bar-inner"
-                  style={{ width: `${Math.min(myProgress, 100)}%` }}
-                />
-              </div>
+              <div className="loading-text">{brandStatus === 'INVALID'? 'Brand name does not exist': 'Your experience is loading!'}</div>
+              {brandStatus === 'VALID' && (
+                <div className="progress-bar">
+                  <div
+                    className="progress-bar-inner"
+                    style={{ width: `${Math.min(myProgress, 100)}%` }}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>

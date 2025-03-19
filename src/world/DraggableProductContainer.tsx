@@ -31,7 +31,7 @@ const DraggableProductContainer = ({
   // Placeholder data
   const placeHolderData = useMemo(() => {
     if(!brandData) return null;
-    return environmentData[brandData.brand_name].placeHolderData;
+    return environmentData[brandData.environment_name.toUpperCase()].placeHolderData;
   }, [brandData]);
   
   // Find the corresponding product for the envProduct

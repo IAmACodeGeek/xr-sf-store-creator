@@ -239,7 +239,6 @@ interface EnvAsset {
   id: string;
   type: "MODEL_3D" | "PHOTO";
   status: 'SUCCESS' | 'FAILURE';
-  placeHolderId?: number | undefined;
   position?: number[];
   rotation?: number[];
   scale?: number;

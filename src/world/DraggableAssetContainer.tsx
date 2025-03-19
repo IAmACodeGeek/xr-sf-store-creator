@@ -1,10 +1,9 @@
-import { EnvAsset, useToolStore, useEnvAssetStore, useBrandStore } from "@/stores/ZustandStores";
+import { EnvAsset, useEnvAssetStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef } from "react";
 import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
-import environmentData from "../data/environment/EnvironmentData";
 
 interface DraggableAssetContainerProps {
   placeHolderId?: number | undefined;
@@ -15,7 +14,6 @@ interface DraggableAssetContainerProps {
 }
 
 const DraggableAssetContainer = ({
-  placeHolderId = undefined,
   envPosition = undefined,
   envRotation = undefined,
   envScale = 1,
@@ -23,18 +21,11 @@ const DraggableAssetContainer = ({
 }: DraggableAssetContainerProps) => {
   const {camera} = useThree();
   const {modifyEnvAsset, activeAssetId} = useEnvAssetStore();
-  const {brandData} = useBrandStore();
-
-  // Placeholder data
-  const placeHolderData = useMemo(() => {
-    if(!brandData) return null;
-    return environmentData[brandData.brand_name].placeHolderData;
-  }, [brandData]);
 
   // To show axes when selected
   const isActive = useMemo(() => {
-    return activeAssetId === envAsset.id && envAsset.placeHolderId === undefined;
-  }, [activeAssetId, envAsset.id, envAsset.placeHolderId]);
+    return activeAssetId === envAsset.id;
+  }, [activeAssetId, envAsset.id]);
   
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {
@@ -68,30 +59,18 @@ const DraggableAssetContainer = ({
     return clonedScene;
   }, [scene]);
 
-  // Fetch position, rotation & scale from placeholder
+  // Get the position, rotation and scale
   const position = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.position || envPosition;
-    }
     return envPosition;
-  }, [placeHolderId, envPosition, placeHolderData]);
+  }, [envPosition]);
 
   const rotation = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.rotation || envRotation;
-    }
     return envRotation;
-  }, [placeHolderId, envRotation, placeHolderData]);
+  }, [envRotation]);
 
   const scale = useMemo(() => {
-    if(placeHolderData && placeHolderId !== undefined){
-      const placeHolder = placeHolderData.find((placeHolder) => placeHolder.id === placeHolderId);
-      return placeHolder?.scale || envScale;
-    }
     return envScale;
-  }, [placeHolderId, envScale, placeHolderData]);
+  }, [envScale]);
 
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
@@ -111,7 +90,7 @@ const DraggableAssetContainer = ({
       rotArray[2] * Math.PI / 180,
       'YZX'
     );
-  }, [rotation, position]);
+  }, [rotation, camera]);
   
   // Manually compute scale such that object has unit height
   const computedScaleForModel = useMemo(() => {

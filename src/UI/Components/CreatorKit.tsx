@@ -27,7 +27,7 @@ export const CreatorKit = () => {
   // Load Placeholder data
   const placeHolderData = useMemo(() => {
     if(!brandData) return null;
-    return environmentData[brandData?.brand_name.toUpperCase()].placeHolderData;
+    return environmentData[brandData?.environment_name.toUpperCase()].placeHolderData;
   }, [brandData]);
 
   const threeParamsEntry = useRef<null | string>(null);
@@ -204,27 +204,6 @@ export const CreatorKit = () => {
                 newEnvProduct.scale = placeHolder?.scale;
               }
               modifyEnvProduct(envProduct.id, newEnvProduct);
-            }
-            else if(entityType === "ASSET" && envAsset){
-              if(paramsType !== "CUSTOM") setParamsType("CUSTOM");
-              
-              const newEnvAsset: EnvAsset = {
-                id: envAsset.id,
-                name: envAsset.name,
-                type: envAsset.type,
-                src: envAsset.src,
-                isEnvironmentAsset: true,
-                status: envAsset.status,
-                placeHolderId: undefined
-              };
-  
-              if(placeHolderData && envAsset.placeHolderId !== undefined){
-                const placeHolder = placeHolderData.find((data) => data.id === envAsset.placeHolderId);
-                newEnvAsset.position = placeHolder?.position;
-                newEnvAsset.rotation = placeHolder?.rotation;
-                newEnvAsset.scale = placeHolder?.scale;
-              }
-              modifyEnvAsset(envAsset.id, newEnvAsset);
             }
           }}
           className="CustomButton"
@@ -549,10 +528,9 @@ export const CreatorKit = () => {
           className="PlaceHolderEditor"
         >
           {placeHolderData && placeHolderData.map((placeHolderItem) => {
-            const placeHolderEntity = 
-              Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id) ||
-              Object.values(envAssets).find((envAsset: EnvAsset) => envAsset.placeHolderId === placeHolderItem.id);
-            return (
+            const placeHolderEntity = Object.values(envProducts).find((envProduct: EnvProduct) => envProduct.placeHolderId === placeHolderItem.id);
+
+              return (
               <span 
                 key={placeHolderItem.id}
                 ref={el => placeHolderItemRefs.current[placeHolderItem.id] = el}
@@ -616,18 +594,6 @@ export const CreatorKit = () => {
                           placeHolderId: placeHolderItem.id
                         }
                         modifyEnvProduct(envProduct?.id, newEnvProduct);
-                      }
-                      else if(entityType == "ASSET" && envAsset){
-                        const newEnvAsset: EnvAsset = {
-                          id: envAsset.id,
-                          isEnvironmentAsset: true,
-                          type: envAsset.type,
-                          status: envAsset.status,
-                          src: envAsset.src,
-                          name: envAsset.name,
-                          placeHolderId: placeHolderItem.id
-                        };
-                        modifyEnvAsset(envAsset.id, newEnvAsset);
                       }
                     }}
                     className="UsePlaceHolderButton"
