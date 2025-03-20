@@ -9,6 +9,7 @@ import { useGLTF } from "@react-three/drei";
 import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
+import { request } from "http";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -30,7 +31,9 @@ export const CreatorKit = () => {
     return environmentData[brandData?.environment_name.toUpperCase()].placeHolderData;
   }, [brandData]);
 
+  // For component reload logic
   const threeParamsEntry = useRef<null | string>(null);
+  const threeParamsSlider = useRef<null | string>(null);
 
   useEffect(() => {
     if(entityType === "PRODUCT" && activeProductId !== null) {
@@ -286,7 +289,7 @@ export const CreatorKit = () => {
           return envAsset?.scale;
         }
       }
-      return null;
+      return undefined;
     };
 
     const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
@@ -388,9 +391,9 @@ export const CreatorKit = () => {
       return (
         <div
           style={{
-            height: "40px", padding: "5px", boxSizing: "border-box",
+            height: "40px", width: "85%", padding: "5px", boxSizing: "border-box",
             border: "2px solid #41cbff", borderRadius: 0,
-            display: "flex", justifyContent: "space-between", alignItems: "center"
+            display: "flex", justifyContent: "space-between", alignItems: "center",
           }}
         >
           <Button
@@ -418,7 +421,7 @@ export const CreatorKit = () => {
             className="ParameterInput"
             defaultValue={defaultValue}
             style={{
-              width: "80%",
+              width: "80px",
               fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
               background: "transparent", color: "white",
               appearance: "none",
@@ -467,15 +470,108 @@ export const CreatorKit = () => {
     }
 
     const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
+      const entryRef = useRef<HTMLDivElement>(null);
+      const mouseDown = useRef<boolean>(false);
+      const mouseX = useRef<number>();
+
+      useEffect(() => {
+        const handleMouseDown = (event: MouseEvent) => {
+          // Prevent activation if clicking inside an input field
+          if (
+            (event.target as HTMLElement).tagName === "INPUT" || 
+            (event.target as HTMLElement).tagName === "BUTTON"
+          ) return;
+
+          mouseDown.current = true;
+          mouseX.current = event.clientX;
+          document.body.classList.add('slider-active');
+          threeParamsSlider.current = type + ((type !== 'SCALE') ? ' ' + axis : '');
+        };
+
+        const handleMouseUp = (event: MouseEvent) => {
+          mouseDown.current = false;
+          document.body.classList.remove('slider-active');
+          threeParamsSlider.current = null;
+        }
+
+        const handleMouseMove = (event: MouseEvent) => {
+          if (!mouseDown.current || mouseX.current === undefined) return;
+
+          if (event.buttons === 0) {
+            handleMouseUp(event); // Force a mouse up if no mouse buttons are pressed
+            return;
+          }
+
+          if(threeParamsSlider.current){
+            const sliderValues = threeParamsSlider.current.split(' ');
+            if(type === sliderValues[0] && ((type === 'SCALE') || (axis === sliderValues[1]))){
+              const SENSITIVITY = 0.03;
+              const currentX = event.clientX;
+              const delta = (currentX - mouseX.current) * SENSITIVITY;
+            
+              if(delta > 1 || delta < -1){
+                const value = getValue(type, axis);
+                
+                if(value === undefined || value === null) return;
+                mouseX.current = currentX;
+                setValue(
+                  type, 
+                  Math.round(value + Math.round(delta) * (type !== 'ROTATION'? 0.1 : 1) * 1000) / 1000, 
+                  axis
+                );
+              } 
+            }
+          }
+        }
+
+        // Check if the sliding is continued
+        if(threeParamsSlider.current){
+          const sliderValues = threeParamsSlider.current.split(' ');
+          if(
+            (type === 'SCALE' && type === sliderValues[0]) || 
+            (type !== 'SCALE' && type === sliderValues[0] && axis === sliderValues[1])
+          ){
+            requestAnimationFrame(() => {
+              const event = new MouseEvent("mousedown", {
+                bubbles: true,
+                cancelable: true,
+                clientX: mouseX.current,
+                clientY: 100
+              });
+              entry.dispatchEvent(event);
+            });
+          }
+        }
+        
+        const entry = entryRef.current as HTMLDivElement;
+        entry.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("pointerup", handleMouseUp);
+        document.addEventListener("mouseleave", handleMouseUp);
+        
+        return () => {
+          entry.removeEventListener("mousedown", handleMouseDown);
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+          document.removeEventListener("pointerup", handleMouseUp);
+          document.removeEventListener("mouseleave", handleMouseUp);
+        };
+      }, []);
+      
       return (
         <Box
+          ref={entryRef}
           sx={{
-            display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start"
+            display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start",
+            width: "80%",
+            cursor: "col-resize"
           }}
           key={type+axis}
         >
           <Typography
             sx={{
+              minWidth: "30px",
               fontSize: "20px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
               color: "white",
               textAlign: "left",

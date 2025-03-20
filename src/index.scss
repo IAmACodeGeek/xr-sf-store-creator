@@ -15,6 +15,12 @@ body,
   touch-action: none;
 }
 
+body.slider-active,
+body.slider-active * {
+  cursor: col-resize !important;
+}
+
+
 .canvas-container {
   width: 70%;
   height: 100%;
