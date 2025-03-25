@@ -314,6 +314,16 @@ const useBrandStore = create<BrandStore>((set) => ({
   setBrandData: (data) => set({ brandData: data }),
 }));
 
+interface SliderMouseStore {
+  mouseDown: boolean;
+  setMouseDown: (mouseDown: boolean) => void;
+}
+
+const useSliderMouseStore = create<SliderMouseStore>((set) => ({
+  mouseDown: false,
+  setMouseDown: (mouseDown: boolean) => set({mouseDown: mouseDown}),
+}));
+
 export {
   useResourceFetchStore,
   useComponentStore,
@@ -325,6 +335,7 @@ export {
   useEnvAssetStore,
   useToolStore,
   useEnvironmentStore,
-  useBrandStore
+  useBrandStore,
+  useSliderMouseStore
 };  
 export type { EnvProduct, EnvAsset };

@@ -10,6 +10,7 @@ import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
 import { request } from "http";
+import { deltaTime } from "three/src/nodes/TSL.js";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -473,57 +474,83 @@ export const CreatorKit = () => {
       const entryRef = useRef<HTMLDivElement>(null);
       const mouseDown = useRef<boolean>(false);
       const mouseX = useRef<number>();
+      const lastValue = useRef<number>(defaultValue);
+      const accumulatedMovement = useRef<number>(0);
 
       useEffect(() => {
-        const handleMouseDown = (event: MouseEvent) => {
-          // Prevent activation if clicking inside an input field
-          if (
-            (event.target as HTMLElement).tagName === "INPUT" || 
-            (event.target as HTMLElement).tagName === "BUTTON"
-          ) return;
-
-          mouseDown.current = true;
-          mouseX.current = event.clientX;
-          document.body.classList.add('slider-active');
-          threeParamsSlider.current = type + ((type !== 'SCALE') ? ' ' + axis : '');
-        };
-
-        const handleMouseUp = (event: MouseEvent) => {
-          mouseDown.current = false;
-          document.body.classList.remove('slider-active');
-          threeParamsSlider.current = null;
-        }
-
         const handleMouseMove = (event: MouseEvent) => {
-          if (!mouseDown.current || mouseX.current === undefined) return;
-
+          if (!mouseDown.current) return;
+          
           if (event.buttons === 0) {
-            handleMouseUp(event); // Force a mouse up if no mouse buttons are pressed
+            mouseDown.current = false;
+            document.body.classList.remove('slider-active');
+            threeParamsSlider.current = null;
             return;
           }
 
           if(threeParamsSlider.current){
             const sliderValues = threeParamsSlider.current.split(' ');
             if(type === sliderValues[0] && ((type === 'SCALE') || (axis === sliderValues[1]))){
-              const SENSITIVITY = 0.03;
-              const currentX = event.clientX;
-              const delta = (currentX - mouseX.current) * SENSITIVITY;
-            
-              if(delta > 1 || delta < -1){
-                const value = getValue(type, axis);
+              const SENSITIVITY = 3;
+              
+              // Accumulate movement
+              accumulatedMovement.current += (event.movementX) * SENSITIVITY;
+              
+              // Check if we have enough accumulated movement
+              while(Math.abs(accumulatedMovement.current) >= 1){
+                const increment = Math.sign(accumulatedMovement.current);
                 
-                if(value === undefined || value === null) return;
-                mouseX.current = currentX;
-                setValue(
-                  type, 
-                  Math.round(value + Math.round(delta) * (type !== 'ROTATION'? 0.1 : 1) * 1000) / 1000, 
-                  axis
-                );
-              } 
+                // Calculate new value
+                const newValue = lastValue.current + increment * (type === 'ROTATION' ? 1 : 0.1);
+                
+                // Update last value
+                lastValue.current = Math.round(newValue * 1000) / 1000;
+                
+                // Call setValue
+                setValue(type, lastValue.current, axis);
+                
+                // Reduce accumulated movement
+                accumulatedMovement.current -= increment;
+              }
             }
           }
-        }
+        };
 
+        const handleMouseDown = (event: MouseEvent) => {
+          if (
+            (event.target as HTMLElement).tagName === "INPUT" || 
+            (event.target as HTMLElement).tagName === "BUTTON"
+          ) return;
+          
+          mouseX.current = event.clientX;
+          mouseDown.current = true;
+          document.body.classList.add('slider-active');
+          threeParamsSlider.current = type + ((type !== 'SCALE') ? ' ' + axis : '');
+          
+          // Reset accumulated movement
+          accumulatedMovement.current = 0;
+          
+          // Initialize lastValue with current value
+          const currentValue = getValue(type, axis);
+          if (currentValue !== undefined && currentValue !== null) {
+            lastValue.current = currentValue;
+          }
+        };
+
+        const handleMouseUp = (event: MouseEvent) => {
+          mouseDown.current = false;
+          document.body.classList.remove('slider-active');
+          threeParamsSlider.current = null;
+          accumulatedMovement.current = 0;
+        };
+
+        const entry = entryRef.current as HTMLDivElement;
+        entry.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("pointerup", handleMouseUp);
+        document.addEventListener("mouseleave", handleMouseUp);
+        
         // Check if the sliding is continued
         if(threeParamsSlider.current){
           const sliderValues = threeParamsSlider.current.split(' ');
@@ -542,14 +569,7 @@ export const CreatorKit = () => {
             });
           }
         }
-        
-        const entry = entryRef.current as HTMLDivElement;
-        entry.addEventListener("mousedown", handleMouseDown);
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-        document.addEventListener("pointerup", handleMouseUp);
-        document.addEventListener("mouseleave", handleMouseUp);
-        
+
         return () => {
           entry.removeEventListener("mousedown", handleMouseDown);
           document.removeEventListener("mousemove", handleMouseMove);
