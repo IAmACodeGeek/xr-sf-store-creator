@@ -71,7 +71,7 @@ export const CreatorKit = () => {
       <Box
         sx={{
           display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
-          width: "100%", height: "100px", gap: "25px",
+          width: "100%", height: "100px", minHeight: "100px", gap: "25px",
           padding: "30px", boxSizing: "border-box",
           backgroundColor: "rgb(15, 15, 15)"
         }}
@@ -828,6 +828,7 @@ export const CreatorKit = () => {
                   checked={envProducts[product.id]?.isEnvironmentProduct || false}
                   onChange={(event) => {handleCheckboxChange(event, {productId: product.id})}}
                   color={"primary"}
+                  className="CheckboxToggle"
                 />
                 <Box
                   component="img"
@@ -859,6 +860,7 @@ export const CreatorKit = () => {
                 <Box
                   component="img"
                   src="icons/Attach.svg"
+                  className="MediaAttachButton"
                   sx={{
                     width: "20px", height: "20px",
                     opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
@@ -888,6 +890,7 @@ export const CreatorKit = () => {
                 />
                 <Box
                   component="img"
+                  className="CubeParamsButton"
                   src="icons/Cube.svg"
                   sx={{
                     width: "30px", height: "30px",
