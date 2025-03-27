@@ -143,13 +143,14 @@ export const CreatorKit = () => {
         setActiveProductId(null);
         setToolType(null);
       }
-  
-      const envProduct: EnvProduct = {
+      const envProduct = Object.values(envProducts).find((envProduct) => envProduct.id === product.id);
+      
+      const newEnvProduct: EnvProduct = {
         id: product.id,
         isEnvironmentProduct: event.target.checked,
-        imageIndex: isProductFirstTime? 0 : undefined
+        imageIndex: isProductFirstTime? 0 : envProduct?.imageIndex
       };
-      modifyEnvProduct(product.id, envProduct);
+      modifyEnvProduct(product.id, newEnvProduct);
     }
     else if(entityType === "ASSET"){
       const envAsset = envAssets[parameters.assetId || -1];
