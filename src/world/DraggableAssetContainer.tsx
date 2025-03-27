@@ -385,7 +385,7 @@ const DraggableAssetContainer = ({
       >
         <PivotControls
           anchor={[0, 0, 0]}
-          scale={1.25 * scale}
+          scale={1.25 * (scale >= 1? scale : 1)}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
           onDragEnd={handleObjectMove}
