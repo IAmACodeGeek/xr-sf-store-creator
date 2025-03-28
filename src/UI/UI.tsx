@@ -79,29 +79,65 @@ const UI = () => {
           element: ".iconsContainer",
           popover: {
             title: "Navigation & Controls",
-            description: isMobile
-              ? "Use the virtual joystick to move around and interact with products"
-              : "Use WASD keys to navigate: W (up), A (left), S (down), D (right)",
+            description: "Use WASD keys to navigate: W (up), A (left), S (down), D (right)",
             side: "left",
             align: "start",
           },
         },
         {
+          element: '[alt="Search"]',
           popover: {
-            title: "Find products across the experience",
-            description: "Walk to these products to essentially buy or add them to cart, I'll drop you off for now!",
-          },
-          onHighlightStarted: () => {
-            shouldMoveCamera.current = true; 
-            setTourComplete(true);
+            title: "Find Products",
+            description: "Make your life easier by automatically searching for products in your XR Store.",
+            side: "bottom",
           },
         },
         {
           element: '[alt="Settings"]',
           popover: {
             title: "Settings",
-            description: "Manage your preferences, explore app features, and customize your experience.",
+            description: "Manage your preferences, explore app features, and contact our team.",
             side: "bottom",
+          },
+        },
+        {
+          element: '.CreatorKit',
+          popover: {
+            title: "Creator Kit",
+            description: "Build your store effortlessly. Auto-import products from Shopify and place assets in your environment with ease.",
+            side: "right",
+          },
+        },
+        {
+          element: '.CheckboxToggle',
+          popover: {
+            title: "Toggle Products",
+            description: "Quickly add or remove products from your environment with a single tap!",
+            side: "bottom",
+          },
+        },
+        {
+          element: '.MediaAttachButton',
+          popover: {
+            title: "Attach Media",
+            description: "Select an image or model to place in your environment!",
+            side: "bottom",
+          },
+        },
+        {
+          element: '.CubeParamsButton',
+          popover: {
+            title: "Adjust Product",
+            description: "Move, rotate or resize your product effortlessly!",
+            side: "bottom",
+          },
+        },
+        {
+          element: '.AssetButton',
+          popover: {
+            title: "Assets",
+            description: "Add your own images and models",
+            side: "right",
           },
         },
       ],
@@ -110,7 +146,7 @@ const UI = () => {
     return () => {
       document.head.removeChild(styleSheet);
     };
-  }, [isMobile]);
+  }, [setTourComplete]);
 
   useEffect(() => {
     if(isAudioPlaying)

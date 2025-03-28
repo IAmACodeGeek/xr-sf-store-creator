@@ -3,7 +3,7 @@ import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useEffect, useMemo, useRef } from "react";
 import type Product from '../Types/Product';
-import {Box3, Euler, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
+import {BackSide, Box3, Euler, FrontSide, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import environmentData from "../data/environment/EnvironmentData";
 
@@ -168,6 +168,7 @@ const DraggableProductContainer = ({
   // Set position and rotation
   const modelRef = useRef<Object3D>(null);
   const meshRef = useRef<Mesh>(null);
+  const backMeshRef = useRef<Mesh>(null);
   useEffect(() => {
     if(!modelRef.current || envProduct.type !== "MODEL_3D") return;
 
@@ -197,7 +198,7 @@ const DraggableProductContainer = ({
   }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, modelRef]);
 
   useEffect(() => {
-    if(!meshRef.current || envProduct.type !== "PHOTO") return;
+    if(!meshRef.current || !backMeshRef.current || envProduct.type !== "PHOTO") return;
 
     // Position
     const cameraPosition = new Vector3(); camera.getWorldPosition(cameraPosition);
@@ -212,6 +213,7 @@ const DraggableProductContainer = ({
       worldPosition.applyMatrix4(meshRef.current.parent.matrixWorld.invert());
     }
     meshRef.current.position.copy(worldPosition);
+    backMeshRef.current.position.copy(worldPosition);
 
     // Rotation
     const worldRotation = computedRotation;
@@ -226,8 +228,9 @@ const DraggableProductContainer = ({
       quaternion.multiplyQuaternions(parentQuaternion, quaternion);
     }
     meshRef.current.setRotationFromQuaternion(quaternion);
+    backMeshRef.current.setRotationFromQuaternion(quaternion);
 
-  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, meshRef]);
+  }, [position, computedPositionForModel, envProduct.type, computedRotation, camera, meshRef, backMeshRef]);
 
   const imageUrl = useMemo(() => {
     if((envProduct.imageIndex === undefined) || envProduct.type !== "PHOTO") return null;
@@ -391,7 +394,7 @@ const DraggableProductContainer = ({
       >
         <PivotControls
           anchor={[0, 0, 0]}
-          scale={1.25 * scale}
+          scale={1.25 * (scale >= 1? scale : 1)}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
           onDragEnd={handleObjectMove}
@@ -407,16 +410,29 @@ const DraggableProductContainer = ({
             />
           }
           {envProduct.type === "PHOTO" && computedSizeForImage &&
-            <mesh
-              rotation={computedRotation}
-              ref={meshRef}
-            >
-              <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
-              <meshBasicMaterial 
-                map={imageTexture}
-                transparent={true}
-              />
-            </mesh>
+            <>
+              <mesh
+                rotation={computedRotation}
+                ref={meshRef}
+              >
+                <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
+                <meshBasicMaterial 
+                  map={imageTexture}
+                  transparent={true}
+                  side={FrontSide}
+                />
+              </mesh>
+              <mesh
+                ref={backMeshRef}
+                rotation={computedRotation}
+              >
+                <planeGeometry args={[computedSizeForImage[0], computedSizeForImage[1]]} />
+                <meshBasicMaterial 
+                  color={0xffffff}
+                  side={BackSide}
+                />
+              </mesh>
+            </>
           }
         </PivotControls>
       </group>

@@ -9,6 +9,8 @@ import { useGLTF } from "@react-three/drei";
 import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
+import { request } from "http";
+import { deltaTime } from "three/src/nodes/TSL.js";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -30,7 +32,9 @@ export const CreatorKit = () => {
     return environmentData[brandData?.environment_name.toUpperCase()].placeHolderData;
   }, [brandData]);
 
+  // For component reload logic
   const threeParamsEntry = useRef<null | string>(null);
+  const threeParamsSlider = useRef<null | string>(null);
 
   useEffect(() => {
     if(entityType === "PRODUCT" && activeProductId !== null) {
@@ -67,7 +71,7 @@ export const CreatorKit = () => {
       <Box
         sx={{
           display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
-          width: "100%", height: "100px", gap: "25px",
+          width: "100%", height: "100px", minHeight: "100px", gap: "25px",
           padding: "30px", boxSizing: "border-box",
           backgroundColor: "rgb(15, 15, 15)"
         }}
@@ -139,13 +143,14 @@ export const CreatorKit = () => {
         setActiveProductId(null);
         setToolType(null);
       }
-  
-      const envProduct: EnvProduct = {
+      const envProduct = Object.values(envProducts).find((envProduct) => envProduct.id === product.id);
+      
+      const newEnvProduct: EnvProduct = {
         id: product.id,
         isEnvironmentProduct: event.target.checked,
-        imageIndex: isProductFirstTime? 0 : undefined
+        imageIndex: isProductFirstTime? 0 : envProduct?.imageIndex
       };
-      modifyEnvProduct(product.id, envProduct);
+      modifyEnvProduct(product.id, newEnvProduct);
     }
     else if(entityType === "ASSET"){
       const envAsset = envAssets[parameters.assetId || -1];
@@ -286,7 +291,7 @@ export const CreatorKit = () => {
           return envAsset?.scale;
         }
       }
-      return null;
+      return undefined;
     };
 
     const setValue = (parameter: "POSITION" | "ROTATION" | "SCALE", value: number, axis?: string) => {
@@ -388,9 +393,9 @@ export const CreatorKit = () => {
       return (
         <div
           style={{
-            height: "40px", padding: "5px", boxSizing: "border-box",
+            height: "40px", width: "85%", padding: "5px", boxSizing: "border-box",
             border: "2px solid #41cbff", borderRadius: 0,
-            display: "flex", justifyContent: "space-between", alignItems: "center"
+            display: "flex", justifyContent: "space-between", alignItems: "center",
           }}
         >
           <Button
@@ -418,7 +423,7 @@ export const CreatorKit = () => {
             className="ParameterInput"
             defaultValue={defaultValue}
             style={{
-              width: "80%",
+              width: "80px",
               fontSize: "18px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
               background: "transparent", color: "white",
               appearance: "none",
@@ -467,15 +472,127 @@ export const CreatorKit = () => {
     }
 
     const ParameterEntry = (type: "POSITION" | "ROTATION" | "SCALE", defaultValue: number, axis?: string) => {
+      const entryRef = useRef<HTMLDivElement>(null);
+      const mouseDown = useRef<boolean>(false);
+      const mouseX = useRef<number>();
+      const lastValue = useRef<number>(defaultValue);
+      const accumulatedMovement = useRef<number>(0);
+
+      useEffect(() => {
+        const handleMouseMove = (event: MouseEvent) => {
+          if (!mouseDown.current) return;
+          
+          if (event.buttons === 0) {
+            mouseDown.current = false;
+            document.body.classList.remove('slider-active');
+            threeParamsSlider.current = null;
+            return;
+          }
+
+          if(threeParamsSlider.current){
+            const sliderValues = threeParamsSlider.current.split(' ');
+            if(type === sliderValues[0] && ((type === 'SCALE') || (axis === sliderValues[1]))){
+              const SENSITIVITY = 3;
+              
+              // Accumulate movement
+              accumulatedMovement.current += (event.movementX) * SENSITIVITY;
+              
+              // Check if we have enough accumulated movement
+              while(Math.abs(accumulatedMovement.current) >= 1){
+                const increment = Math.sign(accumulatedMovement.current);
+                
+                // Calculate new value
+                const newValue = lastValue.current + increment * (type === 'ROTATION' ? 1 : 0.1);
+                
+                // Update last value
+                lastValue.current = Math.round(newValue * 1000) / 1000;
+                
+                // Call setValue
+                setValue(type, lastValue.current, axis);
+                
+                // Reduce accumulated movement
+                accumulatedMovement.current -= increment;
+              }
+            }
+          }
+        };
+
+        const handleMouseDown = (event: MouseEvent) => {
+          if (
+            (event.target as HTMLElement).tagName === "INPUT" || 
+            (event.target as HTMLElement).tagName === "BUTTON"
+          ) return;
+          
+          mouseX.current = event.clientX;
+          mouseDown.current = true;
+          document.body.classList.add('slider-active');
+          threeParamsSlider.current = type + ((type !== 'SCALE') ? ' ' + axis : '');
+          
+          // Reset accumulated movement
+          accumulatedMovement.current = 0;
+          
+          // Initialize lastValue with current value
+          const currentValue = getValue(type, axis);
+          if (currentValue !== undefined && currentValue !== null) {
+            lastValue.current = currentValue;
+          }
+        };
+
+        const handleMouseUp = (event: MouseEvent) => {
+          mouseDown.current = false;
+          document.body.classList.remove('slider-active');
+          threeParamsSlider.current = null;
+          accumulatedMovement.current = 0;
+        };
+
+        const entry = entryRef.current as HTMLDivElement;
+        entry.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("pointerup", handleMouseUp);
+        document.addEventListener("mouseleave", handleMouseUp);
+        
+        // Check if the sliding is continued
+        if(threeParamsSlider.current){
+          const sliderValues = threeParamsSlider.current.split(' ');
+          if(
+            (type === 'SCALE' && type === sliderValues[0]) || 
+            (type !== 'SCALE' && type === sliderValues[0] && axis === sliderValues[1])
+          ){
+            requestAnimationFrame(() => {
+              const event = new MouseEvent("mousedown", {
+                bubbles: true,
+                cancelable: true,
+                clientX: mouseX.current,
+                clientY: 100
+              });
+              entry.dispatchEvent(event);
+            });
+          }
+        }
+
+        return () => {
+          entry.removeEventListener("mousedown", handleMouseDown);
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+          document.removeEventListener("pointerup", handleMouseUp);
+          document.removeEventListener("mouseleave", handleMouseUp);
+        };
+      }, []);
+      
       return (
         <Box
+          ref={entryRef}
           sx={{
-            display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start"
+            display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "start",
+            width: "80%",
+            cursor: "col-resize"
           }}
           key={type+axis}
         >
           <Typography
             sx={{
+              minWidth: "30px",
               fontSize: "20px", fontFamily: "'Poppins', sans-serif", fontWeight: "normal",
               color: "white",
               textAlign: "left",
@@ -712,6 +829,7 @@ export const CreatorKit = () => {
                   checked={envProducts[product.id]?.isEnvironmentProduct || false}
                   onChange={(event) => {handleCheckboxChange(event, {productId: product.id})}}
                   color={"primary"}
+                  className="CheckboxToggle"
                 />
                 <Box
                   component="img"
@@ -743,6 +861,7 @@ export const CreatorKit = () => {
                 <Box
                   component="img"
                   src="icons/Attach.svg"
+                  className="MediaAttachButton"
                   sx={{
                     width: "20px", height: "20px",
                     opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
@@ -772,6 +891,7 @@ export const CreatorKit = () => {
                 />
                 <Box
                   component="img"
+                  className="CubeParamsButton"
                   src="icons/Cube.svg"
                   sx={{
                     width: "30px", height: "30px",
