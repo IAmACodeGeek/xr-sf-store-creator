@@ -1,7 +1,10 @@
 import BigRoomModel from "./environmentModel/BigRoom";
 import CastleModel from "./environmentModel/Castle";
+import SingleRoomModel from "./environmentModel/SingleRoom";
+
 import bigRoomPlaceHolderData from "./placeHolderData/BigRoom";
 import castlePlaceHolderData from "./placeHolderData/Castle";
+import singleRoomPlaceHolderData from "./placeHolderData/SingleRoom";
 
 import PlaceHolder from "./placeHolderData/PlaceHolder";
 
@@ -9,6 +12,7 @@ interface EnvironmentData {
   [environment_name: string]: {
     environmentModel: any;
     playerSpeed: number;
+    playerHeight: number;
     placeHolderData: PlaceHolder[];
     initialGSAP: {
       start: {
@@ -40,6 +44,7 @@ const environmentData: EnvironmentData = {
   "BIGROOM": {
     environmentModel: BigRoomModel,
     playerSpeed: 10,
+    playerHeight: 2,
     placeHolderData: bigRoomPlaceHolderData,
     initialGSAP: {
       start: {
@@ -85,6 +90,7 @@ const environmentData: EnvironmentData = {
   "CASTLE": {
     environmentModel: CastleModel,
     playerSpeed: 17,
+    playerHeight: 2,
     placeHolderData: castlePlaceHolderData,
     initialGSAP: {
       start: {
@@ -121,7 +127,51 @@ const environmentData: EnvironmentData = {
         scale: 5
       }
     ]
-  }
+  },
+  "SINGLEROOM": {
+    environmentModel: SingleRoomModel,
+    playerSpeed: 20,
+    playerHeight: 2,
+    placeHolderData: singleRoomPlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [40, 4, 0],
+        rotation: [0, 90, 0],
+        duration: 0
+      },
+      update: [
+        {
+          position: [40, 4, 0],
+          rotation: [0, 270, 0],
+          duration: 5
+        },
+        {
+          position: [20, 3.2, 0],
+          rotation: [0, 270, 0],
+          duration: 2
+        },
+      ]
+    },
+    televisions: [
+      {
+        position: [47.8, 4.5, 0],
+        rotation: [0, 180, 0],
+        scale: 0.37
+      }
+    ],
+    brandPosters: [
+      {
+        position: [-5, 3.2, 13.35],
+        rotation: [0, 90, 0],
+        scale: 4
+      },
+      {
+        position: [-5, 3.2, -13.35],
+        rotation: [0, 90, 0],
+        scale: 4
+      }
+    ]
+  },
 };
 
 export default environmentData;
