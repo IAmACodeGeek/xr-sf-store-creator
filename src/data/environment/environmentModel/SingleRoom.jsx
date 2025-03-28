@@ -8,7 +8,7 @@ const SingleRoomModel = () => {
   const memoizedMaterials = useMemo(() => materials, [materials]);
   
   return (
-    <group rotation={[Math.PI / 2, 0, 0]} scale={0.05}>
+    <group position={[1, 0, 0]} rotation={[Math.PI / 2, 0, 0]} scale={0.05}>
       <mesh
         geometry={memoizedNodes.polySurface104.geometry}
         material={memoizedMaterials.phong14}

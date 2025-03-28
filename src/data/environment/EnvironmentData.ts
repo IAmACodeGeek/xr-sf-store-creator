@@ -135,40 +135,40 @@ const environmentData: EnvironmentData = {
     placeHolderData: singleRoomPlaceHolderData,
     initialGSAP: {
       start: {
-        position: [40, 4, 0],
-        rotation: [0, 90, 0],
+        position: [0, 3, 0],
+        rotation: [0, 0, 0],
         duration: 0
       },
       update: [
         {
-          position: [40, 4, 0],
-          rotation: [0, 270, 0],
+          position: [0, 4, 0],
+          rotation: [0, 360, 0],
           duration: 5
         },
         {
-          position: [20, 3.2, 0],
-          rotation: [0, 270, 0],
+          position: [0, 3.2, 18],
+          rotation: [0, 360, 0],
           duration: 2
         },
       ]
     },
     televisions: [
       {
-        position: [47.8, 4.5, 0],
-        rotation: [0, 180, 0],
-        scale: 0.37
+        position: [0, 4.5, -17.1],
+        rotation: [0, -90, 0],
+        scale: 0.6
       }
     ],
     brandPosters: [
       {
-        position: [-5, 3.2, 13.35],
-        rotation: [0, 90, 0],
-        scale: 4
+        position: [9, 4.5, -17.1],
+        rotation: [0, 0, 0],
+        scale: 3
       },
       {
-        position: [-5, 3.2, -13.35],
-        rotation: [0, 90, 0],
-        scale: 4
+        position: [-9, 4.5, -17.1],
+        rotation: [0, 0, 0],
+        scale: 3
       }
     ]
   },
