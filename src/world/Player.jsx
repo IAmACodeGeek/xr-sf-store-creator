@@ -116,6 +116,12 @@ export const Player = () => {
     const handleMouseMove = (e) => {
       if(!isMouseDown) return;
       if (!isTouchEnabled) return;
+      
+      if (e.buttons === 0) {
+        setMouseDown(false);
+        return;
+      }
+      
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
       
       const deltaX = previousMousePosition.current? e.clientX - previousMousePosition.current.x : 0;
