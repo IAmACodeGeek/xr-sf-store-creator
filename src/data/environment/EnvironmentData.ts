@@ -6,7 +6,7 @@ import bigRoomPlaceHolderData from "./placeHolderData/BigRoom";
 import castlePlaceHolderData from "./placeHolderData/Castle";
 import singleRoomPlaceHolderData from "./placeHolderData/SingleRoom";
 
-import PlaceHolder from "./placeHolderData/PlaceHolder";
+import PlaceHolder from "./placeHolderData/PlaceHolderData";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -130,7 +130,7 @@ const environmentData: EnvironmentData = {
   },
   "SINGLEROOM": {
     environmentModel: SingleRoomModel,
-    playerSpeed: 20,
+    playerSpeed: 15,
     playerHeight: 2,
     placeHolderData: singleRoomPlaceHolderData,
     initialGSAP: {

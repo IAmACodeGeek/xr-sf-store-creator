@@ -1,6 +1,6 @@
-import PlaceHolder from "./PlaceHolder";
+import PlaceHolderData from "./PlaceHolderData";
 
-const singleRoomPlaceHolderData: PlaceHolder[] = [
+const singleRoomPlaceHolderData: PlaceHolderData[] = [
   {
     id: 0,
     position: [-12.78, 4.7, -9.3],

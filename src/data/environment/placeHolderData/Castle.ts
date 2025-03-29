@@ -1,6 +1,6 @@
-import PlaceHolder from "./PlaceHolder";
+import PlaceHolderData from "./PlaceHolderData";
 
-const castlePlaceHolderData: PlaceHolder[] = [
+const castlePlaceHolderData: PlaceHolderData[] = [
 
 ];
 

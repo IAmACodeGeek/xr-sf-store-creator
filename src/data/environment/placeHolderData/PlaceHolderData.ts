@@ -1,8 +1,8 @@
-interface PlaceHolder {
+interface PlaceHolderData {
   id: number;
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;
 }
 
-export default PlaceHolder;
+export default PlaceHolderData;
