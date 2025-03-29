@@ -24,7 +24,10 @@ export default function CanvasWrapper() {
     
     async function fetchBrandDetails(){
       try{
-        if (!brandName) return;
+        if (!brandName) {
+          setBrandStatus('INVALID');
+          return;
+        }
 
         setBrandStatus('LOADING');
         BrandService.fetchBrandData(brandName).then((response) => {
