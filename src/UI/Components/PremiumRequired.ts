@@ -1,18 +1,25 @@
 import Swal from "sweetalert2";
-import styles from "./UI.module.css";
+import styles from "../UI.module.scss";
 
-const showPremiumPopup: () => void = () => {
+const showPremiumPopup: (description: string) => void = (description: string) => {
   Swal.fire({
     title: "Subscribe to Premium",
-    text: "You cannot have more than 20 products. Contact the sales team.",
+    text: description,
     icon: "warning",
+    showCancelButton: true,
     showConfirmButton: true,
     allowOutsideClick: false,
     customClass: {
       title: styles.swalTitle,
       popup: styles.swalPopup,
+      confirmButton: styles.swalButton,
+      cancelButton: styles.swalButton
     },
+  }).then((result) => {
+    if(result.isConfirmed){
+      window.open("https://strategyfox.in/#sec-contact", "_blank", "noopener,noreferrer");
+    }
   });
 };
 
-export default showPremiumPopup;
+export {showPremiumPopup};

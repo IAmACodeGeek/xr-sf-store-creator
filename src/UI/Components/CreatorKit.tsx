@@ -9,6 +9,7 @@ import { useGLTF } from "@react-three/drei";
 import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
+import {showPremiumPopup} from './PremiumRequired';
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -129,18 +130,9 @@ export const CreatorKit = () => {
       if(!product) return;
 
       // Check if the number of products with this new one is <= 20
-      if(Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
-        Swal.fire({
-          title: "",
-          text: "Please select one of the provided 2D or 3D assets before proceeding.",
-          icon: "warning",
-          showConfirmButton: true,
-          allowOutsideClick: false,
-          customClass: {
-            title: styles.swalTitle,
-            popup: styles.swalPopup,
-          },
-        });
+      if(event.target.checked && Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
+        showPremiumPopup("Your current plan supports up to 20 products. To unlock more, please reach out to our sales team for exclusive options.");
+        return;
       }
 
       const isProductFirstTime = (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined);
@@ -1014,6 +1006,14 @@ export const CreatorKit = () => {
 
       const setMediaItem = (type: "MODEL_3D" | "PHOTO", index: number) => {
         if(!product) return;
+
+        // Ensure there are not more than 5 model products
+        if(type === "MODEL_3D"){
+          if(Object.values(envProducts).filter((envProduct) => envProduct.modelIndex !== undefined).length >= 5){
+            showPremiumPopup("Your current plan supports only up to 5 product models. To unlock more, please reach out to our sales team for exclusive options.");
+            return;
+          }
+        }
 
         const envProduct: EnvProduct = {
           id: product.id,
