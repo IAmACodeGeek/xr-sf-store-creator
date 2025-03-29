@@ -52,10 +52,10 @@ export const CreatorKit = () => {
         sx={{
           width: "100%",
           padding: "10px", boxSizing: "border-box",
-          borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
+          borderRadius: "0",
           fontFamily: "'Poppins', sans-serif", fontSize: "16px",
           color: "white",
-          backgroundColor: "rgb(77, 177, 255)",
+          background: "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)"
         }}
         className="FullWideButton"
         onClick={onClick}
@@ -80,11 +80,11 @@ export const CreatorKit = () => {
           sx={{
             width: "40%", height: "100%", flexGrow: 1,
             padding: "10px", boxSizing: "border-box",
-            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
             fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
             textTransform: "none",
             color: entityType === "PRODUCT" ? "white" : "rgb(77, 177, 255)",
-            backgroundColor: entityType === "PRODUCT" ? "rgb(77, 177, 255)" : "transparent",
+            background: entityType === "PRODUCT" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: entityType === "PRODUCT" ? "none" : "solid", borderRadius: "0",
             "&:hover": {
               backgroundColor: entityType === "PRODUCT" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
               color: "white"
@@ -102,11 +102,11 @@ export const CreatorKit = () => {
           sx={{
             width: "40%", height: "100%", flexGrow: 1,
             padding: "10px", boxSizing: "border-box",
-            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
             fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
             textTransform: "none",
             color: entityType === "ASSET" ? "white" : "rgb(77, 177, 255)",
-            backgroundColor: entityType === "ASSET" ? "rgb(77, 177, 255)" : "transparent",
+            background: entityType === "ASSET" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: entityType === "ASSET" ? "none" : "solid", borderRadius: "0",
             "&:hover": {
               backgroundColor: entityType === "ASSET" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
               color: "white"
@@ -114,7 +114,10 @@ export const CreatorKit = () => {
           }}
           onClick={() => {
             if(activeProductId !== null) setActiveProductId(null); 
-            if(entityType !== "ASSET") setEntityType("ASSET");
+            if(entityType !== "ASSET") {
+              setEntityType("ASSET");
+              setParamsType('CUSTOM');
+            }
           }}
           className="AssetButton"
         >
@@ -191,10 +194,10 @@ export const CreatorKit = () => {
           sx={{
             width: "40%", height: "100%", flexGrow: 1,
             padding: "10px", boxSizing: "border-box",
-            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
             fontFamily: "'Poppins', sans-serif", fontSize: "14px",
             color: paramsType === "CUSTOM" ? "white" : "rgb(77, 177, 255)",
-            backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "transparent",
+            background: paramsType === "CUSTOM" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: paramsType === "CUSTOM" ? "none" : "solid", borderRadius: "0",
             "&:hover": {
               backgroundColor: paramsType === "CUSTOM" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
               color: "white"
@@ -227,10 +230,10 @@ export const CreatorKit = () => {
           sx={{
             width: "40%", height: "100%", flexGrow: 1,
             padding: "10px", boxSizing: "border-box",
-            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
             fontFamily: "'Poppins', sans-serif", fontSize: "14px",
             color: paramsType === "PLACEHOLDER" ? "white" : "rgb(77, 177, 255)",
-            backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "transparent",
+            background: paramsType === "PLACEHOLDER" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: paramsType === "PLACEHOLDER" ? "none" : "solid", borderRadius: "0",
             "&:hover": {
               backgroundColor: paramsType === "PLACEHOLDER" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
               color: "white"
@@ -719,10 +722,9 @@ export const CreatorKit = () => {
                     sx={{
                       minWidth: "30%", height: "40px",
                       padding: "10px", boxSizing: "border-box",
-                      borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                       fontFamily: "'Poppins', sans-serif", fontSize: "14px",
-                      color: "white",
-                      backgroundColor: "rgb(77, 177, 255)",
+                      color: "white", borderRadius: 0,
+                      background: "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)",
                       "&:hover": {
                         backgroundColor: "rgb(109, 192, 255)",
                       }
@@ -962,11 +964,11 @@ export const CreatorKit = () => {
               sx={{
                 width: "40%", height: "100%", flexGrow: 1,
                 padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                 fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
                 textTransform: "none",
                 color: mediaType === "PHOTO" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "PHOTO" ? "rgb(77, 177, 255)" : "transparent",
+                background: mediaType === "PHOTO" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: mediaType === "PHOTO" ? "none" : "solid", borderRadius: "0",
                 "&:hover": {
                   backgroundColor: mediaType === "PHOTO" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
                   color: "white"
@@ -983,11 +985,11 @@ export const CreatorKit = () => {
               sx={{
                 width: "40%", height: "100%", flexGrow: 1,
                 padding: "10px", boxSizing: "border-box",
-                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: "solid", borderRadius: "0",
                 fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
                 textTransform: "none",
                 color: mediaType === "MODEL_3D" ? "white" : "rgb(77, 177, 255)",
-                backgroundColor: mediaType === "MODEL_3D" ? "rgb(77, 177, 255)" : "transparent",
+                background: mediaType === "MODEL_3D" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+                borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: mediaType === "MODEL_3D" ? "none" : "solid", borderRadius: "0",
                 "&:hover": {
                   backgroundColor: mediaType === "MODEL_3D" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
                   color: "white"
