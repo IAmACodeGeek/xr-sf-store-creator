@@ -9,8 +9,6 @@ import { useGLTF } from "@react-three/drei";
 import environmentData from "@/data/environment/EnvironmentData";
 import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
-import { request } from "http";
-import { deltaTime } from "three/src/nodes/TSL.js";
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
@@ -129,6 +127,22 @@ export const CreatorKit = () => {
     if(entityType === "PRODUCT"){
       const product: Product | undefined = products.find((product) => product.id === parameters.productId);
       if(!product) return;
+
+      // Check if the number of products with this new one is <= 20
+      if(Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
+        Swal.fire({
+          title: "",
+          text: "Please select one of the provided 2D or 3D assets before proceeding.",
+          icon: "warning",
+          showConfirmButton: true,
+          allowOutsideClick: false,
+          customClass: {
+            title: styles.swalTitle,
+            popup: styles.swalPopup,
+          },
+        });
+      }
+
       const isProductFirstTime = (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined);
       if(event.target.checked && isProductFirstTime){
         setToolType("MEDIA");
