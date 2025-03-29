@@ -3,13 +3,9 @@ import { useEffect, useState } from "react";
 export const usePersonControls = () => {
     const keys = {
         KeyW: "forward",
-        ArrowUp: "forward",
         KeyS: "backward",
-        ArrowDown: "backward",
         KeyA: "left",
-        ArrowLeft: "left",
         KeyD: "right",
-        ArrowRight: "right",
         Space: "jump",
     }
 

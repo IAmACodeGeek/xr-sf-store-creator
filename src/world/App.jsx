@@ -10,6 +10,7 @@ import { Suspense, useState, useEffect } from "react";
 import Skybox from "./Skybox";
 import environmentData from "@/data/environment/EnvironmentData";
 import { useBrandStore, useEnvironmentStore } from "@/stores/ZustandStores";
+import Lights from "./Lights.jsx";
 const shadowOffset = 50;
 
 export const App = () => {
@@ -27,18 +28,7 @@ export const App = () => {
   return (
     <>
       <Skybox />
-      <ambientLight intensity={3.5} />
-      <directionalLight
-        castShadow
-        intensity={1.5}
-        shadow-mapSize={4096}
-        shadow-camera-top={shadowOffset}
-        shadow-camera-bottom={-shadowOffset}
-        shadow-camera-left={shadowOffset}
-        shadow-camera-right={-shadowOffset}
-        position={[100, 100, 0]}
-      />
-
+      <Lights />
       <Physics gravity={[0, -20, 0]}>
         <Ground />
         <Suspense fallback={null}>

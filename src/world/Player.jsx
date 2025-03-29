@@ -13,7 +13,7 @@ const direction = new THREE.Vector3();
 const frontVector = new THREE.Vector3();
 const sideVector = new THREE.Vector3();
 
-const RESPAWN_HEIGHT = -5;
+const RESPAWN_HEIGHT = -20;
 const START_POSITION = new THREE.Vector3(0, 7, -5);
 const TOUCH_SENSITIVITY = {x: 0.003, y: 0.003}
 
@@ -116,6 +116,12 @@ export const Player = () => {
     const handleMouseMove = (e) => {
       if(!isMouseDown) return;
       if (!isTouchEnabled) return;
+      
+      if (e.buttons === 0) {
+        setMouseDown(false);
+        return;
+      }
+      
       if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
       
       const deltaX = previousMousePosition.current? e.clientX - previousMousePosition.current.x : 0;
@@ -224,7 +230,7 @@ export const Player = () => {
       <ProductGSAPUtil setAnimating={setAnimating} playerRef={playerRef} />
       <CameraController setAnimating={setAnimating} playerRef={playerRef} />
       <mesh castShadow>
-        <CapsuleCollider args={[2, 1]} />
+        <CapsuleCollider args={[environmentData[environmentType].playerHeight, 1]} />
       </mesh>
     </RigidBody>
   );
