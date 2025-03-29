@@ -8,6 +8,12 @@ interface ResourceFetchStore {
   setProductsLoading: (value: boolean) => void;
   setProductsLoaded: (value: boolean) => void;
 
+  // Own Store Products Loading
+  ownstoreproductsLoading: boolean;
+  ownstoreproductsLoaded: boolean;
+  setOwnStoreProductsLoading: (value: boolean) => void;
+  setOwnStoreProductsLoaded: (value: boolean) => void;
+
   envItemsLoaded: boolean;
   setEnvItemsLoaded: (value: boolean) => void;
   envItemsLoading: boolean;
@@ -17,15 +23,23 @@ interface ResourceFetchStore {
 const useResourceFetchStore = create<ResourceFetchStore>((set) => ({
   // Products
   productsLoading: false,
-  setProductsLoading: (value: boolean) => set({productsLoading: value}),
+  setProductsLoading: (value: boolean) => set({ productsLoading: value }),
   productsLoaded: false,
-  setProductsLoaded: (value: boolean) => set({productsLoaded: value}),
+  setProductsLoaded: (value: boolean) => set({ productsLoaded: value }),
+
+  // OwnStoreProducts
+  ownstoreproductsLoading: false,
+  setOwnStoreProductsLoading: (value: boolean) =>
+    set({ ownstoreproductsLoading: value }),
+  ownstoreproductsLoaded: false,
+  setOwnStoreProductsLoaded: (value: boolean) =>
+    set({ ownstoreproductsLoaded: value }),
 
   // EnvAssets and EnvProducts
   envItemsLoaded: false,
-  setEnvItemsLoaded: (value: boolean) => set({envItemsLoaded: value}),
+  setEnvItemsLoaded: (value: boolean) => set({ envItemsLoaded: value }),
   envItemsLoading: false,
-  setEnvItemsLoading: (value: boolean) => set({envItemsLoading: value}),
+  setEnvItemsLoading: (value: boolean) => set({ envItemsLoading: value }),
 }));
 
 interface ComponentStore {
@@ -39,7 +53,9 @@ interface ComponentStore {
   selectedProduct: Product | undefined;
   setProducts: (products: Product[]) => void;
   setSelectedProduct: (productId: number | null) => void;
-  
+
+  ownProducts: Product[];
+  setOwnProducts: (ownproducts: Product[]) => void;
   // Info Handling
   isInfoModalOpen: boolean;
   openInfoModal: () => void;
@@ -86,7 +102,11 @@ const useComponentStore = create<ComponentStore>((set) => ({
       return { ...state, selectedProduct: finalProduct };
     });
   },
-  
+
+  // Own Store Products
+  ownProducts: [],
+  setOwnProducts: (ownProducts: Product[]) => set({ ownProducts }),
+
   // Info Handling
   isInfoModalOpen: false,
   openInfoModal: () => {
@@ -178,11 +198,11 @@ const useTourStore = create<TourStore>((set) => ({
 
 // Search handling
 interface SearchStore {
-  searchResult: {x: number, y: number, z: number} | undefined,
-  initiateSearchGSAP: boolean,
-  setSearchResult: (position: { x: number; y: number; z: number }) => void,
-  startSearchGSAP: () => void,
-  resetSearchGSAP: () => void,
+  searchResult: { x: number; y: number; z: number } | undefined;
+  initiateSearchGSAP: boolean;
+  setSearchResult: (position: { x: number; y: number; z: number }) => void;
+  startSearchGSAP: () => void;
+  resetSearchGSAP: () => void;
 }
 const useSearchStore = create<SearchStore>((set) => ({
   searchResult: undefined,
@@ -211,34 +231,65 @@ interface EnvProduct {
 }
 
 interface EnvProductStore {
-  envProducts: {[id: number]: EnvProduct};
-  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => void;
+  envProducts: { [id: number]: EnvProduct };
+  setEnvProducts: (envProducts: { [id: number]: EnvProduct }) => void;
   modifyEnvProduct: (id: number, envProduct: EnvProduct) => void;
 
-  activeProductId: number | null,
-  setActiveProductId: (value: number | null) => void
+  activeProductId: number | null;
+  setActiveProductId: (value: number | null) => void;
 }
 
 const useEnvProductStore = create<EnvProductStore>((set) => ({
   envProducts: {},
-  setEnvProducts: (envProducts: {[id: number]: EnvProduct}) => set((state: {envProducts: { [id: number]: EnvProduct }}) => ({
-    envProducts: { ...state.envProducts, ...envProducts },
-  })),
-  modifyEnvProduct: (id: number, envProduct: EnvProduct) => set((state: { envProducts: { [id: number]: EnvProduct } }) => ({
-    envProducts: {
-      ...state.envProducts,
-      [id]: { ...state.envProducts[id], ...envProduct },
-    },
-  })),
+  setEnvProducts: (envProducts: { [id: number]: EnvProduct }) =>
+    set((state: { envProducts: { [id: number]: EnvProduct } }) => ({
+      envProducts: { ...state.envProducts, ...envProducts },
+    })),
+  modifyEnvProduct: (id: number, envProduct: EnvProduct) =>
+    set((state: { envProducts: { [id: number]: EnvProduct } }) => ({
+      envProducts: {
+        ...state.envProducts,
+        [id]: { ...state.envProducts[id], ...envProduct },
+      },
+    })),
 
   activeProductId: null,
-  setActiveProductId: (value: number | null) => set({activeProductId: value})
+  setActiveProductId: (value: number | null) => set({ activeProductId: value }),
+}));
+
+// Own Environment Product Handling
+interface OwnEnvProductStore {
+  ownEnvProducts: { [id: number]: EnvProduct };
+  setOwnEnvProducts: (envProducts: { [id: number]: EnvProduct }) => void;
+  modifyOwnEnvProduct: (id: number, envProduct: EnvProduct) => void;
+
+  activeOwnProductId: number | null;
+  setOwnActiveProductId: (value: number | null) => void;
+}
+
+const useOwnEnvProductStore = create<OwnEnvProductStore>((set) => ({
+  ownEnvProducts: {},
+  setOwnEnvProducts: (ownEnvProducts: { [id: number]: EnvProduct }) =>
+    set((state: { ownEnvProducts: { [id: number]: EnvProduct } }) => ({
+      ownEnvProducts: { ...state.ownEnvProducts, ...ownEnvProducts },
+    })),
+  modifyOwnEnvProduct: (id: number, ownEnvProduct: EnvProduct) =>
+    set((state: { ownEnvProducts: { [id: number]: EnvProduct } }) => ({
+      ownEnvProducts: {
+        ...state.ownEnvProducts,
+        [id]: { ...state.ownEnvProducts[id], ...ownEnvProduct },
+      },
+    })),
+
+  activeOwnProductId: null,
+  setOwnActiveProductId: (value: number | null) =>
+    set({ activeOwnProductId: value }),
 }));
 
 interface EnvAsset {
   id: string;
   type: "MODEL_3D" | "PHOTO";
-  status: 'SUCCESS' | 'FAILURE';
+  status: "SUCCESS" | "FAILURE";
   position?: number[];
   rotation?: number[];
   scale?: number;
@@ -248,8 +299,8 @@ interface EnvAsset {
 }
 
 interface EnvAssetStore {
-  envAssets: {[id: string]: EnvAsset};
-  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => void;
+  envAssets: { [id: string]: EnvAsset };
+  setEnvAssets: (envAssets: { [id: string]: EnvAsset }) => void;
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => void;
 
   activeAssetId: string | null;
@@ -258,28 +309,30 @@ interface EnvAssetStore {
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   envAssets: {},
-  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
-    envAssets: { ...state.envAssets, ...envAssets },
-  })),
-  modifyEnvAsset: (id: string, envAsset: EnvAsset) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
-    envAssets: {
-      ...state.envAssets,
-      [id]: {...state.envAssets[id], ...envAsset}
-    }
-  })),
-  
+  setEnvAssets: (envAssets: { [id: string]: EnvAsset }) =>
+    set((state: { envAssets: { [id: string]: EnvAsset } }) => ({
+      envAssets: { ...state.envAssets, ...envAssets },
+    })),
+  modifyEnvAsset: (id: string, envAsset: EnvAsset) =>
+    set((state: { envAssets: { [id: string]: EnvAsset } }) => ({
+      envAssets: {
+        ...state.envAssets,
+        [id]: { ...state.envAssets[id], ...envAsset },
+      },
+    })),
+
   activeAssetId: null,
-  setActiveAssetId: (value: string | null) => set({activeAssetId: value})
+  setActiveAssetId: (value: string | null) => set({ activeAssetId: value }),
 }));
 
 interface ToolStore {
-  toolType: "MEDIA" | "3DPARAMS" | null,
-  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => void
+  toolType: "MEDIA" | "3DPARAMS" | null;
+  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => void;
 }
 
 const useToolStore = create<ToolStore>((set) => ({
   toolType: "MEDIA",
-  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => set({toolType: value})
+  setToolType: (value: "MEDIA" | "3DPARAMS" | null) => set({ toolType: value }),
 }));
 
 // Dynamic Loading of Environment
@@ -290,7 +343,8 @@ interface EnvironmentStore {
 
 const useEnvironmentStore = create<EnvironmentStore>((set) => ({
   environmentType: undefined,
-  setEnvironmentType: (value: string | undefined) =>  set({environmentType: value})
+  setEnvironmentType: (value: string | undefined) =>
+    set({ environmentType: value }),
 }));
 
 // Brand Store Handling
@@ -321,8 +375,10 @@ interface SliderMouseStore {
 
 const useSliderMouseStore = create<SliderMouseStore>((set) => ({
   mouseDown: false,
-  setMouseDown: (mouseDown: boolean) => set({mouseDown: mouseDown}),
+  setMouseDown: (mouseDown: boolean) => set({ mouseDown: mouseDown }),
 }));
+
+// Own Store Asset Store
 
 export {
   useResourceFetchStore,
@@ -332,10 +388,12 @@ export {
   useTourStore,
   useSearchStore,
   useEnvProductStore,
+  useOwnEnvProductStore,
   useEnvAssetStore,
   useToolStore,
   useEnvironmentStore,
   useBrandStore,
-  useSliderMouseStore
-};  
+  useSliderMouseStore,
+};
+
 export type { EnvProduct, EnvAsset };
