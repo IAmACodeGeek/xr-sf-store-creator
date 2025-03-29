@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import styles from "../UI.module.scss";
 import { useGLTF } from "@react-three/drei";
 import environmentData from "@/data/environment/EnvironmentData";
-import { ALLOWED_MIME_TYPES, AssetService } from "@/api/assetService";
+import { ALLOWED_MIME_TYPES, AssetService, ERROR_CODES } from "@/api/assetService";
 import EnvStoreService from "@/api/envStoreService";
 import {showPremiumPopup} from './PremiumRequired';
 
@@ -1302,11 +1302,18 @@ export const CreatorKit = () => {
         return;
       }
       if(!brandData) return;
-      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles).then((result) => {
-        if(!result) return;
-        Object.keys(result).forEach((id) => {
-          modifyEnvAsset(id, result[id]);
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.keys(envAssets).length).then((result) => {
+        if(!result || result.assets) return;
+        Object.keys(result.assets).forEach((id) => {
+          modifyEnvAsset(id, result.assets[id]);
         });
+
+        // Check for any errors
+        if(result.fileErrors && result.fileErrors.length > 0){
+          if(result.fileErrors.map((fileError) => fileError.code).includes(ERROR_CODES.FILE_TOO_LARGE)) {
+            showPremiumPopup('Your current plan only supports assets of maximum size 2MB. Reach out to our sales team for more exclusive options.');
+          }
+        }
       });
     };
     
@@ -1320,11 +1327,18 @@ export const CreatorKit = () => {
       }
       
       if(!brandData) return;
-      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles).then((result) => {
-        if(!result) return;
-        Object.keys(result).forEach((id) => {
-          modifyEnvAsset(id, result[id]);
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.keys(envAssets).length).then((result) => {
+        if(!result || !result.assets) return;
+        Object.keys(result.assets).forEach((id) => {
+          modifyEnvAsset(id, result.assets[id]);
         });
+
+        // Check for any errors
+        if(result.fileErrors && result.fileErrors.length > 0){
+          if(result.fileErrors.map((fileError) => fileError.code).includes(ERROR_CODES.FILE_TOO_LARGE)) {
+            showPremiumPopup('Your current plan only supports assets of maximum size 2MB. Reach out to our sales team for more exclusive options.');
+          }
+        }
       });
       
       // Clear the input value to allow selecting the same file again
