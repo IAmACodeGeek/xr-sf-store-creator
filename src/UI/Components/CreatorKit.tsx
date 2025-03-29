@@ -868,10 +868,10 @@ export const CreatorKit = () => {
                 </Typography>
                 <Box
                   component="img"
-                  src="icons/Attach.svg"
+                  src="icons/Image.svg"
                   className="MediaAttachButton"
                   sx={{
-                    width: "20px", height: "20px",
+                    width: "30px", height: "30px",
                     opacity: (product.id === activeProductId  && toolType === "MEDIA") ? 1 : ((envProducts[product.id]?.isEnvironmentProduct) ? 0.5 : 0.2),
                     "&:hover": {
                       opacity: (envProducts[product.id]?.isEnvironmentProduct) ? 1 : 0.2,
@@ -1213,9 +1213,9 @@ export const CreatorKit = () => {
           </Typography>
           <Box
             component="img"
-            src="icons/Attach.svg"
+            src="icons/Image.svg"
             sx={{
-              width: "20px", height: "20px",
+              width: "30px", height: "30px",
               opacity: (product.id === activeProductId && toolType === "MEDIA") ? 1 : ((envProduct?.isEnvironmentProduct) ? 0.5 : 0.2),
               "&:hover": {
                 opacity: (envProduct?.isEnvironmentProduct) ? 1 : 0.2,
