@@ -1,13 +1,18 @@
-import { Environment } from '@react-three/drei'
-import React from 'react'
+import { useEnvironmentStore } from '@/stores/ZustandStores';
+import BigRoomLighting from '@/data/environment/environmentLighting/BigRoom';
+import CastleLighting from '@/data/environment/environmentLighting/Castle';
+import SingleRoomLighting from '@/data/environment/environmentLighting/SingleRoom';
 
 const Lights = () => {
+  const {environmentType} = useEnvironmentStore();
+
   return (
     <>
-    <Environment preset='studio' environmentIntensity={0.1} />
-    <ambientLight intensity={1} color={"#ffffff"} />
+      {environmentType === "BIGROOM" && <BigRoomLighting/>}
+      {environmentType === "CASTLE" && <CastleLighting/>}
+      {environmentType === "SINGLEROOM" && <SingleRoomLighting/>}
     </>
-  )
-}
+  );
+};
 
-export default Lights
+export default Lights;
