@@ -132,10 +132,19 @@ export const CreatorKit = () => {
       const product: Product | undefined = products.find((product) => product.id === parameters.productId);
       if(!product) return;
 
-      // Check if the number of products with this new one is <= 20
-      if(event.target.checked && Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
-        showPremiumPopup("Your current plan supports up to 20 products. To unlock more, please reach out to our sales team for exclusive options.");
-        return;
+      if(event.target.checked){
+        // Check if the number of products with this new one is <= 20
+        if(Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
+          showPremiumPopup("Your current plan supports up to 20 products. To unlock more, please reach out to our sales team for exclusive options.");
+          return;
+        }
+        // Check if there are more than 5 product models
+        if(
+          Object.values(envProducts).find((envProduct) => envProduct.id === parameters.productId)?.type === "MODEL_3D" && 
+          Object.values(envProducts).filter((envProduct) => envProduct.type === "MODEL_3D" && envProduct.isEnvironmentProduct).length >=5){
+            showPremiumPopup("Your current plan supports only up to 5 product models. To unlock more, please reach out to our sales team for exclusive options.");
+            return;
+          }
       }
 
       const isProductFirstTime = (envProducts[product.id]?.imageIndex === undefined) && (envProducts[product.id]?.modelIndex === undefined);
@@ -1011,7 +1020,7 @@ export const CreatorKit = () => {
 
         // Ensure there are not more than 5 model products
         if(type === "MODEL_3D"){
-          if(Object.values(envProducts).filter((envProduct) => envProduct.modelIndex !== undefined).length >= 5){
+          if(Object.values(envProducts).filter((envProduct) => (envProduct.type === "MODEL_3D" && envProduct.isEnvironmentProduct)).length >= 5){
             showPremiumPopup("Your current plan supports only up to 5 product models. To unlock more, please reach out to our sales team for exclusive options.");
             return;
           }

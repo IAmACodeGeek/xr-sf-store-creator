@@ -9,6 +9,7 @@ const showPremiumPopup: (description: string) => void = (description: string) =>
     showCancelButton: true,
     showConfirmButton: true,
     allowOutsideClick: false,
+    confirmButtonText: "Contact Sales",
     customClass: {
       title: styles.swalTitle,
       popup: styles.swalPopup,
