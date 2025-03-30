@@ -7,8 +7,7 @@ import UI from "@/UI/UI.tsx";
 import { ProductService } from "./api/shopifyAPIService";
 import { EnvProduct, useComponentStore, useEnvironmentStore, useEnvProductStore, useEnvAssetStore, useBrandStore, useResourceFetchStore, EnvAsset } from "./stores/ZustandStores";
 import BrandService from "./api/brandService.js";
-import EnvStoreService
-  from "./api/envStoreService.js";
+import EnvStoreService from "./api/envStoreService.js";
 import { AssetService } from "./api/assetService.js";
 
 export default function CanvasWrapper() {
@@ -99,16 +98,16 @@ export default function CanvasWrapper() {
     
     async function fetchLibraryAssets() {
       try {
-        if (!assetLibraryLoaded && !assetLibraryLoading) {
+        if (brandData && !assetLibraryLoaded && !assetLibraryLoading) {
           setAssetLibraryLoading(true);
-          const assets = await ProductService.getLibraryAssets();
+          const assets = await ProductService.getLibraryAssets(brandData.brand_name);
           
           const newEnvAssets: {[id: string]: EnvAsset} = {};
           assets.forEach((asset) => {
             newEnvAssets[asset.id] = asset;
           });
 
-          setEnvAssets(envAssets);
+          setEnvAssets(newEnvAssets);
 
           setAssetLibraryLoaded(true);
           console.log('Asset Library:', assets);
@@ -122,7 +121,7 @@ export default function CanvasWrapper() {
       try {
         if (brandData && !envItemsLoading && !envItemsLoaded){
           const response = await AssetService.importAssetFiles(brandData.brand_name);
-          const newEnvAssets: { [id: string]: EnvAsset } = {};
+          const newEnvAssets: { [id: string]: EnvAsset } = envAssets;
           for (const asset of Object.values(response)) {
             newEnvAssets[asset.id] = {
               ...asset,

@@ -70,6 +70,8 @@ export default function Login() {
         const data = await postResponse.json();
 
         console.log(data);
+        console.log(brandNameFromQuery);
+        console.log(data["brand_name"]);
 
         // E) Compare brandName from response with brandNameFromQuery
         if (brandNameFromQuery && data["brand_name"] === brandNameFromQuery) {
