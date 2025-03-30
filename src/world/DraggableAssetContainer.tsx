@@ -439,7 +439,7 @@ const DraggableAssetContainer = ({
 
   useEffect(() => {
     handleObjectMove();
-  }, [activeAssetId]);
+  }, [activeAssetId, model]);
 
   return (
     <RigidBody type="fixed">

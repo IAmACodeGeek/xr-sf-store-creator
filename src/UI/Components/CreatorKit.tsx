@@ -174,6 +174,11 @@ export const CreatorKit = () => {
     else if(entityType === "ASSET"){
       const envAsset = envAssets[parameters.assetId || -1];
       if(event.target.checked){
+        if(Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset).length >= 5){
+          showPremiumPopup("Your current plan supports only up to assets. To unlock more, please reach out to our sales team for exclusive options.");
+          return;
+        }
+
         setActiveAssetId(envAsset.id);
         // Preload its models
         if(envAsset.type === 'MODEL_3D'){
