@@ -1,11 +1,14 @@
 import { useComponentStore, EnvProduct, useToolStore, useEnvProductStore, useBrandStore } from "@/stores/ZustandStores";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type Product from '../Types/Product';
 import {BackSide, Box3, Euler, FrontSide, Mesh, Object3D, Quaternion, TextureLoader, Vector3} from 'three';
 import { useLoader, useThree } from "@react-three/fiber";
 import environmentData from "../data/environment/EnvironmentData";
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 
 interface DraggableProductContainerProps {
   placeHolderId?: number | undefined;
@@ -104,18 +107,78 @@ const DraggableProductContainer = ({
   }, [product, envProduct.modelIndex, envProduct.type]);
 
   // Load the GLTF model
-  const model = useMemo(() => {
-    if (!modelUrl) return null;
-    try {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      return useGLTF(modelUrl);
-    } catch (error) {
-      console.error('Error loading model:', error);
-      return null;
+  const [model, setModel] = useState<GLTF | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    if (!modelUrl) return;
+    
+    let isMounted = true;
+    const loadModel = async () => {
+      setIsLoading(true);
+      
+      // Create GLTFLoader with DRACOLoader
+      const loader = new GLTFLoader();
+      
+      // Set up DRACOLoader
+      const dracoLoader = new DRACOLoader();
+      // Set the path to the Draco decoder files
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.5/');
+      
+      // Attach DRACOLoader to GLTFLoader
+      loader.setDRACOLoader(dracoLoader);
+      
+      try {
+        const gltf = await new Promise<GLTF>((resolve, reject) => {
+          loader.load(
+            modelUrl,
+            (gltf) => resolve(gltf),
+            (progress) => {
+              // Optional: handle loading progress
+              // console.log(`Loading progress: ${(progress.loaded / progress.total) * 100}%`);
+            },
+            (error) => reject(error)
+          );
+        });
+        
+        if (isMounted) {
+          setModel(gltf);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error loading model:', error);
+        if (isMounted) {
+          setIsLoading(false);
+          
+          // Implement a retry mechanism with a maximum retry count
+          if (retryCount < 5) {
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+            }, 1000); // Wait 1 second before retrying
+          }
+        }
+      }
+    };
+    
+    loadModel();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [modelUrl, retryCount]);
+  
+  // You can still use useGLTF.preload at the component level
+  useEffect(() => {
+    if (modelUrl) {
+      useGLTF.preload(modelUrl);
     }
   }, [modelUrl]);
 
-  const scene = model?.scene;
+  const scene = useMemo(() => {
+    return model?.scene;
+  }, [model]);
 
   // Memoize the scene to prevent unnecessary rerenders
   const memoizedModelScene = useMemo(() => {
