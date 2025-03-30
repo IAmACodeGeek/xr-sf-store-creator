@@ -8,10 +8,17 @@ interface ResourceFetchStore {
   setProductsLoading: (value: boolean) => void;
   setProductsLoaded: (value: boolean) => void;
 
+  // Environment products and assets
   envItemsLoaded: boolean;
   setEnvItemsLoaded: (value: boolean) => void;
   envItemsLoading: boolean;
   setEnvItemsLoading: (value: boolean) => void;
+
+  // Asset library
+  assetLibraryLoaded: boolean;
+  setAssetLibraryLoaded: (value: boolean) => void;
+  assetLibraryLoading: boolean;
+  setAssetLibraryLoading: (value: boolean) => void;
 }
 
 const useResourceFetchStore = create<ResourceFetchStore>((set) => ({
@@ -26,6 +33,12 @@ const useResourceFetchStore = create<ResourceFetchStore>((set) => ({
   setEnvItemsLoaded: (value: boolean) => set({envItemsLoaded: value}),
   envItemsLoading: false,
   setEnvItemsLoading: (value: boolean) => set({envItemsLoading: value}),
+
+  // Asset library
+  assetLibraryLoaded: false,
+  setAssetLibraryLoaded: (value: boolean) => set({assetLibraryLoaded: value}),
+  assetLibraryLoading: false,
+  setAssetLibraryLoading: (value: boolean) => set({assetLibraryLoading: value}),
 }));
 
 interface ComponentStore {
@@ -245,6 +258,7 @@ interface EnvAsset {
   src: string;
   name: string;
   isEnvironmentAsset: boolean;
+  source: 'OWN' | 'LIBRARY';
 }
 
 interface EnvAssetStore {

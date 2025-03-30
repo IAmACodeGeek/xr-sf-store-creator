@@ -62,6 +62,7 @@ export default function CanvasWrapper() {
   const { envProducts, setEnvProducts } = useEnvProductStore();
   const { productsLoaded, productsLoading, setProductsLoaded, setProductsLoading } = useResourceFetchStore();
   const { envItemsLoaded, setEnvItemsLoaded, envItemsLoading, setEnvItemsLoading } = useResourceFetchStore();
+  const { assetLibraryLoaded, setAssetLibraryLoaded, assetLibraryLoading, setAssetLibraryLoading } = useResourceFetchStore();
 
   const [myProgress, setProgress] = useState(0);
 
@@ -90,6 +91,27 @@ export default function CanvasWrapper() {
           setEnvProducts(newEnvProducts);
           setProductsLoaded(true);
           console.log('All Products:', response);
+        }
+      } catch (err) {
+        console.error('Products error:', err);
+      }
+    }
+    
+    async function fetchLibraryAssets() {
+      try {
+        if (!assetLibraryLoaded && !assetLibraryLoading) {
+          setAssetLibraryLoading(true);
+          const assets = await ProductService.getLibraryAssets();
+          
+          const newEnvAssets: {[id: string]: EnvAsset} = {};
+          assets.forEach((asset) => {
+            newEnvAssets[asset.id] = asset;
+          });
+
+          setEnvAssets(envAssets);
+
+          setAssetLibraryLoaded(true);
+          console.log('Asset Library:', assets);
         }
       } catch (err) {
         console.error('Products error:', err);
@@ -176,8 +198,9 @@ export default function CanvasWrapper() {
 
     (async () => {
       if(brandData && brandStatus === 'VALID') {
-        await fetchProducts(); setProgress(myProgress > 32 ? myProgress : 32);
-        await fetchAssets(); setProgress(myProgress > 58 ? myProgress : 58);
+        await fetchProducts(); setProgress(myProgress > 24 ? myProgress : 24);
+        await fetchLibraryAssets(); setProgress(myProgress > 47 ? myProgress : 47);
+        await fetchAssets(); setProgress(myProgress > 62 ? myProgress : 62);
         await fetchEnvData(); setProgress(myProgress > 76 ? myProgress : 76);
         await fetchModels(); setProgress(myProgress > 99 ? myProgress : 99);
         await new Promise(() => {setTimeout(() => setProgress(100), 800)}); // Delay to show fully loaded progress bar

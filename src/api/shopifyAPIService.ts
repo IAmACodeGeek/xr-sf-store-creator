@@ -1,5 +1,6 @@
 import Variant from '@/Types/Variant';
 import Product from '../Types/Product';
+import { EnvAsset } from '@/stores/ZustandStores';
 
 const BASE_URL = "https://function-14-934416248688.us-central1.run.app?brandname=";
 
@@ -131,5 +132,24 @@ export const ProductService = {
     });
 
     return products;
+  },
+
+  async getLibraryAssets(): Promise<EnvAsset[]> {
+    const products = await this.getAllProducts('asset-library');
+
+    const libraryAssets = products.map((product) => {
+      const assets: EnvAsset = {
+        id: String(product.id),
+        type: product.models.length > 0 ? 'MODEL_3D' : 'PHOTO',
+        status: 'SUCCESS',
+        src: product.models.length > 0 ? product.models[0].sources?.[0].url || '' : product.images[0].src,
+        name: product.title,
+        source: 'LIBRARY',
+        isEnvironmentAsset: false
+      };
+      return assets;
+    });
+
+    return libraryAssets;
   }
 };

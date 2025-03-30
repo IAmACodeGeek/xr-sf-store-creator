@@ -21,6 +21,7 @@ export const CreatorKit = () => {
   const [ entityType, setEntityType ] = useState<"PRODUCT" | "ASSET">("PRODUCT");
   const [mediaType, setMediaType] = useState<"PHOTO" | "MODEL_3D">("PHOTO");
   const [paramsType, setParamsType] = useState<"CUSTOM" | "PLACEHOLDER">("CUSTOM");
+  const [assetSource, setAssetSource] = useState<"LIBRARY" | "OWN">("LIBRARY");
 
   const [envProduct, setEnvProduct] = useState<EnvProduct | undefined>(undefined); 
   const [envAsset, setEnvAsset] = useState<EnvAsset | undefined>(undefined);
@@ -354,7 +355,8 @@ export const CreatorKit = () => {
           type: envAsset.type,
           status: envAsset.status,
           src: envAsset.src,
-          name: envAsset.name
+          name: envAsset.name,
+          source: envAsset.source
         };
   
         if(parameter === "POSITION" && axis && envAsset.position){
@@ -1279,6 +1281,62 @@ export const CreatorKit = () => {
     );
   };
   
+  const AssetSourceButtons = () => {
+    return (
+      <Box
+        sx={{
+          display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center",
+          width: "100%", height: "100px", gap: "25px",
+          padding: "30px", boxSizing: "border-box"
+        }}
+        className="AssetSourceButtons"
+      >
+        <Button
+          sx={{
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+            textTransform: "none",
+            color: assetSource === "LIBRARY" ? "white" : "rgb(77, 177, 255)",
+            background: assetSource === "LIBRARY" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: assetSource === "LIBRARY" ? "none" : "solid", borderRadius: "0",
+            "&:hover": {
+              backgroundColor: assetSource === "LIBRARY" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
+            }
+          }}
+          onClick={() => {
+            if(assetSource !== "LIBRARY") setAssetSource("LIBRARY");
+          }}
+          className="LibraryButton"
+        >
+          Library
+        </Button>
+        <Button
+          sx={{
+            width: "40%", height: "100%", flexGrow: 1,
+            padding: "10px", boxSizing: "border-box",
+            fontFamily: "'Poppins', sans-serif", fontSize: "16px", 
+            textTransform: "none",
+            color: assetSource === "OWN" ? "white" : "rgb(77, 177, 255)",
+            background: assetSource === "OWN" ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)" : "transparent",
+            borderWidth: "2px", borderColor: "rgb(77, 177, 255)", borderStyle: assetSource === "OWN" ? "none" : "solid", borderRadius: "0",
+            "&:hover": {
+              backgroundColor: assetSource === "OWN" ? "rgb(77, 177, 255)" : "rgba(77, 178, 255, 0.3)", 
+              color: "white"
+            }
+          }}
+          onClick={() => {
+            if(assetSource !== "OWN") setAssetSource("OWN");
+          }}
+          className="OwnButton"
+        >
+          Your Assets
+        </Button>
+      </Box>
+    );
+  };
+
   const FileSelector = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     
@@ -1450,8 +1508,9 @@ export const CreatorKit = () => {
         ref={assetListRef}
         className="AssetList"
       >
-        {Object.keys(envAssets).map((assetId: string) => {
-          const envAsset = envAssets[assetId];
+        {Object.values(envAssets).filter((envAsset) => envAsset.source === assetSource).map((envAsset: EnvAsset) => {
+          const assetId = envAsset.id;
+          
           return (
             <span 
               key={assetId}
@@ -1625,7 +1684,8 @@ export const CreatorKit = () => {
       <ProductOrAssetButtons/>
       {entityType === "PRODUCT" && <ProductList/>}
       {entityType === "PRODUCT" && <ProductEditor/>}
-      {entityType === "ASSET" && !activeAssetId && <FileSelector/>}
+      {entityType === "ASSET" && <AssetSourceButtons/>}
+      {entityType === "ASSET" && assetSource === "OWN" && !activeAssetId && <FileSelector/>}
       {entityType === "ASSET" && <AssetList/>}
       {entityType === "ASSET" && <AssetEditor/>}
       {!activeProductId && !activeAssetId && <FullWideButton text={"Save Store"} onClick={

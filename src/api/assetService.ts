@@ -76,7 +76,8 @@ const AssetService = {
           type: (fileResponse.type === 'model/gltf-binary' || fileResponse.originalName.endsWith('.glb')) ? 'MODEL_3D' : 'PHOTO',
           src: fileResponse.src,
           isEnvironmentAsset: false,
-          status: 'SUCCESS'
+          status: 'SUCCESS',
+          source: 'OWN'
         };
       });
 
@@ -110,7 +111,8 @@ const AssetService = {
           type: (fileResponse.type === 'model/gltf-binary' || fileResponse.originalName.endsWith('.glb')) ? 'MODEL_3D' : 'PHOTO',
           src: fileResponse.src,
           isEnvironmentAsset: false,
-          status: 'SUCCESS'
+          status: 'SUCCESS',
+          source: 'OWN'
         };
       });
   

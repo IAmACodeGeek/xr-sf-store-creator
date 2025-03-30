@@ -320,7 +320,8 @@ const DraggableAssetContainer = ({
         isEnvironmentAsset: true,
         status: envAsset.status,
         position: pos,
-        scale: envScale
+        scale: envScale,
+        source: envAsset.source
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -343,7 +344,8 @@ const DraggableAssetContainer = ({
         isEnvironmentAsset: true,
         status: envAsset.status,
         position: pos,
-        scale: envScale
+        scale: envScale,
+        source: envAsset.source
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -386,7 +388,8 @@ const DraggableAssetContainer = ({
         status: envAsset.status,
         position: pos,
         rotation: rot,
-        scale: envScale
+        scale: envScale,
+        source: envAsset.source
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
@@ -422,7 +425,8 @@ const DraggableAssetContainer = ({
         status: envAsset.status,
         position: pos,
         rotation: rot,
-        scale: envScale
+        scale: envScale,
+        source: envAsset.source
       };
 
       modifyEnvAsset(newEnvAsset.id, newEnvAsset);
