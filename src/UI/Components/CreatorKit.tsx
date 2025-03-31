@@ -1576,6 +1576,21 @@ export const CreatorKit = () => {
                 >
                   {envAsset.name}
                 </Typography>
+                {envAsset.source === 'OWN' && <Box
+                  component="img"
+                  src="icons/Dustbin.svg"
+                  sx={{
+                    width: "30px", height: "30px",
+                    opacity: (envAsset?.isEnvironmentAsset) ? 0.7 : 0.4,
+                    "&:hover": {
+                      cursor: (envAsset?.isEnvironmentAsset) ? "pointer" : "default",
+                      opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.4
+                    }
+                  }}
+                  onClick={() => {
+                    
+                  }}
+                />}
               </Box>
             </span>
           );
@@ -1668,6 +1683,23 @@ export const CreatorKit = () => {
           >
             {envAsset.name}
           </Typography>
+          {envAsset.source === 'OWN' && <Box
+            component="img"
+            src="icons/Dustbin.svg"
+            sx={{
+              width: "30px", height: "30px",
+              opacity: (envAsset?.isEnvironmentAsset) ? 0.7 : 0.4,
+              "&:hover": {
+                cursor: (envAsset?.isEnvironmentAsset) ? "pointer" : "default",
+                opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.4
+              }
+            }}
+            onClick={async () => {
+              if(!brandData) return;
+              const result = await AssetService.deleteAssetFile(brandData.brand_name, envAsset.id);
+              console.log(result);
+            }}
+          />}
         </Box>
         <AssetPane/>
       </Box>

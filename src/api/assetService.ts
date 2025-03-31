@@ -3,6 +3,7 @@ import { showPremiumPopup } from "@/UI/Components/PremiumRequired";
 
 const UPLOAD_URL = "https://us-central1-global-road-449105-e7.cloudfunctions.net/Assets-Uploading";
 const IMPORT_URL = 'https://asset-importing-934416248688.us-central1.run.app';
+const DELETE_URL = 'https://asset-deletion-934416248688.us-central1.run.app';
 
 const ALLOWED_MIME_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/svg+xml', 'model/gltf-binary'];
 
@@ -123,6 +124,34 @@ const AssetService = {
     }
     
     return {};
+  },
+
+  deleteAssetFile: async function (brandName: string, envAssetId: string): Promise<{status: number, id: string | null}> {
+    try {
+      const response = await fetch(DELETE_URL, {
+        method: 'POST',
+        headers: {
+          'x-shopify-domain': brandName
+        },
+        body: JSON.stringify({
+          filePath: envAssetId
+        })
+      });
+      
+      const resultJSON = await response.json();
+
+      return {
+        status: response.status,
+        id: resultJSON.filePath
+      };
+    }
+    catch(error){
+      console.error(error);
+      return {
+        status: 500,
+        id: null
+      };
+    }
   }
 }
 
