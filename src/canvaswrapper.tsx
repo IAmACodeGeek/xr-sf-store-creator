@@ -13,7 +13,7 @@ import { AssetService } from "./api/assetService.js";
 export default function CanvasWrapper() {
   // Load brand data
   const { brandData, setBrandData } = useBrandStore();
-  const [brandStatus, setBrandStatus] = useState<'LOADING' | 'VALID' | 'INVALID' | null>(null);
+  const [brandStatus, setBrandStatus] = useState<'VALID' | 'INVALID' | null>(null);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -28,7 +28,6 @@ export default function CanvasWrapper() {
           return;
         }
 
-        setBrandStatus('LOADING');
         BrandService.fetchBrandData(brandName).then((response) => {
           if (response.status && response.status === 404) {
             setBrandStatus('INVALID');

@@ -70,13 +70,9 @@ export default function Login() {
         const data = await postResponse.json();
 
         console.log(data);
-        console.log(brandNameFromQuery);
-        console.log(data["brand_name"]);
 
         // E) Compare brandName from response with brandNameFromQuery
         if (brandNameFromQuery && data["brand_name"] === brandNameFromQuery) {
-          console.log(brandNameFromQuery);
-          console.log(data["brand_name"]);
           // MATCH => brand environment is correct
           toast.success("Successful: brand configuration matches!");
           // Optionally navigate to /canvas or /dashboard
