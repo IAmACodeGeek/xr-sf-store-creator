@@ -19,8 +19,6 @@ export default function CanvasWrapper() {
     const queryParams = new URLSearchParams(window.location.search);
     const brandName = queryParams.get('brandName');
     
-    if(brandStatus !== null) return;
-    
     async function fetchBrandDetails(){
       try{
         if (!brandName) {
