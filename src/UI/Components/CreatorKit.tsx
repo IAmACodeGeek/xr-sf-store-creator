@@ -136,14 +136,14 @@ export const CreatorKit = () => {
       if(event.target.checked){
         // Check if the number of products with this new one is <= 20
         if(Object.values(envProducts).filter((envProduct) => envProduct.isEnvironmentProduct).length >= 20){
-          showPremiumPopup("Your current plan supports up to 20 products. To unlock more, please reach out to our sales team for exclusive options.");
+          showPremiumPopup("Your current plan supports up to 20 products. Reach out to our sales team to unlock more exclusive options.");
           return;
         }
         // Check if there are more than 5 product models
         if(
           Object.values(envProducts).find((envProduct) => envProduct.id === parameters.productId)?.type === "MODEL_3D" && 
           Object.values(envProducts).filter((envProduct) => envProduct.type === "MODEL_3D" && envProduct.isEnvironmentProduct).length >=5){
-            showPremiumPopup("Your current plan supports only up to 5 product models. To unlock more, please reach out to our sales team for exclusive options.");
+            showPremiumPopup("Your current plan supports only up to 5 product models. Reach out to our sales team to unlock more exclusive options.");
             return;
           }
       }
@@ -175,7 +175,7 @@ export const CreatorKit = () => {
       const envAsset = envAssets[parameters.assetId || -1];
       if(event.target.checked){
         if(Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset).length >= 5){
-          showPremiumPopup("Your current plan supports only up to assets. To unlock more, please reach out to our sales team for exclusive options.");
+          showPremiumPopup("Your current plan supports only up to 5 assets. Reach out to our sales team to unlock more exclusive options.");
           return;
         }
 
@@ -1028,7 +1028,7 @@ export const CreatorKit = () => {
         // Ensure there are not more than 5 model products
         if(type === "MODEL_3D"){
           if(Object.values(envProducts).filter((envProduct) => (envProduct.type === "MODEL_3D" && envProduct.isEnvironmentProduct)).length >= 5){
-            showPremiumPopup("Your current plan supports only up to 5 product models. To unlock more, please reach out to our sales team for exclusive options.");
+            showPremiumPopup("Your current plan supports only up to 5 product models. Reach out to our sales team to unlock more exclusive options.");
             return;
           }
         }
@@ -1376,7 +1376,7 @@ export const CreatorKit = () => {
         return;
       }
       if(!brandData) return;
-      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.keys(envAssets).length).then((result) => {
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset && envAsset.source === 'OWN').length).then((result) => {
         if(!result || result.assets) return;
         Object.keys(result.assets).forEach((id) => {
           modifyEnvAsset(id, result.assets[id]);
@@ -1401,7 +1401,7 @@ export const CreatorKit = () => {
       }
       
       if(!brandData) return;
-      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.keys(envAssets).length).then((result) => {
+      await AssetService.uploadAssetFiles(brandData.brand_name, validFiles, Object.values(envAssets).filter((envAsset) => envAsset.isEnvironmentAsset && envAsset.source === 'OWN').length).then((result) => {
         if(!result || !result.assets) return;
         Object.keys(result.assets).forEach((id) => {
           modifyEnvAsset(id, result.assets[id]);

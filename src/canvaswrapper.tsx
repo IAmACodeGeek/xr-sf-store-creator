@@ -32,7 +32,7 @@ export default function CanvasWrapper() {
             return;
           }
 
-          console.log(response);
+          console.log("BrandService:", response);
           setBrandStatus('VALID');
           setBrandData(response);
         });

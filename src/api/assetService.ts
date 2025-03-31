@@ -47,7 +47,7 @@ const AssetService = {
 
     // Limit the number of assets to 5
     if(files.length + existingAssetCount > 5){
-      showPremiumPopup("Your current plan supports up to 5 assets. To unlock more, please reach out to our sales team for exclusive options.");
+      showPremiumPopup("Your current plan supports up to 5 assets. Reach out to our sales team to unlock more exclusive options.");
       return;
     }
   
