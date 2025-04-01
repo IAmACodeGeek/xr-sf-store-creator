@@ -69,6 +69,14 @@ const RedirectToAuth = () => {
 
 // eslint-disable-next-line react-refresh/only-export-components
 function AppRouter() {
+  // Check if mobile
+  const checkIfMobile = () => {
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|Opera Mini|Kindle|Silk|Mobile|Tablet|Touch/i.test(navigator.userAgent)
+    );
+  }
+  const [isMobile, setIsMobile] = useState(checkIfMobile);
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -80,22 +88,38 @@ function AppRouter() {
     return <div>Loading...</div>;
   }
 
-  return (
-    <GoogleOAuthProvider clientId={clientId}>
-      <Router>
-        <QueryParamsPreserver>
-          <Routes>
-            <Route path="/auth" element={<Login />} />
-            <Route
-              path="/canvas"
-              element={<ProtectedRoute component={CanvasWrapper} />}
-            />
-            <Route path="*" element={<RedirectToAuth />} />
-          </Routes>
-        </QueryParamsPreserver>
-      </Router>
-    </GoogleOAuthProvider>
-  );
+  if(!isMobile) {
+    return (
+      <GoogleOAuthProvider clientId={clientId}>
+        <Router>
+          <QueryParamsPreserver>
+            <Routes>
+              <Route path="/auth" element={<Login />} />
+              <Route
+                path="/canvas"
+                element={<ProtectedRoute component={CanvasWrapper} />}
+              />
+              <Route path="*" element={<RedirectToAuth />} />
+            </Routes>
+          </QueryParamsPreserver>
+        </Router>
+      </GoogleOAuthProvider>
+    );
+  }
+  else{
+    return (
+      <div style={{
+        padding: 20, boxSizing: "border-box",
+        display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+        width: "100vw", height: "100vh"
+      }}>
+        <h3 style={{
+          fontFamily: "Poppins, sans-seriff", fontWeight: "bold", textAlign: "center",
+          color: "#f26e02"
+        }}>Please open the store builder on your desktop!</h3>
+      </div>
+    );
+  }
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

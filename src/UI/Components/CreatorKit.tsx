@@ -13,7 +13,7 @@ import {showPremiumPopup} from './PremiumRequired';
 
 export const CreatorKit = () => {
   const { products } = useComponentStore();
-  const {envAssets, modifyEnvAsset, activeAssetId, setActiveAssetId} = useEnvAssetStore();
+  const {envAssets, modifyEnvAsset, setEnvAssets, activeAssetId, setActiveAssetId} = useEnvAssetStore();
   const { envProducts, modifyEnvProduct, activeProductId, setActiveProductId } = useEnvProductStore();
   const {toolType, setToolType} = useToolStore();
   const {brandData} = useBrandStore();
@@ -1502,6 +1502,22 @@ export const CreatorKit = () => {
     }
   }, [activeAssetId]);
 
+  // Delete asset function
+  const deleteAsset = async(id: string) => {
+    if(!brandData) return;
+    const result = await AssetService.deleteAssetFile(brandData.brand_name, id);
+    
+    console.log(result);
+    if(result.status === 200 && result.id){
+      const newEnvAssets = envAssets;
+      delete newEnvAssets[result.id];
+      if(activeAssetId === result.id){
+        setActiveAssetId(null);
+      }
+      setEnvAssets(newEnvAssets);
+    }
+  };
+
   const AssetList = () => {
     return ( !activeAssetId &&
       <Box
@@ -1587,9 +1603,7 @@ export const CreatorKit = () => {
                       opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.4
                     }
                   }}
-                  onClick={() => {
-                    
-                  }}
+                  onClick={() => deleteAsset(envAsset.id)}
                 />}
               </Box>
             </span>
@@ -1694,11 +1708,7 @@ export const CreatorKit = () => {
                 opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.4
               }
             }}
-            onClick={async () => {
-              if(!brandData) return;
-              const result = await AssetService.deleteAssetFile(brandData.brand_name, envAsset.id);
-              console.log(result);
-            }}
+            onClick={() => deleteAsset(envAsset.id)}
           />}
         </Box>
         <AssetPane/>

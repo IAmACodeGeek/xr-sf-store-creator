@@ -129,9 +129,10 @@ const AssetService = {
   deleteAssetFile: async function (brandName: string, envAssetId: string): Promise<{status: number, id: string | null}> {
     try {
       const response = await fetch(DELETE_URL, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
-          'x-shopify-domain': brandName
+          'x-shopify-domain': brandName,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           filePath: envAssetId
@@ -142,7 +143,7 @@ const AssetService = {
 
       return {
         status: response.status,
-        id: resultJSON.filePath
+        id: resultJSON.deletedFile
       };
     }
     catch(error){
