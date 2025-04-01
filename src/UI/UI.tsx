@@ -11,6 +11,8 @@ import ReactAudioPlayer from "react-audio-player";
 import ModalWrapper from "@/world/ModalWrapper";
 import ProductSearcher from "@/UI/Components/ProductSearcher";
 import { CreatorKit } from "./Components/CreatorKit";
+import DiamondIcon from "@mui/icons-material/Diamond";
+import { showPremiumPopup } from "./Components/PremiumRequired";
 
 const customDriverStyles = `
   .driver-popover {
@@ -194,7 +196,19 @@ const UI = () => {
   return (
     <div className="ui-root">
       <div className={styles.iconsContainer}>
-        <img src="/icons/Search.svg" alt="Search" className={styles.icon} onClick={openProductSearcher} />
+        <div className={styles.iconWithPremiumContainer}
+          onClick={() => {
+            showPremiumPopup('Upgrade to Premium and unlock this feature. Contact sales right away!')
+          }}
+        >
+          <img src="/icons/Search.svg" alt="Search" className={styles.icon}/>
+          <DiamondIcon style={{
+            color: 'gold',
+            position: 'absolute',
+            top: '0.2vw', right: '0.2vw',
+            width: '1vw'
+          }}/>
+        </div>
         <img src="/icons/Settings.svg"  alt="Settings" className={styles.icon} onClick={openSettingsModal} />
         <img src="/icons/Help.svg" alt="Help" className={styles.icon} onClick={startTour}/>
       </div>

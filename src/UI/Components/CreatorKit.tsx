@@ -1599,7 +1599,7 @@ export const CreatorKit = () => {
                     width: "30px", height: "30px",
                     opacity: (envAsset?.isEnvironmentAsset) ? 0.7 : 0.4,
                     "&:hover": {
-                      cursor: (envAsset?.isEnvironmentAsset) ? "pointer" : "default",
+                      cursor: "pointer",
                       opacity: (envAsset?.isEnvironmentAsset) ? 1 : 0.4
                     }
                   }}

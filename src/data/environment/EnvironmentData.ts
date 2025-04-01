@@ -87,22 +87,16 @@ const environmentData: EnvironmentData = {
     placeHolderData: castlePlaceHolderData,
     initialGSAP: {
       start: {
-        position: [-150, 100, 200],
-        rotation: [-30, -60, 0],
-        duration: 0
+        position: [-4.62, 2.3, 46],
+        rotation: [0, -30, 0],
+        duration: 0,
       },
       update: [
         {
-          position: [-4.62, 2.3, 46],
-          rotation: [0, -30, 0],
-          duration: 4,
-          ease: "power2.in"
-        },
-        {
           position: [10, 2.5, -25],
           rotation: [0, 0, 0],
-          duration: 5,
-          ease: "power2.out"
+          duration: 4,
+          ease: "power2.inOut"
         }
       ]
     },
