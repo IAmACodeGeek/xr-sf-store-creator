@@ -13,9 +13,8 @@ import LockIcon from "@mui/icons-material/Lock";
 import { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
-import { ToastContainer,toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -50,6 +49,15 @@ export default function Login() {
           secure: true,
           sameSite: "Strict",
         });
+        
+        // Store the initial brandName in a secure cookie
+        if (brandNameFromQuery) {
+          Cookies.set("brandName", brandNameFromQuery, {
+            expires: 1 / 24, // 1 hour
+            secure: true,
+            sameSite: "Strict",
+          });
+        }
 
         const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -81,6 +89,7 @@ export default function Login() {
           // MISMATCH => Clear localStorage + remove cookies + show error
           localStorage.removeItem("user");
           Cookies.remove("accessToken");
+          Cookies.remove("brandName");
 
           toast.error("It is not your configuration");
         }
