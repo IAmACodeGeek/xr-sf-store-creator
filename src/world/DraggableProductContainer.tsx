@@ -448,9 +448,9 @@ const DraggableProductContainer = ({
   useEffect(() => {
     handleObjectMove();
   }, [activeProductId]);
-
+ 
   return (
-    <RigidBody type="fixed">
+    <RigidBody type="fixed" collisionGroups={0}>
       <group
         position={[0, 0, 0]}
         rotation={new Euler(0, 0, 0, 'YZX')}
