@@ -2,13 +2,13 @@ import bigRoomPlaceHolderData from "./placeHolderData/BigRoom";
 import castlePlaceHolderData from "./placeHolderData/Castle";
 import singleRoomPlaceHolderData from "./placeHolderData/SingleRoom";
 
-import PlaceHolder from "./placeHolderData/PlaceHolderData";
+import PlaceHolderData from "./placeHolderData/PlaceHolderData";
 
 interface EnvironmentData {
   [environment_name: string]: {
     playerSpeed: number;
     playerHeight: number;
-    placeHolderData: PlaceHolder[];
+    placeHolderData: PlaceHolderData[];
     initialGSAP: {
       start: {
         position: [number, number, number];
@@ -68,12 +68,12 @@ const environmentData: EnvironmentData = {
     ],
     brandPosters: [
       {
-        position: [-5, 3.2, 13.35],
+        position: [-5, 3.2, 14.3],
         rotation: [0, 90, 0],
         scale: 4
       },
       {
-        position: [-5, 3.2, -13.35],
+        position: [-5, 3.2, -12.4],
         rotation: [0, 90, 0],
         scale: 4
       }

@@ -10,7 +10,7 @@ const BigRoomModel = () => {
   return (
     <group>
 
-      <group position={[6, 0, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[0.9, 0.9, 0.9]} dispose={null}>
+      <group position={[6, 0, 1]} rotation={[Math.PI / 2, 0, 0]} scale={[0.9, 0.9, 0.9]} dispose={null}>
         <mesh
             castShadow
             receiveShadow

@@ -1,8 +1,7 @@
 const BigRoomLighting = () => {
-  const shadowOffset = 50;
   return (
     <>
-      <ambientLight intensity={3} />
+      <ambientLight intensity={2.5} />
     </>
   );
 };
