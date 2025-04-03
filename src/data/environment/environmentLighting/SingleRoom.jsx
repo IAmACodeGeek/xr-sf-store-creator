@@ -2,10 +2,10 @@ const SingleRoomLighting = () => {
   const shadowOffset = 50;
   return (
     <>
-      <ambientLight intensity={5} />
+      <ambientLight intensity={2.5} />
       <directionalLight
         castShadow
-        intensity={2.5}
+        intensity={1.5}
         shadow-mapSize={4096}
         shadow-camera-top={shadowOffset}
         shadow-camera-bottom={-shadowOffset}
