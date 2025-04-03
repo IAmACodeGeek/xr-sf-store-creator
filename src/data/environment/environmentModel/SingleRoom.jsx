@@ -10,20 +10,18 @@ const SingleRoomModel = () => {
   return (
     <group position={[1, 0, 0]} rotation={[Math.PI / 2, 0, 0]} scale={0.05}>
       <mesh
-        geometry={memoizedNodes.polySurface104.geometry}
-        material={memoizedMaterials.phong14}
-        position={[0, 0, -54.545]}
-      />
-      <mesh
-        geometry={memoizedNodes.polySurface104001.geometry}
-        material={memoizedMaterials['Material.002']}
-      />
-      <mesh
-        geometry={memoizedNodes.polySurface107.geometry}
-        material={memoizedMaterials.phong14}
-        position={[-16.968, 51.203, 8.892]}
-        scale={634.876}
-      />
+          castShadow
+          receiveShadow
+          geometry={memoizedNodes.polySurface104004.geometry}
+          material={memoizedMaterials['phong14.001']}
+          position={[0, 0, -54.545]}
+        />
+        <mesh
+          castShadow
+          receiveShadow
+          geometry={memoizedNodes.polySurface104005.geometry}
+          material={memoizedMaterials['Luxurious White Marble']}
+        />
     </group>
   );
 };

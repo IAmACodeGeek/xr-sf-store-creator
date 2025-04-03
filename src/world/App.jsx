@@ -11,7 +11,6 @@ import Skybox from "./Skybox";
 import environmentData from "@/data/environment/EnvironmentData";
 import { useBrandStore, useEnvironmentStore } from "@/stores/ZustandStores";
 import Lights from "./Lights.jsx";
-const shadowOffset = 50;
 
 export const App = () => {
   const [isMobile, setIsMobile] = useState(false);
