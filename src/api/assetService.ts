@@ -1,9 +1,9 @@
 import { EnvAsset, useEnvAssetStore } from "@/stores/ZustandStores";
 import { showPremiumPopup } from "@/UI/Components/PremiumRequired";
 
-const UPLOAD_URL = "https://us-central1-global-road-449105-e7.cloudfunctions.net/Assets-Uploading";
-const IMPORT_URL = 'https://asset-importing-934416248688.us-central1.run.app';
-const DELETE_URL = 'https://asset-deletion-934416248688.us-central1.run.app';
+const UPLOAD_URL = "https://assets-uploading-864197837687.asia-south1.run.app";
+const IMPORT_URL = 'https://assets-importing-864197837687.asia-south1.run.app';
+const DELETE_URL = 'https://asset-deletion-864197837687.us-central1.run.app';
 
 const ALLOWED_MIME_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/svg+xml', 'model/gltf-binary'];
 
