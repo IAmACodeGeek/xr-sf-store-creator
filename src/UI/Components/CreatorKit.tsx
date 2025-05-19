@@ -1311,7 +1311,10 @@ export const CreatorKit = () => {
             }
           }}
           onClick={() => {
-            if(assetSource !== "LIBRARY") setAssetSource("LIBRARY");
+            if(assetSource !== "LIBRARY") {
+              setAssetSource("LIBRARY");
+              setActiveAssetId(null);
+            }
           }}
           className="LibraryButton"
         >
@@ -1332,7 +1335,10 @@ export const CreatorKit = () => {
             }
           }}
           onClick={() => {
-            if(assetSource !== "OWN") setAssetSource("OWN");
+            if(assetSource !== "OWN") {
+              setAssetSource("OWN");
+              setActiveAssetId(null);
+            }
           }}
           className="OwnButton"
         >
