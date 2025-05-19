@@ -1,8 +1,8 @@
 import { EnvAsset, EnvProduct } from "@/stores/ZustandStores";
 
 const GET_URL =
-  "https://get-env-data-864197837687.asia-south1.run.app?brandname=";
-const UPLOAD_URL = "https://store-env-data-864197837687.asia-south1.run.app";
+  "https://get-env-data-201137466588.asia-south1.run.app?brandname=";
+const UPLOAD_URL = "https://storeenvdata-201137466588.asia-south1.run.app";
 
 const EnvStoreService = {
   getEnvData: async function (

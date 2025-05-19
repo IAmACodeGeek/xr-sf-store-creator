@@ -3,8 +3,8 @@ import Product from "../Types/Product";
 import { EnvAsset } from "@/stores/ZustandStores";
 
 const BASE_URL =
-  "https://function-14-864197837687.asia-south1.run.app?brandname=";
-const LIBRARY_URL = "https://ownstoreasset-864197837687.asia-south1.run.app";
+  "https://function-14-201137466588.asia-south1.run.app?brandname=";
+const LIBRARY_URL = "https://ownstoreasset-201137466588.asia-south1.run.app";
 
 interface ProductResponse {
   data: {
