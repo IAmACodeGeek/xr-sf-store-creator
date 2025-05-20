@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { useComponentStore } from "../stores/ZustandStores";
+import { useSearchStore } from "../stores/ZustandStores";
 
 export const ProductGSAPUtil = ({ setAnimating, playerRef }) => {
   const { camera } = useThree();
-  const { searchResult, initiateSearchGSAP, resetSearchGSAP } = useComponentStore();
+  const { searchResult, initiateSearchGSAP, resetSearchGSAP } = useSearchStore();
 
   useEffect(() => {
     if (!initiateSearchGSAP || !searchResult || !playerRef.current) return;
@@ -13,7 +13,7 @@ export const ProductGSAPUtil = ({ setAnimating, playerRef }) => {
     setAnimating(true);
     const targetPosition = {
       x: searchResult.x,
-      y: searchResult.y + 1.9 ,
+      y: searchResult.y+1,
       z: searchResult.z+3,
     };
 

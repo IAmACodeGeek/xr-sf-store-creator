@@ -1,7 +1,7 @@
 import { TextField, Typography, Box } from "@mui/material";
 import { useState, useEffect, useRef, useMemo } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { useComponentStore } from "../../stores/ZustandStores";
+import { useComponentStore, useEnvProductStore, useSearchStore } from "../../stores/ZustandStores";
 import Product from "../../Types/Product";
 import Fuse from "fuse.js";
 
@@ -9,6 +9,17 @@ const ProductSearcher = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([] as Product[]);
   const { closeProductSearcher, products } = useComponentStore();
+  const { envProducts } = useEnvProductStore();
+  const { setSearchResult, startSearchGSAP } = useSearchStore();
+
+  // Filter products to only include those that are in the environment
+  const environmentProducts = useMemo(() => {
+    return products.filter(product => 
+      envProducts[product.id] && 
+      envProducts[product.id].isEnvironmentProduct && 
+      envProducts[product.id].position
+    );
+  }, [products, envProducts]);
 
   const fuseOptions = {
     keys: [
@@ -19,24 +30,40 @@ const ProductSearcher = () => {
     includeScore: true, 
   };
 
-
   const fuse = useMemo(
-    () => new Fuse(products, fuseOptions),
-    [products]
+    () => new Fuse(environmentProducts, fuseOptions),
+    [environmentProducts]
   );
 
   useEffect(() => {
     const results = searchTerm
       ? fuse.search(searchTerm).map((result) => result.item)
-      : products;
+      : environmentProducts;
     setSearchResults(results);
-  }, [searchTerm, fuse, products]);
+  }, [searchTerm, fuse, environmentProducts]);
 
   const searcherRef = useRef<HTMLDivElement>(null);
   const onClickOutside = (event: React.MouseEvent<HTMLDivElement>) => {
     const searcher = searcherRef.current;
     if (searcher && !searcher.contains(event.target as Node))
       closeProductSearcher();
+  };
+
+  const handleProductClick = (product: Product) => {
+    // Find the corresponding environment product
+    const envProduct = envProducts[product.id];
+    
+    // Since we're filtering for environment products with positions,
+    // this check should always pass, but keeping it for safety
+    if (envProduct && envProduct.position) {
+      setSearchResult({
+        x: envProduct.position[0],
+        y: envProduct.position[1],
+        z: envProduct.position[2]
+      });
+      startSearchGSAP();
+      closeProductSearcher();
+    }
   };
 
   return (
@@ -79,7 +106,7 @@ const ProductSearcher = () => {
           className="SearchInput"
         >
           <TextField
-            placeholder="Looking for a product?"
+            placeholder="Search for placed products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="SearchField"
@@ -127,60 +154,70 @@ const ProductSearcher = () => {
           }}
           className="SearchItems"
         >
-          {searchResults &&
-            searchResults.map((product) => {
-              return (
+          {searchResults.length > 0 ? (
+            searchResults.map((product) => (
+              <Box
+                key={product.id}
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  height: { sm: "12%", md: "15%", lg: "25%" },
+                  gap: "30px",
+                  padding: "3px",
+                  boxSizing: "border-box",
+                  "&:hover": {
+                    cursor: "pointer",
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  },
+                }}
+                className="SearchItem"
+                onClick={() => handleProductClick(product)}
+              >
                 <Box
-                  key={product.id}
+                  component="img"
+                  src={product.images[0]?.src}
                   sx={{
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    height: { sm: "12%", md: "15%", lg: "25%" },
-                    gap: "30px",
-                    padding: "3px",
-                    boxSizing: "border-box",
-                    "&:hover": {
-                      cursor: "pointer",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                    },
+                    height: "40px",
+                    width: "40px",
+                    minWidth: "40px",
+                    backgroundColor: "rgb(255, 255, 255)",
+                    objectFit: "contain",
                   }}
-                  className="SearchItem"
-                  onClick={() => {
-                    
+                  className="SearchItemImage"
+                />
+                <Typography
+                  sx={{
+                    fontSize: { xs: "16px", sm: "20px" },
+                    fontFamily: "'Poppins', sans-serif",
+                    fontWeight: "normal",
+                    color: "rgba(255, 255, 255, 0.83)",
+                    textAlign: "left",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
                   }}
+                  className="SearchItemTitle"
                 >
-                  <Box
-                    component="img"
-                    src={product.images[0]?.src}
-                    sx={{
-                      height: "40px",
-                      width: "40px",
-                      minWidth: "40px",
-                      backgroundColor: "rgb(255, 255, 255)",
-                      objectFit: "contain",
-                    }}
-                    className="SearchItemImage"
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "16px", sm: "20px" },
-                      fontFamily: "'Poppins', sans-serif",
-                      fontWeight: "normal",
-                      color: "rgba(255, 255, 255, 0.83)",
-                      textAlign: "left",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                    }}
-                    className="SearchItemTitle"
-                  >
-                    {product.title}
-                  </Typography>
-                </Box>
-              );
-            })}
+                  {product.title}
+                </Typography>
+              </Box>
+            ))
+          ) : (
+            <Typography
+              sx={{
+                fontSize: { xs: "16px", sm: "18px" },
+                fontFamily: "'Poppins', sans-serif",
+                fontWeight: "normal",
+                color: "rgba(255, 255, 255, 0.7)",
+                textAlign: "center",
+                marginTop: "20px",
+              }}
+            >
+              No products placed in environment
+            </Typography>
+          )}
         </Box>
       </Box>
     </div>

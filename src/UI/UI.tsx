@@ -196,19 +196,12 @@ const UI = () => {
   return (
     <div className="ui-root">
       <div className={styles.iconsContainer}>
-        <div className={styles.iconWithPremiumContainer}
-          onClick={() => {
-            showPremiumPopup('Upgrade to Premium and unlock this feature. Contact sales right away!')
-          }}
-        >
-          <img src="/icons/Search.svg" alt="Search" className={styles.icon}/>
-          <DiamondIcon style={{
-            color: 'gold',
-            position: 'absolute',
-            top: '0.2vw', right: '0.2vw',
-            width: '1vw'
-          }}/>
-        </div>
+        <img 
+          src="/icons/Search.svg" 
+          alt="Search" 
+          className={styles.icon} 
+          onClick={openProductSearcher}
+        />
         <img src="/icons/Settings.svg"  alt="Settings" className={styles.icon} onClick={openSettingsModal} />
         <img src="/icons/Help.svg" alt="Help" className={styles.icon} onClick={startTour}/>
       </div>
