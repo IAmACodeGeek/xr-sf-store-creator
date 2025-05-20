@@ -6,50 +6,56 @@
 }
 
 .loader-container-container {
-  width: 100%;
-  height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  background-color: #000;
-  position: relative;
-  z-index: 1001;
+  gap: 2rem;
 }
-
 
 .loader-background {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
+  background-color: #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #000;
-  position: relative;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-  opacity: 1;
-  /* Fully visible */
-  transition: opacity 3s ease;
-  /* Smooth fade-out effect */
-}
-
-.loader-background.fade-out {
-  opacity: 0;
-  /* Fully transparent */
-  pointer-events: none;
-  /* Prevent interaction after fading out */
+  z-index: 9999;
 }
 
 .loader-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  position: relative;
-  z-index: 2;
+  gap: 3rem;
+  padding: 2rem;
 }
 
+/* Header Section */
+.loader-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.powered-by-loader {
+  width: 120px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+.loading-text {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: "SF Pro Display", sans-serif;
+  margin-bottom: 0.5rem;
+}
+
+/* Spinner Section */
 .spinner {
   width: 70.4px;
   height: 70.4px;
@@ -58,10 +64,9 @@
   animation: spinner 1.6s infinite ease;
   transform-style: preserve-3d;
   margin-bottom: 30px;
-  /* Increased spacing below the spinner */
 }
 
-.spinner>div {
+.spinner > div {
   background-color: var(--clr-alpha);
   height: 100%;
   position: absolute;
@@ -97,110 +102,65 @@
   transform: translateZ(35.2px);
 }
 
+/* Progress Section */
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.progress-text {
+  color: #fff;
+  font-size: 1.2rem;
+  font-family: "SF Pro Display", sans-serif;
+  opacity: 0.8;
+}
+
+.progress-percentage {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: "SF Pro Display", sans-serif;
+}
+
+/* Loading Line */
+.loading-line {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 4px;
+  background: linear-gradient(to right, #e1401d, #f39c12, #e1401d);
+  background-size: 200% 100%;
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.6);
+  transform-origin: left;
+  z-index: 10000;
+  transition: transform 0.3s ease-out, background-position 0.3s ease-out;
+}
+
+/* Animations */
 @keyframes spinner {
   0% {
     transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
   }
-
   50% {
     transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
   }
-
   100% {
     transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
   }
 }
 
-.loading-text-container {
-  margin-top: 20px;
-  /* Adjusted to give more spacing from the spinner */
-  text-align: center;
-}
-
-.loading-text {
-  color: #fff;
-  font-size: 36px;
-  font-family: "SF Pro Display", sans-serif;
-  margin-bottom: 10px;
-  /* Added spacing between lines of text */
-}
-
-.typewriter {
-  overflow: hidden;
-  border-right: 0.15em solid #e1401d;
-  white-space: nowrap;
-  margin: 0 auto;
-  letter-spacing: 0.15em;
-  animation: typing 6s steps(40, end), blink-caret 0.75s step-end infinite;
-}
-
-@keyframes typing {
-
-  0%,
-  100% {
-    width: 0;
-  }
-
-  50% {
-    width: 100%;
-  }
-}
-
-@keyframes blink-caret {
-
-  from,
-  to {
-    border-color: transparent;
-  }
-
-  50% {
-    border-color: #e1401d;
-  }
-}
-
-/* Loading Line */
-.loading-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  /* Adjust the height as needed */
-  background: linear-gradient(to right, #e1401d, #f39c12, #e1401d);
-  /* Gradient effect for a glowing look */
-  background-size: 200% 100%;
-  animation: loading 4s steps(10, end) forwards;
-  /* More steps for a realistic effect */
-  box-shadow: 0 0 10px rgba(255, 87, 34, 0.6);
-  /* Glowing effect */
-  transform-origin: left;
-  /* Start the scaling from the left */
-}
-
 @keyframes loading {
   0% {
     transform: scaleX(0);
-    /* Start with no width */
     transform-origin: left;
-    /* Ensure scaling starts from the left */
     background-position: 0% 0%;
   }
-
   100% {
     transform: scaleX(1);
-    /* Expand to full width */
     transform-origin: left;
-    /* Keep the scaling start point at the left */
     background-position: 100% 0%;
   }
-}
-
-.powered-by-loader {
-  max-width: 150px;
-  /* Adjust the size of the image */
-  max-height: 50px;
-  object-fit: contain;
-  /* Maintain aspect ratio */
-  margin-top: 70px;
-  /* Added spacing between the image and text */
 }

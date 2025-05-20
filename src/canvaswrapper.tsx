@@ -20,6 +20,7 @@ import EnvStoreService from "./api/envStoreService.js";
 import { AssetService } from "./api/assetService.js";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import Load from "./UI/Components/Loader";
 
 export default function CanvasWrapper() {
   // Load brand data
@@ -286,33 +287,7 @@ export default function CanvasWrapper() {
       {myProgress >= 100 ? (
         <UI />
       ) : (
-        <div className="video-loader">
-          <video
-            ref={videoRef}
-            src="/media/Intro.MOV"
-            autoPlay
-            muted
-            playsInline
-            onEnded={() => setVideoLoaded(true)}
-          />
-          {videoLoaded && (
-            <>
-              <div className="loading-text">
-                {brandStatus === "INVALID"
-                  ? "Brand name does not exist"
-                  : "Your experience is loading!"}
-              </div>
-              {brandStatus === "VALID" && (
-                <div className="progress-bar">
-                  <div
-                    className="progress-bar-inner"
-                    style={{ width: `${Math.min(myProgress, 100)}%` }}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        <Load progress={myProgress} />
       )}
       {myProgress >= 100 && (
         <div className="canvas-container">
