@@ -59,7 +59,8 @@ const ProductSearcher = () => {
       setSearchResult({
         x: envProduct.position[0],
         y: envProduct.position[1],
-        z: envProduct.position[2]
+        z: envProduct.position[2],
+        face: envProduct.face || 'N' // Default to North if face is not set
       });
       startSearchGSAP();
       closeProductSearcher();

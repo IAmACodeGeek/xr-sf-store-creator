@@ -191,16 +191,16 @@ const useTourStore = create<TourStore>((set) => ({
 
 // Search handling
 interface SearchStore {
-  searchResult: {x: number, y: number, z: number} | undefined,
+  searchResult: {x: number, y: number, z: number, face?: "N" | "S" | "E" | "W"} | undefined,
   initiateSearchGSAP: boolean,
-  setSearchResult: (position: { x: number; y: number; z: number }) => void,
+  setSearchResult: (position: { x: number; y: number; z: number; face?: "N" | "S" | "E" | "W" }) => void,
   startSearchGSAP: () => void,
   resetSearchGSAP: () => void,
 }
 const useSearchStore = create<SearchStore>((set) => ({
   searchResult: undefined,
   initiateSearchGSAP: false,
-  setSearchResult: (position: { x: number; y: number; z: number }) =>
+  setSearchResult: (position: { x: number; y: number; z: number; face?: "N" | "S" | "E" | "W" }) =>
     set({ searchResult: position }),
   startSearchGSAP: () => set({ initiateSearchGSAP: true }),
   resetSearchGSAP: () =>
@@ -221,6 +221,7 @@ interface EnvProduct {
   rotation?: number[];
   scale?: number;
   isEnvironmentProduct: boolean;
+  face?: "N" | "S" | "E" | "W"; // North, South, East, West
 }
 
 interface EnvProductStore {

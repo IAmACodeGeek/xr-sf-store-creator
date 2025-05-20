@@ -662,6 +662,84 @@ export const CreatorKit = () => {
       );
     };
 
+    const FaceSelector = () => {
+      if (!envProduct) return null;
+      const faceOptions = [
+        { label: "North", value: "N" },
+        { label: "South", value: "S" },
+        { label: "East", value: "E" },
+        { label: "West", value: "W" },
+      ];
+      return (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+          }}
+          className="FaceSelector"
+        >
+          <Typography
+            sx={{
+              width: "100%",
+              fontSize: { xs: "20px" },
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: "normal",
+              color: "white",
+              textAlign: "left",
+            }}
+          >
+            Face
+          </Typography>
+          <Typography
+            sx={{
+              width: "100%",
+              fontSize: { xs: "12px" },
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: "normal",
+              color: "rgba(255, 255, 255, 0.6)",
+              textAlign: "left",
+              marginTop: "-4px",
+              marginBottom: "8px",
+            }}
+          >
+            Direction player faces when placing the object
+          </Typography>
+          <Box sx={{ display: "flex", gap: "10px" }}>
+            {faceOptions.map((opt) => (
+              <Button
+                key={opt.value}
+                variant={envProduct.face === opt.value ? "contained" : "outlined"}
+                sx={{
+                  minWidth: "60px",
+                  color: "white",
+                  background: envProduct.face === opt.value
+                    ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)"
+                    : "rgba(77, 177, 255, 0.1)",
+                  border: envProduct.face === opt.value ? "none" : "2px solid #41cbff",
+                  borderRadius: 0,
+                  fontFamily: "'Poppins', sans-serif",
+                  fontSize: "16px",
+                  '&:hover': {
+                    background: envProduct.face === opt.value
+                      ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)"
+                      : "rgba(77, 177, 255, 0.3)",
+                  },
+                }}
+                onClick={() => {
+                  modifyEnvProduct(envProduct.id, { ...envProduct, face: opt.value });
+                }}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      );
+    };
+
     const CustomParamterEntries = () => {
       return (
         <Box
@@ -674,6 +752,7 @@ export const CreatorKit = () => {
           {ThreeAxisParameterBox("POSITION")}
           {ThreeAxisParameterBox("ROTATION")}
           {ThreeAxisParameterBox("SCALE")}
+          {FaceSelector()}
         </Box>
       );
     };

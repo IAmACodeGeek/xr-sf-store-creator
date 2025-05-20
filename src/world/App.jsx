@@ -34,6 +34,12 @@ export const App = () => {
           <Player />
         </Suspense>
         <Products />
+        <BrandPoster 
+          imageUrl={"https://cdn.creazilla.com/cliparts/3868244/compass-rose-clipart-original.png"}
+          position={[0, -0.444, 6]}
+          rotation={[-90, 0, 0]}
+          scale={5}
+        />
         {brandData && (
           <>
             {environmentData[environmentType].televisions && 
