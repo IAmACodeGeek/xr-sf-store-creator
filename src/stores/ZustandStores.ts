@@ -317,6 +317,8 @@ interface BrandData {
   brand_video_url: string;
   environment_name: string;
   email: string;
+  shopify_store_name: string;
+  original_brand_name: string;
 }
 
 interface BrandStore {
