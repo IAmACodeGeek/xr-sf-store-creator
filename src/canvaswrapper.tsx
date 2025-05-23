@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import App from "./world/App.jsx";
@@ -275,10 +275,6 @@ export default function CanvasWrapper() {
       }
     })();
   }, [brandStatus]);
-
-  // Loader video
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const videoRef = useRef(null);
 
   return (
     <div id="container">

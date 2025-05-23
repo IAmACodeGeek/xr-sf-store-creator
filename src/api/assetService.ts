@@ -1,4 +1,4 @@
-import { EnvAsset, useEnvAssetStore } from "@/stores/ZustandStores";
+import { EnvAsset } from "@/stores/ZustandStores";
 import { showPremiumPopup } from "@/UI/Components/PremiumRequired";
 
 const UPLOAD_URL = "https://assets-uploading-201137466588.asia-south1.run.app";

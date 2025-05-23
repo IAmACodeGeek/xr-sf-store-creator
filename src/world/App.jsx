@@ -6,19 +6,15 @@ import { useFrame } from "@react-three/fiber";
 import Television from "./Television";
 import BrandPoster from "./BrandPoster";
 import Products from "./Products";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense } from "react";
 import Skybox from "./Skybox";
 import environmentData from "@/data/environment/EnvironmentData";
 import { useBrandStore, useEnvironmentStore } from "@/stores/ZustandStores";
 import Lights from "./Lights.jsx";
 
 export const App = () => {
-  const [isMobile, setIsMobile] = useState(false);
   const {brandData} = useBrandStore();
   const {environmentType} = useEnvironmentStore();
-  useEffect(() => {
-    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-  }, []);
 
   useFrame(() => {
     TWEEN.update();
