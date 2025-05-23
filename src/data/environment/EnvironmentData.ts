@@ -32,6 +32,11 @@ interface EnvironmentData {
       rotation: [number, number, number];
       scale: number;
     }[];
+    compasses: {
+      position: [number, number, number];
+      rotation: [number, number, number];
+      scale: number;
+    }[];
   };
 }
 
@@ -77,8 +82,8 @@ const environmentData: EnvironmentData = {
         rotation: [0, 90, 0],
         scale: 4
       }
-    ]
-    
+    ],
+    compasses: []
   },
   
   "CASTLE": {
@@ -113,8 +118,10 @@ const environmentData: EnvironmentData = {
         rotation: [2, 90, 0],
         scale: 5
       }
-    ]
+    ],
+    compasses: []
   },
+  
   "SINGLEROOM": {
     playerSpeed: 15,
     playerHeight: 2,
@@ -155,6 +162,13 @@ const environmentData: EnvironmentData = {
         position: [-9, 4.5, -17.1],
         rotation: [0, 0, 0],
         scale: 3
+      }
+    ],
+    compasses: [
+      {
+        position: [0, -0.444, 6],
+        rotation: [-90, 0, 0],
+        scale: 5
       }
     ]
   },
