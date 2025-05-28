@@ -1,18 +1,28 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-  return null;
-};
+import Cookies from "js-cookie";
 
 const useAutoLogin = (redirectPath = "/dashboard") => {
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
-  const hasCheckedRef = useRef(false); // Prevent multiple executions
-  const isCheckingRef = useRef(false); // Prevent concurrent requests
+  const hasCheckedRef = useRef(false);
+  const isCheckingRef = useRef(false);
+
+  const clearAuthData = useCallback(() => {
+    localStorage.removeItem("user");
+    // Use Cookies.remove() with the same options used when setting
+    Cookies.remove("accessToken", {
+      domain: ".strategyfox.in",
+      path: "/",
+    });
+    Cookies.remove("brandName", {
+      domain: ".strategyfox.in",
+      path: "/",
+    });
+    // Also try removing without domain (fallback)
+    Cookies.remove("accessToken");
+    Cookies.remove("brandName");
+  }, []);
 
   const checkAuthentication = useCallback(async () => {
     if (isCheckingRef.current || hasCheckedRef.current) {
@@ -22,13 +32,15 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
     isCheckingRef.current = true;
 
     try {
-      const token = getCookie("accessToken");
+      const token = Cookies.get("accessToken"); // Use Cookies.get() instead of getCookie
 
       if (!token) {
         setIsChecking(false);
         hasCheckedRef.current = true;
         return;
       }
+
+      console.log("Found token, validating with cloud function...");
 
       const response = await fetch(
         "https://function-cookie-validate-201137466588.asia-south1.run.app",
@@ -44,28 +56,29 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
 
       if (response.ok) {
         const authData = await response.json();
+        console.log("Cloud function response:", authData);
 
         if (authData.success && authData.user) {
           const urlParams = new URLSearchParams(window.location.search);
           const brandNameFromQuery = urlParams.get("brandName");
-          const storedBrandName = getCookie("brandName");
+          const storedBrandName = Cookies.get("brandName"); // Use Cookies.get()
+
+          console.log("Brand check:", {
+            brandNameFromQuery,
+            storedBrandName,
+          });
 
           if (!brandNameFromQuery) {
             console.log("No brandName in query - rejecting authentication");
-            localStorage.removeItem("user");
-            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-            if (storedBrandName) {
-              document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-            }
+            clearAuthData();
             setIsChecking(false);
             hasCheckedRef.current = true;
             return;
           }
 
           if (storedBrandName && brandNameFromQuery !== storedBrandName) {
-            localStorage.removeItem("user");
-            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-            document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            console.log("Brand mismatch in cookies - clearing auth");
+            clearAuthData();
             setIsChecking(false);
             hasCheckedRef.current = true;
             return;
@@ -73,6 +86,11 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
 
           try {
             const user = authData.user;
+            console.log(
+              "Verifying brand with function-15 for user:",
+              user.email
+            );
+
             const brandResponse = await fetch(
               "https://function-15-201137466588.asia-south1.run.app",
               {
@@ -83,16 +101,29 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
             );
 
             if (!brandResponse.ok) {
-              throw new Error(`Brand API returned status ${brandResponse.status}`);
+              throw new Error(
+                `Brand API returned status ${brandResponse.status}`
+              );
             }
 
             const brandData = await brandResponse.json();
             console.log("Auto-login brand verification:", brandData);
 
             if (brandData["brand_name"] === brandNameFromQuery) {
+              // Store brand name if not already stored
               if (!storedBrandName) {
-                document.cookie = `brandName=${brandNameFromQuery};expires=${new Date(Date.now() + 60*60*1000).toUTCString()};path=/;secure;samesite=strict`;
+                Cookies.set("brandName", brandNameFromQuery, {
+                  expires: 1 / 24, // 1 hour
+                  secure: true,
+                  sameSite: "None",
+                  domain: ".strategyfox.in",
+                });
               }
+
+              console.log(
+                "Auto-login successful, redirecting to:",
+                redirectPath
+              );
               hasCheckedRef.current = true;
               setIsChecking(false);
               navigate(redirectPath, { replace: true });
@@ -100,50 +131,55 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
             } else {
               console.log("Brand mismatch during auto-login:", {
                 expected: brandNameFromQuery,
-                actual: brandData["brand_name"]
+                actual: brandData["brand_name"],
               });
-              localStorage.removeItem("user");
-              document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-              document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+              clearAuthData();
               setIsChecking(false);
               hasCheckedRef.current = true;
               return;
             }
           } catch (error) {
-            console.error("Brand verification failed during auto-login:", error);
-            localStorage.removeItem("user");
-            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-            document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            console.error(
+              "Brand verification failed during auto-login:",
+              error
+            );
+            clearAuthData();
             setIsChecking(false);
             hasCheckedRef.current = true;
             return;
           }
+        } else {
+          console.log("Cloud function returned unsuccessful response");
         }
+      } else {
+        console.log(
+          "Cloud function validation failed with status:",
+          response.status
+        );
       }
 
-      document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-      
+      // If we reach here, authentication failed
+      clearAuthData();
     } catch (error) {
       console.error("Auto login check failed:", error);
-      localStorage.removeItem("user");
-      document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-      document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+      clearAuthData();
     } finally {
       setIsChecking(false);
       isCheckingRef.current = false;
       hasCheckedRef.current = true;
     }
-  }, [navigate, redirectPath]);
+  }, [navigate, redirectPath, clearAuthData]);
 
   useEffect(() => {
     if (!hasCheckedRef.current) {
+      console.log("Starting auto-login check...");
       checkAuthentication();
     }
 
     return () => {
       isCheckingRef.current = false;
     };
-  }, []); 
+  }, [checkAuthentication]);
 
   return { isChecking };
 };
