@@ -11,8 +11,8 @@ const getCookie = (name: string) => {
 const useAutoLogin = (redirectPath = "/dashboard") => {
   const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
-  const hasCheckedRef = useRef(false); 
-  const isCheckingRef = useRef(false); 
+  const hasCheckedRef = useRef(false); // Prevent multiple executions
+  const isCheckingRef = useRef(false); // Prevent concurrent requests
 
   const checkAuthentication = useCallback(async () => {
     if (isCheckingRef.current || hasCheckedRef.current) {
@@ -50,68 +50,72 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
           const brandNameFromQuery = urlParams.get("brandName");
           const storedBrandName = getCookie("brandName");
 
-          if (brandNameFromQuery) {
-            if (storedBrandName && brandNameFromQuery !== storedBrandName) {
-              localStorage.removeItem("user");
-              document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-              document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-              setIsChecking(false);
-              hasCheckedRef.current = true;
-              return;
-            }
-
-            try {
-              const user = authData.user;
-              const brandResponse = await fetch(
-                "https://function-15-201137466588.asia-south1.run.app",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ email: user.email }),
-                }
-              );
-
-              if (!brandResponse.ok) {
-                throw new Error(`Brand API returned status ${brandResponse.status}`);
-              }
-
-              const brandData = await brandResponse.json();
-              console.log("Auto-login brand verification:", brandData);
-
-              if (brandData["brand_name"] === brandNameFromQuery) {
-                if (!storedBrandName) {
-                  document.cookie = `brandName=${brandNameFromQuery};expires=${new Date(Date.now() + 60*60*1000).toUTCString()};path=/;secure;samesite=strict`;
-                }
-                hasCheckedRef.current = true;
-                navigate(redirectPath, { replace: true });
-                return;
-              } else {
-                console.log("Brand mismatch during auto-login:", {
-                  expected: brandNameFromQuery,
-                  actual: brandData["brand_name"]
-                });
-                localStorage.removeItem("user");
-                document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-                document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-                setIsChecking(false);
-                hasCheckedRef.current = true;
-                return;
-              }
-            } catch (error) {
-              console.error("Brand verification failed during auto-login:", error);
-              localStorage.removeItem("user");
-              document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-              document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
-              setIsChecking(false);
-              hasCheckedRef.current = true;
-              return;
-            }
-          } else {
+          if (!brandNameFromQuery) {
+            console.log("No brandName in query - rejecting authentication");
+            localStorage.removeItem("user");
+            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
             if (storedBrandName) {
               document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
             }
+            setIsChecking(false);
             hasCheckedRef.current = true;
-            navigate(redirectPath, { replace: true });
+            return;
+          }
+
+          if (storedBrandName && brandNameFromQuery !== storedBrandName) {
+            localStorage.removeItem("user");
+            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            setIsChecking(false);
+            hasCheckedRef.current = true;
+            return;
+          }
+
+          try {
+            const user = authData.user;
+            const brandResponse = await fetch(
+              "https://function-15-201137466588.asia-south1.run.app",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: user.email }),
+              }
+            );
+
+            if (!brandResponse.ok) {
+              throw new Error(`Brand API returned status ${brandResponse.status}`);
+            }
+
+            const brandData = await brandResponse.json();
+            console.log("Auto-login brand verification:", brandData);
+
+            if (brandData["brand_name"] === brandNameFromQuery) {
+              if (!storedBrandName) {
+                document.cookie = `brandName=${brandNameFromQuery};expires=${new Date(Date.now() + 60*60*1000).toUTCString()};path=/;secure;samesite=strict`;
+              }
+              hasCheckedRef.current = true;
+              setIsChecking(false);
+              navigate(redirectPath, { replace: true });
+              return;
+            } else {
+              console.log("Brand mismatch during auto-login:", {
+                expected: brandNameFromQuery,
+                actual: brandData["brand_name"]
+              });
+              localStorage.removeItem("user");
+              document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+              document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+              setIsChecking(false);
+              hasCheckedRef.current = true;
+              return;
+            }
+          } catch (error) {
+            console.error("Brand verification failed during auto-login:", error);
+            localStorage.removeItem("user");
+            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            document.cookie = "brandName=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            setIsChecking(false);
+            hasCheckedRef.current = true;
             return;
           }
         }
