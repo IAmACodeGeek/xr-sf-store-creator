@@ -11,6 +11,7 @@ import {
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Cookies from "js-cookie";
 import Login from "./UI/Components/Login";
+import Register from "./UI/Components/Register";
 import CanvasWrapper from "./canvaswrapper";
 import "./index.scss";
 
@@ -103,6 +104,7 @@ function AppRouter() {
           <QueryParamsPreserver>
             <Routes>
               <Route path="/auth" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route
                 path="/canvas"
                 element={<ProtectedRoute component={CanvasWrapper} />}
