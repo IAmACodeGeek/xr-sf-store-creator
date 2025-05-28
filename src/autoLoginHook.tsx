@@ -23,7 +23,7 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
         }
 
         const response = await fetch(
-          "https://your-region-your-project.cloudfunctions.net/authMe",
+          "https://function-cookie-validate-201137466588.asia-south1.run.app",
           {
             method: "GET",
             credentials: "include",
