@@ -3,6 +3,7 @@ import BigRoomModel from '@/data/environment/environmentModel/BigRoom';
 import CastleModel from '@/data/environment/environmentModel/Castle';
 import SingleRoomModel from '@/data/environment/environmentModel/SingleRoom';
 import { useEnvironmentStore } from '@/stores/ZustandStores';
+import ShowroomModel from '@/data/environment/environmentModel/Showroom';
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
@@ -11,6 +12,7 @@ export function Ground() {
       {environmentType === "BIGROOM" && <BigRoomModel/>}
       {environmentType === "CASTLE" && <CastleModel/>}
       {environmentType === "SINGLEROOM" && <SingleRoomModel/>}
+      {environmentType === "SHOWROOM" && <ShowroomModel/>}
     </RigidBody>
   );
 }

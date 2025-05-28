@@ -37,7 +37,7 @@ export const App = () => {
                 imageUrl={"https://cdn.creazilla.com/cliparts/3868244/compass-rose-clipart-original.png"}
                 position={compass.position}
                 rotation={compass.rotation}
-                scale={5}
+                scale={compass.scale}
                 key={index}
               />
             );
