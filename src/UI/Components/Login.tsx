@@ -50,8 +50,8 @@ export default function Login() {
         Cookies.set("accessToken", response.access_token, {
           expires: 1 / 24, // 1 hour
           secure: true,
-          sameSite: "Strict",
-          domain: "strategyfox.in"
+          sameSite: "None",
+          domain: ".strategyfox.in"
         });
 
         const postResponse = await fetch(
@@ -75,7 +75,8 @@ export default function Login() {
             Cookies.set("brandName", brandNameFromQuery, {
               expires: 1 / 24, // 1 hour
               secure: true,
-              sameSite: "Strict",
+              sameSite: "None",
+              domain: ".strategyfox.in"
             });
             toast.success("Successful: brand configuration matches!");
             navigate("/canvas");
@@ -159,7 +160,7 @@ export default function Login() {
           expires: 1 / 24,
           secure: true,
           sameSite: "None",
-          domain: "strategyfox.in"
+          domain: ".strategyfox.in"
         });
 
         localStorage.setItem(
@@ -194,7 +195,8 @@ export default function Login() {
             Cookies.set("brandName", brandNameFromQuery, {
               expires: 1 / 24, // 1 hour
               secure: true,
-              sameSite: "Strict",
+              sameSite: "None",
+              domain: ".strategyfox.in"
             });
             toast.success("Successful: brand configuration matches!");
             navigate("/canvas");
