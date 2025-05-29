@@ -34,7 +34,7 @@ export const App = () => {
           environmentData[environmentType].compasses.map((compass, index) => {
             return (
               <BrandPoster
-                imageUrl={"https://cdn.creazilla.com/cliparts/3868244/compass-rose-clipart-original.png"}
+                imageUrl={"/media/compass.png"}
                 position={compass.position}
                 rotation={compass.rotation}
                 scale={compass.scale}
