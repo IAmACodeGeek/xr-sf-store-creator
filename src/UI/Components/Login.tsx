@@ -48,7 +48,7 @@ export default function Login() {
         localStorage.setItem("user", JSON.stringify(userProfile));
 
         Cookies.set("accessToken", response.access_token, {
-          expires: 1 / 24, // 1 hour
+          expires: 2 / 24, // 1 hour
           secure: true,
           sameSite: "None",
           domain: ".strategyfox.in"
@@ -73,7 +73,7 @@ export default function Login() {
         if (brandNameFromQuery) {
           if (data["brand_name"] === brandNameFromQuery) {
             Cookies.set("brandName", brandNameFromQuery, {
-              expires: 1 / 24, // 1 hour
+              expires: 2 / 24, // 1 hour
               secure: true,
               sameSite: "None",
               domain: ".strategyfox.in"
@@ -157,7 +157,7 @@ export default function Login() {
         toast.success(result.message || "Login successful ✅");
 
         Cookies.set("accessToken", result.token, {
-          expires: 1 / 24,
+          expires: 2 / 24,
           secure: true,
           sameSite: "None",
           domain: ".strategyfox.in"
@@ -193,7 +193,7 @@ export default function Login() {
         if (brandNameFromQuery) {
           if (data["brand_name"] === brandNameFromQuery) {
             Cookies.set("brandName", brandNameFromQuery, {
-              expires: 1 / 24, // 1 hour
+              expires: 2 / 24, // 1 hour
               secure: true,
               sameSite: "None",
               domain: ".strategyfox.in"

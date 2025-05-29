@@ -113,7 +113,7 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
               // Store brand name if not already stored
               if (!storedBrandName) {
                 Cookies.set("brandName", brandNameFromQuery, {
-                  expires: 1 / 24, // 1 hour
+                  expires: 2 / 24, // 1 hour
                   secure: true,
                   sameSite: "None",
                   domain: ".strategyfox.in",
