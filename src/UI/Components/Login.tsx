@@ -18,6 +18,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginUser } from "../../api/LoginApi";
 import useAutoLogin from "../../autoLoginHook";
+import { getCookieConfig } from "../../utils/cookieConfig";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -45,14 +46,8 @@ export default function Login() {
         const userProfile = await res.json();
         console.log("User Profile:", userProfile);
 
-        localStorage.setItem("user", JSON.stringify(userProfile));
-
-        Cookies.set("accessToken", response.access_token, {
-          expires: 2 / 24, // 1 hour
-          secure: true,
-          sameSite: "None",
-          domain: ".strategyfox.in"
-        });
+        // Set access token with environment-specific config
+        Cookies.set("accessToken", response.access_token, getCookieConfig());
 
         const postResponse = await fetch(
           "https://function-15-201137466588.asia-south1.run.app",
@@ -72,12 +67,10 @@ export default function Login() {
 
         if (brandNameFromQuery) {
           if (data["brand_name"] === brandNameFromQuery) {
-            Cookies.set("brandName", brandNameFromQuery, {
-              expires: 2 / 24, // 1 hour
-              secure: true,
-              sameSite: "None",
-              domain: ".strategyfox.in"
-            });
+            // Store user data in localStorage
+            localStorage.setItem("user", JSON.stringify(userProfile));
+
+            Cookies.set("brandName", brandNameFromQuery, getCookieConfig());
             toast.success("Successful: brand configuration matches!");
             navigate("/canvas");
           } else {
@@ -156,12 +149,7 @@ export default function Login() {
       if (result.success) {
         toast.success(result.message || "Login successful ✅");
 
-        Cookies.set("accessToken", result.token, {
-          expires: 2 / 24,
-          secure: true,
-          sameSite: "None",
-          domain: ".strategyfox.in"
-        });
+        Cookies.set("accessToken", result.token, getCookieConfig());
 
         localStorage.setItem(
           "user",
@@ -192,12 +180,7 @@ export default function Login() {
 
         if (brandNameFromQuery) {
           if (data["brand_name"] === brandNameFromQuery) {
-            Cookies.set("brandName", brandNameFromQuery, {
-              expires: 2 / 24, // 1 hour
-              secure: true,
-              sameSite: "None",
-              domain: ".strategyfox.in"
-            });
+            Cookies.set("brandName", brandNameFromQuery, getCookieConfig());
             toast.success("Successful: brand configuration matches!");
             navigate("/canvas");
           } else {

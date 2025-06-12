@@ -69,7 +69,7 @@ const RedirectToAuth = () => {
 };
 
 // 🔇 Remove console logs in production
-if (process.env.NODE_ENV === "production") {
+if (import.meta.env.PROD) {
   console.debug = () => {};
   console.info = () => {};
   // Optional: leave console.warn and console.error for debugging

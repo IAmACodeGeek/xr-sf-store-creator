@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { getCookieConfig, getRemoveConfig } from "./utils/cookieConfig";
 
 const useAutoLogin = (redirectPath = "/dashboard") => {
   const [isChecking, setIsChecking] = useState(true);
@@ -10,15 +11,10 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
 
   const clearAuthData = useCallback(() => {
     localStorage.removeItem("user");
-    // Use Cookies.remove() with the same options used when setting
-    Cookies.remove("accessToken", {
-      domain: ".strategyfox.in",
-      path: "/",
-    });
-    Cookies.remove("brandName", {
-      domain: ".strategyfox.in",
-      path: "/",
-    });
+    // Use environment-specific remove configuration
+    const removeConfig = getRemoveConfig();
+    Cookies.remove("accessToken", removeConfig);
+    Cookies.remove("brandName", removeConfig);
     // Also try removing without domain (fallback)
     Cookies.remove("accessToken");
     Cookies.remove("brandName");
@@ -112,12 +108,7 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
             if (brandData["brand_name"] === brandNameFromQuery) {
               // Store brand name if not already stored
               if (!storedBrandName) {
-                Cookies.set("brandName", brandNameFromQuery, {
-                  expires: 2 / 24, // 1 hour
-                  secure: true,
-                  sameSite: "None",
-                  domain: ".strategyfox.in",
-                });
+                Cookies.set("brandName", brandNameFromQuery, getCookieConfig());
               }
 
               console.log(
