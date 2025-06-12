@@ -110,6 +110,7 @@ export default function CanvasWrapper() {
           setProductsLoading(true);
           const response = (brandData.shopify_store_name !== 'h49c6z-yr.myshopify.com')? await ProductService.getAllProducts(brandData.brand_name) : await ProductService.getAllProductsFromVendor(brandData.original_brand_name);
           setProducts(response);
+          console.log("All Products:", response);
 
           const newEnvProducts: { [id: number]: EnvProduct } = {};
           for (const product of response) {
