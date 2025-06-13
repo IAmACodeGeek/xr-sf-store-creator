@@ -42,6 +42,7 @@ import {
   RotateCcw,
   ZoomIn,
   Check,
+  ArrowLeft,
 } from "lucide-react";
 import PlaceHolderData from "@/data/environment/placeHolderData/PlaceHolderData";
 
@@ -1596,7 +1597,44 @@ export const CreatorKit = () => {
       onClick={(event) => event.stopPropagation()}
     >
       {/* Header */}
-      <Box sx={{ p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
+      <Box sx={{ p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)", display: 'flex', alignItems: 'center', gap: 2 }}>
+        {(activeProductId || activeAssetId) && (
+          <GlassButton
+            onClick={() => {
+              if (entityType === "PRODUCT" && activeProductId) {
+                // Create a synthetic event for the checkbox
+                const syntheticEvent = {
+                  target: { checked: false }
+                } as React.ChangeEvent<HTMLInputElement>;
+                handleCheckboxChange(syntheticEvent, { productId: activeProductId });
+              } else if (entityType === "ASSET" && activeAssetId) {
+                // Create a synthetic event for the checkbox
+                const syntheticEvent = {
+                  target: { checked: false }
+                } as React.ChangeEvent<HTMLInputElement>;
+                handleCheckboxChange(syntheticEvent, { assetId: activeAssetId });
+              }
+              setActiveProductId(null);
+              setActiveAssetId(null);
+              setToolType(null);
+            }}
+            sx={{
+              minWidth: '48px',
+              width: '48px',
+              height: '48px',
+              padding: 0,
+              background: "rgba(255, 255, 255, 0.1)",
+              color: "rgba(255, 255, 255, 0.9)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              "&:hover": {
+                background: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+              }
+            }}
+          >
+            <ArrowLeft size={24} />
+          </GlassButton>
+        )}
         <Typography
           sx={{
             fontFamily: "'Poppins', sans-serif",
@@ -1604,6 +1642,7 @@ export const CreatorKit = () => {
             fontWeight: 700,
             color: "white",
             textAlign: "center",
+            flex: 1,
             background: "linear-gradient(135deg, #f12711, #f5af19)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
