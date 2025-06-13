@@ -99,27 +99,6 @@ const DraggableProductContainer = ({
     return envScale;
   }, [placeHolderId, envScale, placeHolderData]);
 
-  const pivotOffset = useMemo(() => {
-    if (envProduct.type === "MODEL_3D" && scene && computedScaleForModel) {
-      const box = new Box3().setFromObject(
-        scene
-          .clone()
-          .scale.set(
-            computedScaleForModel,
-            computedScaleForModel,
-            computedScaleForModel
-          )
-      );
-      const size = new Vector3();
-      box.getSize(size);
-      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
-    } else if (envProduct.type === "PHOTO" && computedSizeForImage) {
-      const objectHeight = computedSizeForImage[1];
-      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
-    }
-    return [0, 0, 0] as [number, number, number];
-  }, [envProduct.type, scene, computedScaleForModel, computedSizeForImage]);
-
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
     const rotArray = [0, 0, 0];
@@ -410,6 +389,27 @@ const DraggableProductContainer = ({
       computedScale * imageHeightInWorld,
     ];
   }, [imageTexture, scale]);
+
+  const pivotOffset = useMemo(() => {
+    if (envProduct.type === "MODEL_3D" && scene && computedScaleForModel) {
+      const box = new Box3().setFromObject(
+        scene
+          .clone()
+          .scale.set(
+            computedScaleForModel,
+            computedScaleForModel,
+            computedScaleForModel
+          )
+      );
+      const size = new Vector3();
+      box.getSize(size);
+      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
+    } else if (envProduct.type === "PHOTO" && computedSizeForImage) {
+      const objectHeight = computedSizeForImage[1];
+      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
+    }
+    return [0, 0, 0] as [number, number, number];
+  }, [envProduct.type, scene, computedScaleForModel, computedSizeForImage]);
 
   const handleObjectTranslate = () => {
     if (envProduct.type === "MODEL_3D") {

@@ -142,27 +142,6 @@ const DraggableAssetContainer = ({
     return envScale;
   }, [envScale]);
 
-  const pivotOffset = useMemo(() => {
-    if (envAsset.type === "MODEL_3D" && scene && computedScaleForModel) {
-      const box = new Box3().setFromObject(
-        scene
-          .clone()
-          .scale.set(
-            computedScaleForModel,
-            computedScaleForModel,
-            computedScaleForModel
-          )
-      );
-      const size = new Vector3();
-      box.getSize(size);
-      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
-    } else if (envAsset.type === "PHOTO" && computedSizeForImage) {
-      const objectHeight = computedSizeForImage[1];
-      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
-    }
-    return [0, 0, 0] as [number, number, number];
-  }, [envAsset.type, scene, computedScaleForModel, computedSizeForImage]);
-
   // Convert rotation from degrees to radians
   const computedRotation = useMemo(() => {
     const rotArray = [0, 0, 0];
@@ -234,6 +213,66 @@ const DraggableAssetContainer = ({
       boxCenter: boxCenter,
     };
   }, [scene, computedScaleForModel, position, camera]);
+
+  const imageUrl = useMemo(() => {
+    if (envAsset.type !== "PHOTO" || !envAsset.src) return null;
+    return envAsset.src;
+  }, [envAsset.type, envAsset.src]);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const texture = imageUrl ? useLoader(TextureLoader, imageUrl) : null;
+  const imageTexture = useMemo(() => {
+    if (!imageUrl) return null;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    try {
+      return texture;
+    } catch (error) {
+      console.error("Error Loading Asset Image: ", error);
+      return null;
+    }
+  }, [imageUrl, texture]);
+
+  const computedSizeForImage = useMemo(() => {
+    if (!imageTexture) return null;
+
+    const width = imageTexture.image.width;
+    const height = imageTexture.image.height;
+
+    // Convert to world size
+    const convertPixelToWorldSize = (i: number) => {
+      return i / 100;
+    };
+    const imageWidthInWorld = convertPixelToWorldSize(width);
+    const imageHeightInWorld = convertPixelToWorldSize(height);
+
+    // Scale
+    const computedScale = scale / imageHeightInWorld;
+    return [
+      computedScale * imageWidthInWorld,
+      computedScale * imageHeightInWorld,
+    ];
+  }, [imageTexture, scale]);
+
+  const pivotOffset = useMemo(() => {
+    if (envAsset.type === "MODEL_3D" && scene && computedScaleForModel) {
+      const box = new Box3().setFromObject(
+        scene
+          .clone()
+          .scale.set(
+            computedScaleForModel,
+            computedScaleForModel,
+            computedScaleForModel
+          )
+      );
+      const size = new Vector3();
+      box.getSize(size);
+      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
+    } else if (envAsset.type === "PHOTO" && computedSizeForImage) {
+      const objectHeight = computedSizeForImage[1];
+      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
+    }
+    return [0, 0, 0] as [number, number, number];
+  }, [envAsset.type, scene, computedScaleForModel, computedSizeForImage]);
 
   // Set position and rotation
   const modelRef = useRef<Object3D>(null);
@@ -319,45 +358,6 @@ const DraggableAssetContainer = ({
     meshRef,
     backMeshRef,
   ]);
-
-  const imageUrl = useMemo(() => {
-    if (envAsset.type !== "PHOTO" || !envAsset.src) return null;
-    return envAsset.src;
-  }, [envAsset.type, envAsset.src]);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const texture = imageUrl ? useLoader(TextureLoader, imageUrl) : null;
-  const imageTexture = useMemo(() => {
-    if (!imageUrl) return null;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    try {
-      return texture;
-    } catch (error) {
-      console.error("Error Loading Asset Image: ", error);
-      return null;
-    }
-  }, [imageUrl, texture]);
-
-  const computedSizeForImage = useMemo(() => {
-    if (!imageTexture) return null;
-
-    const width = imageTexture.image.width;
-    const height = imageTexture.image.height;
-
-    // Convert to world size
-    const convertPixelToWorldSize = (i: number) => {
-      return i / 100;
-    };
-    const imageWidthInWorld = convertPixelToWorldSize(width);
-    const imageHeightInWorld = convertPixelToWorldSize(height);
-
-    // Scale
-    const computedScale = scale / imageHeightInWorld;
-    return [
-      computedScale * imageWidthInWorld,
-      computedScale * imageHeightInWorld,
-    ];
-  }, [imageTexture, scale]);
 
   const handleObjectTranslate = () => {
     if (envAsset.type === "MODEL_3D") {
