@@ -72,24 +72,24 @@ const GlassButton = styled(Button)<{ isPrimary?: boolean }>(
     minHeight: "48px",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     backdropFilter: "blur(12px)",
-    border: "1px solid rgba(77, 177, 255, 0.3)",
+    border: isPrimary
+      ? "1px solid rgba(241, 39, 17, 0.5)"
+      : "1px solid rgba(245, 175, 25, 0.4)",
     ...(isPrimary
       ? {
-          background:
-            "linear-gradient(135deg, rgba(132, 88, 251, 0.9), rgba(48, 152, 203, 0.9))",
+          background: "linear-gradient(135deg, #f12711, #f5af19)",
           color: "white",
           "&:hover": {
-            background:
-              "linear-gradient(135deg, rgba(132, 88, 251, 1), rgba(48, 152, 203, 1))",
+            background: "linear-gradient(135deg, #FF4E33, #FFC13B)",
             transform: "translateY(-2px)",
-            boxShadow: "0 8px 24px rgba(132, 88, 251, 0.4)",
+            boxShadow: "0 8px 24px rgba(241, 39, 17, 0.4)",
           },
         }
       : {
-          background: "rgba(15, 15, 25, 0.6)",
-          color: "rgba(77, 177, 255, 0.9)",
+          background: "rgba(245, 175, 25, 0.1)",
+          color: "rgba(245, 175, 25, 0.9)",
           "&:hover": {
-            background: "rgba(77, 177, 255, 0.2)",
+            background: "rgba(245, 175, 25, 0.25)",
             color: "white",
             transform: "translateY(-1px)",
           },
@@ -98,12 +98,11 @@ const GlassButton = styled(Button)<{ isPrimary?: boolean }>(
 );
 
 const GlassSlider = styled(Slider)(() => ({
-  color: "rgba(77, 177, 255, 0.9)",
+  color: "rgba(245, 175, 25, 0.9)",
   height: 6,
   padding: "15px 0",
   "& .MuiSlider-track": {
-    background:
-      "linear-gradient(90deg, rgba(132, 88, 251, 0.8), rgba(48, 152, 203, 0.8))",
+    background: "linear-gradient(90deg, #f12711, #f5af19)",
     border: "none",
   },
   "& .MuiSlider-thumb": {
@@ -111,13 +110,13 @@ const GlassSlider = styled(Slider)(() => ({
     width: 20,
     backgroundColor: "white",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-    border: "2px solid rgba(77, 177, 255, 0.8)",
+    border: "2px solid rgba(245, 175, 25, 0.8)",
     "&:hover": {
-      boxShadow: "0 6px 16px rgba(77, 177, 255, 0.4)",
+      boxShadow: "0 6px 16px rgba(245, 175, 25, 0.4)",
       transform: "scale(1.1)",
     },
     "&.Mui-active": {
-      boxShadow: "0 6px 16px rgba(77, 177, 255, 0.6)",
+      boxShadow: "0 6px 16px rgba(245, 175, 25, 0.6)",
       transform: "scale(1.2)",
     },
   },
@@ -130,7 +129,7 @@ const GlassSlider = styled(Slider)(() => ({
 const AnimatedChip = styled(Chip)(() => ({
   background: "rgba(15, 15, 25, 0.8)",
   color: "white",
-  border: "1px solid rgba(77, 177, 255, 0.3)",
+  border: "1px solid rgba(245, 175, 25, 0.4)",
   borderRadius: "20px",
   fontFamily: "'Poppins', sans-serif",
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -145,8 +144,8 @@ const AnimatedChip = styled(Chip)(() => ({
     justifyContent: "center",
   },
   "&:hover": {
-    background: "rgba(77, 177, 255, 0.2)",
-    borderColor: "rgba(77, 177, 255, 0.6)",
+    background: "rgba(245, 175, 25, 0.25)",
+    borderColor: "rgba(245, 175, 25, 0.6)",
     transform: "scale(1.05)",
   },
 }));
@@ -333,7 +332,7 @@ const SliderControl = memo(
           max={max}
           step={step}
           onChange={handleChange}
-          valueLabelDisplay="auto"
+          valueLabelDisplay="off"
         />
       </Box>
     );
@@ -496,17 +495,20 @@ const FaceSelector = memo(
                 color: "white",
                 background:
                   value === opt.value
-                    ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)"
-                    : "rgba(77, 177, 255, 0.1)",
-                border: value === opt.value ? "none" : "2px solid #41cbff",
+                    ? "linear-gradient(135deg, #f12711, #f5af19)"
+                    : "rgba(245, 175, 25, 0.1)",
+                border:
+                  value === opt.value
+                    ? "none"
+                    : "2px solid rgba(245, 175, 25, 0.7)",
                 borderRadius: 2,
                 fontFamily: "'Poppins', sans-serif",
                 fontSize: "14px",
                 "&:hover": {
                   background:
                     value === opt.value
-                      ? "linear-gradient(135deg, #8458FB, #6A6CEC, #4D82DC, #3098CB, #17ABBD)"
-                      : "rgba(77, 177, 255, 0.3)",
+                      ? "linear-gradient(135deg, #f12711, #f5af19)"
+                      : "rgba(245, 175, 25, 0.3)",
                 },
               }}
             >
@@ -610,15 +612,15 @@ const FileUploadArea = memo(
             justifyContent: "center",
             minHeight: "200px",
             border: isDragOver
-              ? "2px dashed rgba(77, 177, 255, 0.8)"
-              : "2px dashed rgba(77, 177, 255, 0.3)",
+              ? "2px dashed rgba(245, 175, 25, 0.8)"
+              : "2px dashed rgba(245, 175, 25, 0.4)",
             borderRadius: "12px",
-            background: isDragOver ? "rgba(77, 177, 255, 0.1)" : "transparent",
+            background: isDragOver ? "rgba(245, 175, 25, 0.1)" : "transparent",
             transition: "all 0.3s ease",
             cursor: "pointer",
             "&:hover": {
-              borderColor: "rgba(77, 177, 255, 0.6)",
-              background: "rgba(77, 177, 255, 0.05)",
+              borderColor: "rgba(245, 175, 25, 0.6)",
+              background: "rgba(245, 175, 25, 0.05)",
             },
           }}
           onClick={handleClick}
@@ -635,11 +637,11 @@ const FileUploadArea = memo(
             multiple
             style={{ display: "none" }}
           />
-          <Upload size={48} color="rgba(77, 177, 255, 0.8)" />
+          <Upload size={48} color="rgba(245, 175, 25, 0.8)" />
           <Typography
             sx={{
               fontFamily: "'Poppins', sans-serif",
-              color: "rgba(77, 177, 255, 0.9)",
+              color: "rgba(245, 175, 25, 0.9)",
               fontSize: "16px",
               fontWeight: 600,
               mt: 2,
@@ -703,12 +705,12 @@ const AssetList = memo(
                 mb: 1,
                 borderRadius: "12px",
                 background: asset.isEnvironmentAsset
-                  ? "rgba(77, 177, 255, 0.1)"
+                  ? "rgba(245, 175, 25, 0.1)"
                   : "rgba(255, 255, 255, 0.03)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  background: "rgba(77, 177, 255, 0.15)",
+                  background: "rgba(245, 175, 25, 0.15)",
                   transform: "translateX(4px)",
                 },
               }}
@@ -719,9 +721,9 @@ const AssetList = memo(
                   onCheckboxChange(event, { assetId: asset.id })
                 }
                 sx={{
-                  color: "rgba(77, 177, 255, 0.8)",
+                  color: "rgba(245, 175, 25, 0.8)",
                   "&.Mui-checked": {
-                    color: "rgba(77, 177, 255, 1)",
+                    color: "rgba(245, 175, 25, 1)",
                   },
                 }}
               />
@@ -769,7 +771,7 @@ const AssetList = memo(
                   onClick={() => onEdit(asset.id)}
                   sx={{
                     minWidth: "40px",
-                    color: "rgba(77, 177, 255, 0.8)",
+                    color: "rgba(245, 175, 25, 0.8)",
                     "&:hover": { color: "white" },
                     ml: asset.source === "OWN" ? 0 : 1,
                   }}
@@ -839,23 +841,23 @@ const MediaEditor = memo(
               <Box
                 key={index}
                 sx={{
-                  width: "calc(50% - 8px)",
+                  width: "calc(50% - 6px)",
                   aspectRatio: "1 / 1",
                   borderRadius: "12px",
                   overflow: "hidden",
                   background:
                     envProduct.imageIndex === index
-                      ? "rgba(77, 177, 255, 0.2)"
+                      ? "rgba(245, 175, 25, 0.2)"
                       : "rgba(255, 255, 255, 0.05)",
                   border:
                     envProduct.imageIndex === index
-                      ? "2px solid rgba(77, 177, 255, 1)"
+                      ? "2px solid rgba(245, 175, 25, 1)"
                       : "1px solid rgba(255, 255, 255, 0.1)",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "scale(1.05)",
-                    background: "rgba(77, 177, 255, 0.15)",
+                    background: "rgba(245, 175, 25, 0.15)",
                   },
                 }}
                 onClick={() => onMediaSelect("PHOTO", index)}
@@ -883,11 +885,11 @@ const MediaEditor = memo(
                   overflow: "hidden",
                   background:
                     envProduct.modelIndex === index
-                      ? "rgba(77, 177, 255, 0.2)"
+                      ? "rgba(245, 175, 25, 0.2)"
                       : "rgba(255, 255, 255, 0.05)",
                   border:
                     envProduct.modelIndex === index
-                      ? "2px solid rgba(77, 177, 255, 1)"
+                      ? "2px solid rgba(245, 175, 25, 1)"
                       : "1px solid rgba(255, 255, 255, 0.1)",
                   p: 2,
                   display: "flex",
@@ -920,12 +922,10 @@ const MediaEditor = memo(
                   variant="contained"
                   onClick={() => onMediaSelect("MODEL_3D", index)}
                   sx={{
-                    background:
-                      "linear-gradient(135deg, rgba(132, 88, 251, 0.9), rgba(48, 152, 203, 0.9))",
+                    background: "linear-gradient(135deg, #f12711, #f5af19)",
                     color: "white",
                     "&:hover": {
-                      background:
-                        "linear-gradient(135deg, rgba(132, 88, 251, 1), rgba(48, 152, 203, 1))",
+                      background: "linear-gradient(135deg, #FF4E33, #FFC13B)",
                     },
                   }}
                 >
@@ -987,7 +987,7 @@ const PlaceholderEditor = memo(
                   borderRadius: "12px",
                   background:
                     activeEnvProduct.placeHolderId === placeholder.id
-                      ? "rgba(77, 177, 255, 0.2)"
+                      ? "rgba(245, 175, 25, 0.2)"
                       : "rgba(255, 255, 255, 0.03)",
                   border: "1px solid rgba(255, 255, 255, 0.1)",
                   transition: "all 0.3s ease",
@@ -1025,13 +1025,13 @@ const PlaceholderEditor = memo(
                   sx={{
                     background: placeholderEntity
                       ? "rgba(100, 100, 100, 0.5)"
-                      : "linear-gradient(135deg, rgba(132, 88, 251, 0.9), rgba(48, 152, 203, 0.9))",
+                      : "linear-gradient(135deg, #f12711, #f5af19)",
                     color: "white",
                     minWidth: "80px",
                     "&:hover": !placeholderEntity
                       ? {
                           background:
-                            "linear-gradient(135deg, rgba(132, 88, 251, 1), rgba(48, 152, 203, 1))",
+                            "linear-gradient(135deg, #FF4E33, #FFC13B)",
                         }
                       : {},
                   }}
@@ -1537,8 +1537,7 @@ export const CreatorKit = () => {
             fontWeight: 700,
             color: "white",
             textAlign: "center",
-            background:
-              "linear-gradient(135deg, rgba(132, 88, 251, 1), rgba(48, 152, 203, 1))",
+            background: "linear-gradient(135deg, #f12711, #f5af19)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -1563,10 +1562,10 @@ export const CreatorKit = () => {
             borderRadius: "3px",
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "rgba(77, 177, 255, 0.5)",
+            background: "rgba(245, 175, 25, 0.5)",
             borderRadius: "3px",
             "&:hover": {
-              background: "rgba(77, 177, 255, 0.7)",
+              background: "rgba(245, 175, 25, 0.7)",
             },
           },
         }}
@@ -1605,12 +1604,12 @@ export const CreatorKit = () => {
                         borderRadius: "12px",
                         background: envProducts[product.id]
                           ?.isEnvironmentProduct
-                          ? "rgba(77, 177, 255, 0.1)"
+                          ? "rgba(245, 175, 25, 0.1)"
                           : "rgba(255, 255, 255, 0.03)",
                         border: "1px solid rgba(255, 255, 255, 0.1)",
                         transition: "all 0.3s ease",
                         "&:hover": {
-                          background: "rgba(77, 177, 255, 0.15)",
+                          background: "rgba(245, 175, 25, 0.15)",
                           transform: "translateX(4px)",
                         },
                       }}
@@ -1623,9 +1622,9 @@ export const CreatorKit = () => {
                           handleCheckboxChange(event, { productId: product.id })
                         }
                         sx={{
-                          color: "rgba(77, 177, 255, 0.8)",
+                          color: "rgba(245, 175, 25, 0.8)",
                           "&.Mui-checked": {
-                            color: "rgba(77, 177, 255, 1)",
+                            color: "rgba(245, 175, 25, 1)",
                           },
                         }}
                       />
@@ -1671,7 +1670,7 @@ export const CreatorKit = () => {
                             }}
                             sx={{
                               minWidth: "40px",
-                              color: "rgba(77, 177, 255, 0.8)",
+                              color: "rgba(245, 175, 25, 0.8)",
                               "&:hover": { color: "white" },
                             }}
                           >
@@ -1698,7 +1697,7 @@ export const CreatorKit = () => {
                             }}
                             sx={{
                               minWidth: "40px",
-                              color: "rgba(77, 177, 255, 0.8)",
+                              color: "rgba(245, 175, 25, 0.8)",
                               "&:hover": { color: "white" },
                             }}
                           >
