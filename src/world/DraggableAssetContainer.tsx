@@ -255,15 +255,13 @@ const DraggableAssetContainer = ({
 
   const pivotOffset = useMemo(() => {
     if (envAsset.type === "MODEL_3D" && scene && computedScaleForModel) {
-      const box = new Box3().setFromObject(
-        scene
-          .clone()
-          .scale.set(
-            computedScaleForModel,
-            computedScaleForModel,
-            computedScaleForModel
-          )
+      const clonedScene = scene.clone();
+      clonedScene.scale.set(
+        computedScaleForModel,
+        computedScaleForModel,
+        computedScaleForModel
       );
+      const box = new Box3().setFromObject(clonedScene);
       const size = new Vector3();
       box.getSize(size);
       return [0, size.y / 2 + 0.2, 0] as [number, number, number];
