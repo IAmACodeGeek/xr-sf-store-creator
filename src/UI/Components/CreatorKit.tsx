@@ -1635,22 +1635,17 @@ export const CreatorKit = () => {
             <ArrowLeft size={24} />
           </GlassButton>
         )}
-        <Typography
+        <Box
+          component="img"
+          src="/Logo SF.png"
           sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: "24px",
-            fontWeight: 700,
-            color: "white",
-            textAlign: "center",
+            height: '35px',
+            width: 'auto',
             flex: 1,
-            background: "linear-gradient(135deg, #f12711, #f5af19)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            objectFit: 'contain',
           }}
-        >
-          Creator Kit
-        </Typography>
+          alt="Strategy Fox Logo"
+        />
       </Box>
 
       {/* Scrollable content */}
