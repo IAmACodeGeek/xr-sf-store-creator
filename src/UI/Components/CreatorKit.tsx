@@ -298,19 +298,18 @@ const SliderControl = memo(
               height: "24px",
             }}
           >
-            {Icon && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "24px",
-                  height: "24px",
-                }}
-              >
-                <Icon size={16} />
-              </Box>
-            )}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "24px",
+                height: "24px",
+                visibility: Icon ? "visible" : "hidden",
+              }}
+            >
+              {Icon && <Icon size={16} />}
+            </Box>
             <Typography
               sx={{
                 fontFamily: "'Poppins', sans-serif",
