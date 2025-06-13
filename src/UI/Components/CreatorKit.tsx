@@ -42,7 +42,6 @@ import {
   RotateCcw,
   ZoomIn,
   Check,
-  ArrowLeft,
 } from "lucide-react";
 import PlaceHolderData from "@/data/environment/placeHolderData/PlaceHolderData";
 
@@ -1629,10 +1628,22 @@ export const CreatorKit = () => {
               "&:hover": {
                 background: "rgba(255, 255, 255, 0.2)",
                 color: "white",
-              }
+              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <ArrowLeft size={24} />
+            <Box
+              component="img"
+              src="/icons/Back.png"
+              sx={{
+                width: '24px',
+                height: '24px',
+                objectFit: 'contain'
+              }}
+              alt="Back"
+            />
           </GlassButton>
         )}
         <Box
