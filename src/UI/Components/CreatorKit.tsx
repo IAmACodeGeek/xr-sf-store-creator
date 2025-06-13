@@ -1596,22 +1596,67 @@ export const CreatorKit = () => {
       onClick={(event) => event.stopPropagation()}
     >
       {/* Header */}
-      <Box sx={{ p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
-        <Typography
+      <Box sx={{ p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)", display: 'flex', alignItems: 'center', gap: 2 }}>
+        {(activeProductId || activeAssetId) && (
+          <GlassButton
+            onClick={() => {
+              if (entityType === "PRODUCT" && activeProductId) {
+                // Create a synthetic event for the checkbox
+                const syntheticEvent = {
+                  target: { checked: false }
+                } as React.ChangeEvent<HTMLInputElement>;
+                handleCheckboxChange(syntheticEvent, { productId: activeProductId });
+              } else if (entityType === "ASSET" && activeAssetId) {
+                // Create a synthetic event for the checkbox
+                const syntheticEvent = {
+                  target: { checked: false }
+                } as React.ChangeEvent<HTMLInputElement>;
+                handleCheckboxChange(syntheticEvent, { assetId: activeAssetId });
+              }
+              setActiveProductId(null);
+              setActiveAssetId(null);
+              setToolType(null);
+            }}
+            sx={{
+              minWidth: '48px',
+              width: '48px',
+              height: '48px',
+              padding: 0,
+              background: "rgba(255, 255, 255, 0.1)",
+              color: "rgba(255, 255, 255, 0.9)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              "&:hover": {
+                background: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              component="img"
+              src="/icons/Back.png"
+              sx={{
+                width: '24px',
+                height: '24px',
+                objectFit: 'contain'
+              }}
+              alt="Back"
+            />
+          </GlassButton>
+        )}
+        <Box
+          component="img"
+          src="/Logo SF.png"
           sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: "24px",
-            fontWeight: 700,
-            color: "white",
-            textAlign: "center",
-            background: "linear-gradient(135deg, #f12711, #f5af19)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            height: '35px',
+            width: 'auto',
+            flex: 1,
+            objectFit: 'contain',
           }}
-        >
-          Creator Kit
-        </Typography>
+          alt="Strategy Fox Logo"
+        />
       </Box>
 
       {/* Scrollable content */}
