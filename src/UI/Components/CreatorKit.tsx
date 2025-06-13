@@ -284,7 +284,7 @@ const SliderControl = memo(
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             mb: 1.5,
             height: "24px",
           }}
@@ -382,7 +382,7 @@ const Vector3Control = memo(
         <Box
           sx={{
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             mb: 2,
             gap: 1,
             height: "28px",
