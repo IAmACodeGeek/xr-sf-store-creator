@@ -101,8 +101,6 @@ const GlassSlider = styled(Slider)(() => ({
   color: "rgba(245, 175, 25, 0.9)",
   height: 6,
   padding: "15px 0",
-  isolation: "isolate",
-  contain: "layout style",
   "& .MuiSlider-track": {
     background: "linear-gradient(90deg, #f12711, #f5af19)",
     border: "none",
@@ -113,17 +111,16 @@ const GlassSlider = styled(Slider)(() => ({
     backgroundColor: "white",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
     border: "2px solid rgba(245, 175, 25, 0.8)",
-    transformOrigin: "center",
-    willChange: "transform",
+    transition: "all 0.2s ease-in-out",
     "&:hover": {
-      boxShadow: "0 6px 16px rgba(245, 175, 25, 0.4)",
-      transform: "scale(1.1)",
-      transformOrigin: "center",
+      boxShadow: "0 8px 20px rgba(245, 175, 25, 0.6)",
+      borderColor: "rgba(245, 175, 25, 1)",
+      backgroundColor: "rgba(255, 255, 255, 1)",
     },
     "&.Mui-active": {
-      boxShadow: "0 6px 16px rgba(245, 175, 25, 0.6)",
-      transform: "scale(1.2)",
-      transformOrigin: "center",
+      boxShadow: "0 10px 24px rgba(245, 175, 25, 0.8)",
+      borderColor: "rgba(245, 175, 25, 1)",
+      backgroundColor: "rgba(255, 255, 255, 1)",
     },
   },
   "& .MuiSlider-rail": {
