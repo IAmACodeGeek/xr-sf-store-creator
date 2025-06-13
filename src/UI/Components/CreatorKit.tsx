@@ -256,7 +256,10 @@ const SliderControl = memo(
     min?: number;
     max?: number;
     step?: number;
-    icon?: React.ComponentType<{ size?: number | string }>;
+    icon?: React.ComponentType<{
+      size?: number | string;
+      style?: React.CSSProperties;
+    }>;
   }) => {
     const handleChange = useCallback(
       (_event: Event, newValue: number | number[]) => {
@@ -268,7 +271,17 @@ const SliderControl = memo(
     return (
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 1, gap: 1 }}>
-          {Icon && <Icon size={16} />}
+          {Icon && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon size={16} />
+            </Box>
+          )}
           <Typography
             sx={{
               fontFamily: "'Poppins', sans-serif",
@@ -698,6 +711,20 @@ const AssetList = memo(
               >
                 {asset.name}
               </Typography>
+              {asset.isEnvironmentAsset && (
+                <Button
+                  size="small"
+                  onClick={() => onEdit(asset.id)}
+                  sx={{
+                    minWidth: "40px",
+                    color: "rgba(77, 177, 255, 0.8)",
+                    "&:hover": { color: "white" },
+                    ml: asset.source === "OWN" ? 0 : 1,
+                  }}
+                >
+                  <Settings size={18} />
+                </Button>
+              )}
               {asset.source === "OWN" && (
                 <Button
                   size="small"
