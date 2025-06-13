@@ -53,6 +53,7 @@ const GlassBox = styled(Box)(() => ({
   borderRadius: "16px",
   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  padding: "20px",
   "&:hover": {
     background: "rgba(20, 20, 30, 0.9)",
     borderColor: "rgba(77, 177, 255, 0.3)",
@@ -133,6 +134,16 @@ const AnimatedChip = styled(Chip)(() => ({
   borderRadius: "20px",
   fontFamily: "'Poppins', sans-serif",
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  height: "24px",
+  fontSize: "0.8125rem",
+  minWidth: "55px",
+  "& .MuiChip-labelSmall": {
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    lineHeight: "24px",
+    display: "flex",
+    justifyContent: "center",
+  },
   "&:hover": {
     background: "rgba(77, 177, 255, 0.2)",
     borderColor: "rgba(77, 177, 255, 0.6)",
@@ -150,8 +161,8 @@ const EntityTypeSelector = memo(
     onEntityTypeChange: (type: "PRODUCT" | "ASSET") => void;
   }) => {
     return (
-      <GlassBox sx={{ p: 3, mb: 2 }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
+      <GlassBox sx={{ mb: 2.5 }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           <GlassButton
             isPrimary={entityType === "PRODUCT"}
             onClick={() => onEntityTypeChange("PRODUCT")}
@@ -183,8 +194,8 @@ const MediaTypeSelector = memo(
     onMediaTypeChange: (type: "PHOTO" | "MODEL_3D") => void;
   }) => {
     return (
-      <GlassBox sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
+      <GlassBox sx={{ mb: 2.5 }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           <GlassButton
             isPrimary={mediaType === "PHOTO"}
             onClick={() => onMediaTypeChange("PHOTO")}
@@ -216,8 +227,8 @@ const ParamsTypeSelector = memo(
     onParamsTypeChange: (type: "CUSTOM" | "PLACEHOLDER") => void;
   }) => {
     return (
-      <GlassBox sx={{ p: 3 }}>
-        <Box sx={{ display: "flex", gap: 2 }}>
+      <GlassBox sx={{ mb: 2.5 }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           <GlassButton
             isPrimary={paramsType === "CUSTOM"}
             onClick={() => onParamsTypeChange("CUSTOM")}
@@ -269,32 +280,52 @@ const SliderControl = memo(
     );
 
     return (
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1, gap: 1 }}>
-          {Icon && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon size={16} />
-            </Box>
-          )}
-          <Typography
+      <Box sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            mb: 1.5,
+            height: "24px",
+          }}
+        >
+          {/* Group 1: Icon and Label */}
+          <Box
             sx={{
-              fontFamily: "'Poppins', sans-serif",
-              color: "white",
-              fontSize: "14px",
-              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              height: "24px",
             }}
           >
-            {label}
-          </Typography>
-          <Box sx={{ ml: "auto" }}>
-            <AnimatedChip label={value.toFixed(2)} size="small" />
+            {Icon && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "24px",
+                  height: "24px",
+                }}
+              >
+                <Icon size={16} />
+              </Box>
+            )}
+            <Typography
+              sx={{
+                fontFamily: "'Poppins', sans-serif",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: 500,
+                lineHeight: "24px",
+              }}
+            >
+              {label}
+            </Typography>
           </Box>
+          {/* Group 2: Chip */}
+          <AnimatedChip label={value.toFixed(2)} size="small" />
         </Box>
         <GlassSlider
           value={value}
@@ -349,15 +380,36 @@ const Vector3Control = memo(
     );
 
     return (
-      <GlassBox sx={{ p: 3, mb: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1 }}>
-          {Icon && <Icon size={18} />}
+      <GlassBox sx={{ mb: 2.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            mb: 2,
+            gap: 1,
+            height: "28px",
+          }}
+        >
+          {Icon && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "28px",
+                width: "28px",
+              }}
+            >
+              <Icon size={18} />
+            </Box>
+          )}
           <Typography
             sx={{
               fontFamily: "'Poppins', sans-serif",
               color: "white",
               fontSize: "16px",
               fontWeight: 600,
+              lineHeight: "28px",
             }}
           >
             {label}
@@ -411,14 +463,14 @@ const FaceSelector = memo(
     ];
 
     return (
-      <GlassBox sx={{ p: 3, mb: 2 }}>
+      <GlassBox sx={{ mb: 2.5 }}>
         <Typography
           sx={{
             fontFamily: "'Poppins', sans-serif",
             color: "white",
             fontSize: "16px",
             fontWeight: 600,
-            mb: 2,
+            mb: 1.5,
           }}
         >
           Player Face Direction
@@ -428,12 +480,12 @@ const FaceSelector = memo(
             fontFamily: "'Poppins', sans-serif",
             color: "rgba(255, 255, 255, 0.6)",
             fontSize: "12px",
-            mb: 2,
+            mb: 1.5,
           }}
         >
           Direction player faces when placing the object
         </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           {faceOptions.map((opt) => (
             <Button
               key={opt.value}
