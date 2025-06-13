@@ -95,8 +95,9 @@ export const CreatorKit = () => {
     );
   };
 
-  const ProductOrAssetButtons = () => {
-    return (
+  // Memoize ProductOrAssetButtons to prevent re-renders when ProductEditor state changes
+  const memoizedProductOrAssetButtons = useMemo(
+    () => (
       <Box
         sx={{
           display: "flex",
@@ -105,13 +106,12 @@ export const CreatorKit = () => {
           alignItems: "center",
           width: "100%",
           height: "100px",
-          minHeight: "100px",
           gap: "25px",
           padding: "30px",
           boxSizing: "border-box",
-          backgroundColor: "rgb(15, 15, 15)",
+          backgroundColor: "rgb(5, 5, 5)",
         }}
-        className="ProductOrAsset"
+        className="ProductOrAssetButtons"
       >
         <Button
           sx={{
@@ -187,7 +187,20 @@ export const CreatorKit = () => {
           Assets
         </Button>
       </Box>
-    );
+    ),
+    [
+      entityType,
+      activeAssetId,
+      activeProductId,
+      setActiveAssetId,
+      setEntityType,
+      setActiveProductId,
+      setParamsType,
+    ]
+  );
+
+  const ProductOrAssetButtons = () => {
+    return memoizedProductOrAssetButtons;
   };
 
   const handleCheckboxChange = (
@@ -2377,6 +2390,107 @@ export const CreatorKit = () => {
     );
   };
 
+  // Memoize Done buttons to prevent re-renders when ProductEditor state changes
+  const memoizedProductDoneButton = useMemo(() => {
+    if (!(entityType === "PRODUCT" && activeProductId)) return null;
+
+    return (
+      <FullWideButton
+        text={"Done"}
+        onClick={() => {
+          if (!envProducts[activeProductId]) return null;
+
+          if (
+            envProducts[activeProductId].imageIndex !== undefined ||
+            envProducts[activeProductId].modelIndex !== undefined
+          ) {
+            setActiveProductId(null);
+          } else {
+            Swal.fire({
+              title: "No Asset Selected",
+              text: "Please select one of the provided 2D or 3D assets before proceeding.",
+              icon: "warning",
+              showConfirmButton: true,
+              allowOutsideClick: false,
+              customClass: {
+                title: styles.swalTitle,
+                popup: styles.swalPopup,
+              },
+            });
+          }
+        }}
+      />
+    );
+  }, [entityType, activeProductId, envProducts, setActiveProductId]);
+
+  const memoizedAssetDoneButton = useMemo(() => {
+    if (!(entityType === "ASSET" && activeAssetId)) return null;
+
+    return (
+      <FullWideButton
+        text={"Done"}
+        onClick={() => {
+          setActiveAssetId(null);
+        }}
+      />
+    );
+  }, [entityType, activeAssetId, setActiveAssetId]);
+
+  const memoizedSaveButton = useMemo(() => {
+    if (activeProductId || activeAssetId) return null;
+
+    return (
+      <FullWideButton
+        text={"Save Store"}
+        onClick={async () => {
+          if (!brandData) return;
+          Swal.fire({
+            title: "Save Store?",
+            text: "Are you sure you want to save the store?",
+            icon: "question",
+            showConfirmButton: true,
+            showCancelButton: true,
+            allowOutsideClick: false,
+            customClass: {
+              title: styles.swalTitle,
+              popup: styles.swalPopup,
+            },
+          }).then(async (response) => {
+            if (response.isConfirmed) {
+              try {
+                const envResponse = await EnvStoreService.storeEnvData(
+                  brandData.brand_name,
+                  Object.values(envProducts).filter(
+                    (envProduct) => envProduct.isEnvironmentProduct
+                  ),
+                  Object.values(envAssets).filter(
+                    (envAsset) => envAsset.isEnvironmentAsset
+                  )
+                );
+                console.log(envResponse);
+
+                Swal.fire({
+                  title: "XR Store Updated",
+                  text: "Your store has been updated successfully!",
+                  html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
+                  icon: "success",
+                  allowOutsideClick: false,
+                  customClass: {
+                    title: styles.swalTitle,
+                    popup: styles.swalPopup,
+                    htmlContainer: styles.swalPopup,
+                  },
+                });
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          });
+        }}
+      />
+    );
+  }, [activeProductId, activeAssetId, brandData, envProducts, envAssets]);
+
   return (
     <Box
       sx={{
@@ -2405,91 +2519,9 @@ export const CreatorKit = () => {
       )}
       {entityType === "ASSET" && <AssetList />}
       {entityType === "ASSET" && <AssetEditor />}
-      {!activeProductId && !activeAssetId && (
-        <FullWideButton
-          text={"Save Store"}
-          onClick={async () => {
-            if (!brandData) return;
-            Swal.fire({
-              title: "Save Store?",
-              text: "Are you sure you want to save the store?",
-              icon: "question",
-              showConfirmButton: true,
-              showCancelButton: true,
-              allowOutsideClick: false,
-              customClass: {
-                title: styles.swalTitle,
-                popup: styles.swalPopup,
-              },
-            }).then(async (response) => {
-              if (response.isConfirmed) {
-                try {
-                  const envResponse = await EnvStoreService.storeEnvData(
-                    brandData.brand_name,
-                    Object.values(envProducts).filter(
-                      (envProduct) => envProduct.isEnvironmentProduct
-                    ),
-                    Object.values(envAssets).filter(
-                      (envAsset) => envAsset.isEnvironmentAsset
-                    )
-                  );
-                  console.log(envResponse);
-
-                  Swal.fire({
-                    title: "XR Store Updated",
-                    text: "Your store has been updated successfully!",
-                    html: `<a href="https://${brandData.brand_name}.strategyfox.in" target="_blank">Go to your XR Store</a>`,
-                    icon: "success",
-                    allowOutsideClick: false,
-                    customClass: {
-                      title: styles.swalTitle,
-                      popup: styles.swalPopup,
-                      htmlContainer: styles.swalPopup,
-                    },
-                  });
-                } catch (error) {
-                  console.error(error);
-                }
-              }
-            });
-          }}
-        />
-      )}
-      {entityType === "PRODUCT" && activeProductId && (
-        <FullWideButton
-          text={"Done"}
-          onClick={() => {
-            if (!envProducts[activeProductId]) return null;
-
-            if (
-              envProducts[activeProductId].imageIndex !== undefined ||
-              envProducts[activeProductId].modelIndex !== undefined
-            ) {
-              setActiveProductId(null);
-            } else {
-              Swal.fire({
-                title: "No Asset Selected",
-                text: "Please select one of the provided 2D or 3D assets before proceeding.",
-                icon: "warning",
-                showConfirmButton: true,
-                allowOutsideClick: false,
-                customClass: {
-                  title: styles.swalTitle,
-                  popup: styles.swalPopup,
-                },
-              });
-            }
-          }}
-        />
-      )}
-      {entityType === "ASSET" && activeAssetId && (
-        <FullWideButton
-          text={"Done"}
-          onClick={() => {
-            setActiveAssetId(null);
-          }}
-        />
-      )}
+      {memoizedSaveButton}
+      {entityType === "PRODUCT" && activeProductId && memoizedProductDoneButton}
+      {entityType === "ASSET" && activeAssetId && memoizedAssetDoneButton}
     </Box>
   );
 };
