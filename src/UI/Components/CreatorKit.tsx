@@ -680,11 +680,11 @@ export const CreatorKit = () => {
       );
     };
 
-    const ParameterEntry = (
-      type: "POSITION" | "ROTATION" | "SCALE",
-      defaultValue: number,
-      axis?: string
-    ) => {
+    const ParameterEntry: React.FC<{
+      type: "POSITION" | "ROTATION" | "SCALE";
+      defaultValue: number;
+      axis?: string;
+    }> = ({ type, defaultValue, axis }) => {
       const entryRef = useRef<HTMLDivElement>(null);
       const mouseDown = useRef<boolean>(false);
       const mouseX = useRef<number>();
@@ -800,7 +800,7 @@ export const CreatorKit = () => {
           document.removeEventListener("pointerup", handleMouseUp);
           document.removeEventListener("mouseleave", handleMouseUp);
         };
-      }, []);
+      }, [type, axis]);
 
       return (
         <Box
@@ -861,18 +861,29 @@ export const CreatorKit = () => {
             {type}
           </Typography>
           {type !== "SCALE" &&
-            ["X", "Y", "Z"].map((axis: string) => {
-              return ParameterEntry(type, getValue(type, axis) || 0, axis);
-            })}
-          {type === "SCALE" &&
-            ParameterEntry(type, getValue("SCALE") || 1, "U")}
+            ["X", "Y", "Z"].map((axis: string) => (
+              <ParameterEntry
+                key={`${type}-${axis}`}
+                type={type}
+                defaultValue={getValue(type, axis) || 0}
+                axis={axis}
+              />
+            ))}
+          {type === "SCALE" && (
+            <ParameterEntry
+              key={`${type}-U`}
+              type={type}
+              defaultValue={getValue("SCALE") || 1}
+              axis="U"
+            />
+          )}
         </Box>
       );
     };
 
     const FaceSelector = () => {
       if (!envProduct) return null;
-      const faceOptions = [
+      const faceOptions: { label: string; value: "N" | "S" | "E" | "W" }[] = [
         { label: "North", value: "N" },
         { label: "South", value: "S" },
         { label: "East", value: "E" },
