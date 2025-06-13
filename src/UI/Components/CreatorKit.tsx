@@ -1229,7 +1229,18 @@ export const CreatorKit = () => {
 
         if (result && result.assets) {
           Object.keys(result.assets).forEach((id) => {
-            modifyEnvAsset(id, result.assets[id]);
+            const uploadedAssetData = result.assets[id];
+            const assetWithDefaults: EnvAsset = {
+              ...uploadedAssetData,
+              position: uploadedAssetData.position || [0, 0, 0],
+              rotation: uploadedAssetData.rotation || [0, 0, 0],
+              scale:
+                typeof uploadedAssetData.scale === "number"
+                  ? uploadedAssetData.scale
+                  : 1,
+              isEnvironmentAsset: uploadedAssetData.isEnvironmentAsset || false, // Default to not on canvas
+            };
+            modifyEnvAsset(id, assetWithDefaults);
           });
 
           // Check for any errors
@@ -1899,15 +1910,36 @@ export const CreatorKit = () => {
                   step={1}
                   icon={RotateCcw}
                 />
-                <SliderControl
-                  label="Scale"
-                  value={activeEnvAsset.scale || 1}
-                  onChange={handleScaleChange}
-                  min={0.1}
-                  max={5}
-                  step={0.1}
-                  icon={ZoomIn}
-                />
+                <GlassBox sx={{ mb: 2.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: 1.5,
+                      gap: 1,
+                    }}
+                  >
+                    <ZoomIn size={18} />
+                    <Typography
+                      sx={{
+                        fontFamily: "'Poppins', sans-serif",
+                        color: "white",
+                        fontSize: "16px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Scale
+                    </Typography>
+                  </Box>
+                  <SliderControl
+                    label="Scale"
+                    value={activeEnvAsset.scale || 1}
+                    onChange={handleScaleChange}
+                    min={0.1}
+                    max={5}
+                    step={0.1}
+                  />
+                </GlassBox>
               </>
             )}
           </>
