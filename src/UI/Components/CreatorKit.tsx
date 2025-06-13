@@ -1267,28 +1267,93 @@ export const CreatorKit = () => {
 
   // Handle asset deletion
   const handleDeleteAsset = useCallback(
-    async (id: string) => {
+    async (assetId: string) => {
       if (!brandData) return;
 
+      const result = await Swal.fire({
+        title: "Delete Asset?",
+        text: "This action is irreversible. Are you sure you want to delete this asset?",
+        icon: "warning",
+        showConfirmButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it",
+        confirmButtonColor: "#f12711",
+        cancelButtonText: "Cancel",
+        allowOutsideClick: false,
+        customClass: {
+          title: styles.swalTitle,
+          popup: styles.swalPopup,
+        },
+      });
+
+      /* ------------------------------------------------------------------
+         EXIT EARLY ON CANCEL
+      ------------------------------------------------------------------ */
+      if (!result.isConfirmed) return;
+
+      /* ------------------------------------------------------------------
+         1. OPTIMISTICALLY UPDATE THE UI
+      ------------------------------------------------------------------ */
+      // Keep a snapshot so we can roll back if the API call fails
+      const removedAsset = envAssets[assetId];
+
+      // Build a new shallow copy of envAssets *without* the deleted asset
+      const { [assetId]: _discard, ...restAssets } = envAssets;
+      setEnvAssets(restAssets);           // <- zustand expects the new object
+
+      // Clear selection/tool state if it was tied to the deleted asset
+      if (activeAssetId === assetId) {
+        setActiveAssetId(null);
+        if (toolType) setToolType(null);
+      }
+
+      /* ------------------------------------------------------------------
+         2. PERFORM THE BACK‑END DELETE
+      ------------------------------------------------------------------ */
       try {
-        const result = await AssetService.deleteAssetFile(
+        const response = await AssetService.deleteAssetFile(
           brandData.brand_name,
-          id
+          assetId
         );
 
-        if (result.status === 200 && result.id) {
-          const newEnvAssets = { ...envAssets };
-          delete newEnvAssets[result.id];
-          if (activeAssetId === result.id) {
-            setActiveAssetId(null);
-          }
-          setEnvAssets(newEnvAssets);
+        if (response.status !== 200) {
+          throw new Error("Failed to delete asset");
         }
+
+        // Success toast
+        Swal.fire({
+          title: "Asset Deleted",
+          text: "The asset has been successfully deleted",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: {
+            title: styles.swalTitle,
+            popup: styles.swalPopup,
+          },
+        });
       } catch (error) {
+        /* ----------------------------------------------------------------
+           3. ROLLBACK ON FAILURE
+        ---------------------------------------------------------------- */
+        if (removedAsset) {
+          // Restore the original asset map
+          setEnvAssets({ ...envAssets, [assetId]: removedAsset });
+        }
+
         console.error("Error deleting asset:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to delete the asset. Please try again.",
+          icon: "error",
+          customClass: {
+            title: styles.swalTitle,
+            popup: styles.swalPopup,
+          },
+        });
       }
     },
-    [brandData, envAssets, activeAssetId, setActiveAssetId, setEnvAssets]
+    [brandData, envAssets, setEnvAssets, activeAssetId, setActiveAssetId, toolType, setToolType]
   );
 
   // Handle media selection for products

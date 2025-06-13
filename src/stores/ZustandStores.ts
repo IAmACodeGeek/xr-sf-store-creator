@@ -273,9 +273,8 @@ interface EnvAssetStore {
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   envAssets: {},
-  setEnvAssets: (envAssets: {[id: string]: EnvAsset}) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
-    envAssets: { ...state.envAssets, ...envAssets },
-  })),
+  // Replace the whole envAssets map (needed for deletions)
+  setEnvAssets: (envAssets: { [id: string]: EnvAsset }) => set({ envAssets }),
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
     envAssets: {
       ...state.envAssets,
