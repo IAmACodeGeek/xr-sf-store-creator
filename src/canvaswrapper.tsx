@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import App from "./world/App.jsx";
@@ -102,8 +102,9 @@ export default function CanvasWrapper() {
   } = useResourceFetchStore();
 
   const [myProgress, setProgress] = useState(0);
-
+  const assetLibraryRef = useRef<{[id: string]: EnvAsset}>({});
   useEffect(() => {
+
     async function fetchProducts() {
       try {
         if (!productsLoaded && !productsLoading && brandData) {
@@ -146,12 +147,11 @@ export default function CanvasWrapper() {
           const newEnvAssets: { [id: string]: EnvAsset } = {};
           assets.forEach((asset) => {
             newEnvAssets[asset.id] = asset;
+            assetLibraryRef.current[asset.id] = asset; // Use ref instead of local variable
           });
-
+          
           setEnvAssets(newEnvAssets);
-
           setAssetLibraryLoaded(true);
-          console.log("Asset Library:", assets);
         }
       } catch (err) {
         console.error("Products error:", err);
@@ -164,7 +164,9 @@ export default function CanvasWrapper() {
           const response = await AssetService.importAssetFiles(
             brandData.brand_name
           );
-          const newEnvAssets: { [id: string]: EnvAsset } = envAssets;
+
+          const newEnvAssets: { [id: string]: EnvAsset } = {...assetLibraryRef.current};
+
           for (const asset of Object.values(response)) {
             newEnvAssets[asset.id] = {
               ...asset,
@@ -211,7 +213,8 @@ export default function CanvasWrapper() {
                 }
               }
 
-              const newEnvAssets: { [id: string]: EnvAsset } = {};
+              const newEnvAssets: { [id: string]: EnvAsset } = {...assetLibraryRef.current};
+
               for (const envAsset of Object.values(response.envAssets)) {
                 newEnvAssets[envAsset.id] = {
                   ...envAsset,
