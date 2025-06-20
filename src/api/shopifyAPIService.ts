@@ -321,6 +321,7 @@ export const ProductService = {
             : product.images[0].src,
         name: product.title,
         source: "LIBRARY",
+        image : product?.images[0] && product?.images[0].src,
         isEnvironmentAsset: false,
       };
       return assets;

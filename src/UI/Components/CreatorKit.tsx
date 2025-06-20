@@ -731,7 +731,7 @@ const AssetList = memo(
               />
               <Box
                 component="img"
-                src={asset.type === "PHOTO" ? asset.src : "icons/Cube.svg"}
+                src={asset.type === "PHOTO" ? asset.src : (asset.image ? asset.image : "icons/Cube.svg")}
                 sx={{
                   width: "48px",
                   height: "48px",
@@ -899,6 +899,19 @@ const MediaEditor = memo(
                   gap: 2,
                 }}
               >
+                <Button
+                  variant="contained"
+                  onClick={() => onMediaSelect("MODEL_3D", index)}
+                  sx={{
+                    background: "linear-gradient(135deg, #f12711, #f5af19)",
+                    color: "white",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #FF4E33, #FFC13B)",
+                    },
+                  }}
+                >
+                  Use This Model
+                </Button>
                 <ModelViewer
                   style={{
                     width: "100%",
@@ -920,19 +933,7 @@ const MediaEditor = memo(
                   poster=""
                   alt="A 3D model of a product"
                 />
-                <Button
-                  variant="contained"
-                  onClick={() => onMediaSelect("MODEL_3D", index)}
-                  sx={{
-                    background: "linear-gradient(135deg, #f12711, #f5af19)",
-                    color: "white",
-                    "&:hover": {
-                      background: "linear-gradient(135deg, #FF4E33, #FFC13B)",
-                    },
-                  }}
-                >
-                  Use This Model
-                </Button>
+                
               </Box>
             ))}
         </Box>
@@ -1069,6 +1070,9 @@ export const CreatorKit = () => {
     "CUSTOM"
   );
   const [assetSource, setAssetSource] = useState<"LIBRARY" | "OWN">("LIBRARY");
+
+  // Track previous state for products
+  const [previousProductState, setPreviousProductState] = useState<EnvProduct | null>(null);
 
   // Load Placeholder data
   const placeHolderData = useMemo(() => {
@@ -1596,28 +1600,40 @@ export const CreatorKit = () => {
       onClick={(event) => event.stopPropagation()}
     >
       {/* Header */}
-      <Box sx={{ p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)", display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{p: 3, borderBottom: "1px solid rgba(255, 255, 255, 0.1)", display: 'flex', alignItems: 'center', gap: 2 }}>
         {(activeProductId || activeAssetId) && (
           <GlassButton
             onClick={() => {
-              if (entityType === "PRODUCT" && activeProductId) {
-                // Create a synthetic event for the checkbox
-                const syntheticEvent = {
-                  target: { checked: false }
-                } as React.ChangeEvent<HTMLInputElement>;
-                handleCheckboxChange(syntheticEvent, { productId: activeProductId });
-              } else if (entityType === "ASSET" && activeAssetId) {
-                // Create a synthetic event for the checkbox
-                const syntheticEvent = {
-                  target: { checked: false }
-                } as React.ChangeEvent<HTMLInputElement>;
-                handleCheckboxChange(syntheticEvent, { assetId: activeAssetId });
+              if(!previousProductState){
+                if (entityType === "PRODUCT" && activeProductId) {
+                  // Create a synthetic event for the checkbox
+                  const syntheticEvent = {
+                    target: { checked: false }
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  handleCheckboxChange(syntheticEvent, { productId: activeProductId });
+                } else if (entityType === "ASSET" && activeAssetId) {
+                  // Create a synthetic event for the checkbox
+                  const syntheticEvent = {
+                    target: { checked: false }
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  handleCheckboxChange(syntheticEvent, { assetId: activeAssetId });
+                }
+                return;
               }
-              setActiveProductId(null);
-              setActiveAssetId(null);
+              if (entityType === "PRODUCT") {
+                // If we have previous state and a tool is active, restore it
+                if (previousProductState && toolType) {
+                  modifyEnvProduct(previousProductState.id, previousProductState);
+                }
+                setActiveProductId(null);
+                setPreviousProductState(null);
+              } else {
+                setActiveAssetId(null);
+              }
               setToolType(null);
             }}
             sx={{
+              position: 'absolute',
               minWidth: '48px',
               width: '48px',
               height: '48px',
@@ -1778,6 +1794,8 @@ export const CreatorKit = () => {
                                 envProducts[product.id]?.type || "PHOTO"
                               );
                               setActiveProductId(product.id);
+                               // Save current state before changing tool
+                              setPreviousProductState(envProducts[product.id]);
                               setToolType("MEDIA");
                             }}
                             sx={{
@@ -1797,6 +1815,8 @@ export const CreatorKit = () => {
                                 envProducts[product.id]?.modelIndex !==
                                   undefined
                               ) {
+                                // Save current state before changing tool
+                                setPreviousProductState(envProducts[product.id]);
                                 setParamsType(
                                   envProducts[product.id].placeHolderId !==
                                     undefined
@@ -1870,9 +1890,9 @@ export const CreatorKit = () => {
                             ]) || [0, 0, 0]
                           }
                           onChange={handlePositionChange}
-                          min={-20}
-                          max={20}
-                          step={0.1}
+                          min={-30}
+                          max={30}
+                          step={0.15}
                           icon={Move3D}
                         />
                         <Vector3Control
@@ -2074,6 +2094,8 @@ export const CreatorKit = () => {
             isPrimary
             onClick={() => {
               if (entityType === "PRODUCT") {
+                // Clear previous state when done
+                setPreviousProductState(null);
                 setActiveProductId(null);
               } else {
                 setActiveAssetId(null);

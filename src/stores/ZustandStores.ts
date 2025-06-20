@@ -260,6 +260,7 @@ interface EnvAsset {
   name: string;
   isEnvironmentAsset: boolean;
   source: 'OWN' | 'LIBRARY';
+  image?: string;
 }
 
 interface EnvAssetStore {
