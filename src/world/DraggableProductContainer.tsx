@@ -361,24 +361,24 @@ const DraggableProductContainer = ({
     ];
   }, [imageTexture, scale]);
 
-  const pivotOffset = useMemo(() => {
-    if (envProduct.type === "MODEL_3D" && scene && computedScaleForModel) {
-      const clonedScene = scene.clone();
-      clonedScene.scale.set(
-        computedScaleForModel,
-        computedScaleForModel,
-        computedScaleForModel
-      );
-      const box = new Box3().setFromObject(clonedScene);
-      const size = new Vector3();
-      box.getSize(size);
-      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
-    } else if (envProduct.type === "PHOTO" && computedSizeForImage) {
-      const objectHeight = computedSizeForImage[1];
-      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
-    }
-    return [0, 0, 0] as [number, number, number];
-  }, [envProduct.type, scene, computedScaleForModel, computedSizeForImage]);
+  // const pivotOffset = useMemo(() => {
+  //   if (envProduct.type === "MODEL_3D" && scene && computedScaleForModel) {
+  //     const clonedScene = scene.clone();
+  //     clonedScene.scale.set(
+  //       computedScaleForModel,
+  //       computedScaleForModel,
+  //       computedScaleForModel
+  //     );
+  //     const box = new Box3().setFromObject(clonedScene);
+  //     const size = new Vector3();
+  //     box.getSize(size);
+  //     return [0, size.y / 2 + 0.2, 0] as [number, number, number];
+  //   } else if (envProduct.type === "PHOTO" && computedSizeForImage) {
+  //     const objectHeight = computedSizeForImage[1];
+  //     return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
+  //   }
+  //   return [0, 0, 0] as [number, number, number];
+  // }, [envProduct.type, scene, computedScaleForModel, computedSizeForImage]);
 
   const handleObjectTranslate = () => {
     if (!rotationGroupRef.current) return;
@@ -453,7 +453,7 @@ const DraggableProductContainer = ({
     <RigidBody type="fixed" collisionGroups={0}>
       <group position={[0, 0, 0]} rotation={new Euler(0, 0, 0, "YZX")}>
         <PivotControls
-          anchor={pivotOffset}
+          anchor={[0, 0, 0]}
           scale={1.25 * (scale >= 1 ? scale : 1)}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
