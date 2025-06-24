@@ -6,7 +6,6 @@ import {
   BackSide,
   Box3,
   Euler,
-  Group,
   Mesh,
   Object3D,
   Quaternion,
@@ -177,11 +176,11 @@ const DraggableAssetContainer = ({
     return scale / size.y;
   }, [scene, scale]);
 
-  const { computedPositionForModel, modelCenterOffset } = useMemo(() => {
+  const { computedPositionForModel, boxCenter } = useMemo(() => {
     if (!computedScaleForModel || !scene)
       return {
         computedPositionForModel: null,
-        modelCenterOffset: null,
+        boxCenter: null,
       };
 
     const cameraPosition = new Vector3();
@@ -203,13 +202,15 @@ const DraggableAssetContainer = ({
     );
     const box = new Box3().setFromObject(scaledScene);
 
-    // Calculate center offset - this will be used to center the model within the rotation group
-    const modelCenter = new Vector3();
-    box.getCenter(modelCenter);
+    // Calculate center offset
+    const boxCenter = new Vector3();
+    box.getCenter(boxCenter);
 
+    // Adjust position to account for scaled center offset
+    const newPosition = positionVector.clone().sub(boxCenter.clone());
     return {
-      computedPositionForModel: [positionVector.x, positionVector.y, positionVector.z],
-      modelCenterOffset: modelCenter,
+      computedPositionForModel: [newPosition.x, newPosition.y, newPosition.z],
+      boxCenter: boxCenter,
     };
   }, [scene, computedScaleForModel, position, camera]);
 
@@ -252,151 +253,260 @@ const DraggableAssetContainer = ({
     ];
   }, [imageTexture, scale]);
 
-  // const pivotOffset = useMemo(() => {
-  //   if (envAsset.type === "MODEL_3D" && scene && computedScaleForModel) {
-  //     const clonedScene = scene.clone();
-  //     clonedScene.scale.set(
-  //       computedScaleForModel,
-  //       computedScaleForModel,
-  //       computedScaleForModel
-  //     );
-  //     const box = new Box3().setFromObject(clonedScene);
-  //     const size = new Vector3();
-  //     box.getSize(size);
-  //     return [0, size.y / 2 + 0.2, 0] as [number, number, number];
-  //   } else if (envAsset.type === "PHOTO" && computedSizeForImage) {
-  //     const objectHeight = computedSizeForImage[1];
-  //     return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
-  //   }
-  //   return [0, 0, 0] as [number, number, number];
-  // }, [envAsset.type, scene, computedScaleForModel, computedSizeForImage]);
+  const pivotOffset = useMemo(() => {
+    if (envAsset.type === "MODEL_3D" && scene && computedScaleForModel) {
+      const clonedScene = scene.clone();
+      clonedScene.scale.set(
+        computedScaleForModel,
+        computedScaleForModel,
+        computedScaleForModel
+      );
+      const box = new Box3().setFromObject(clonedScene);
+      const size = new Vector3();
+      box.getSize(size);
+      return [0, size.y / 2 + 0.2, 0] as [number, number, number];
+    } else if (envAsset.type === "PHOTO" && computedSizeForImage) {
+      const objectHeight = computedSizeForImage[1];
+      return [0, objectHeight / 2 + 0.2, 0] as [number, number, number];
+    }
+    return [0, 0, 0] as [number, number, number];
+  }, [envAsset.type, scene, computedScaleForModel, computedSizeForImage]);
 
-  // Set position and rotation - Using a rotation group for proper centered rotation
-  const rotationGroupRef = useRef<Group>(null);
+  // Set position and rotation
+  const modelRef = useRef<Object3D>(null);
   const meshRef = useRef<Mesh>(null);
   const backMeshRef = useRef<Mesh>(null);
-
   useEffect(() => {
-    if (!rotationGroupRef.current) return;
+    if (!modelRef.current || envAsset.type !== "MODEL_3D") return;
 
-    // Position the rotation group
-    let worldPosition;
-    
-    if (envAsset.type === "MODEL_3D") {
-      worldPosition = new Vector3(
-        ...(computedPositionForModel || [0, 0, 0])
-      );
-    } else if (envAsset.type === "PHOTO") {
-      // Handle PHOTO positioning like before
-      const cameraPosition = new Vector3();
-      camera.getWorldPosition(cameraPosition);
-      const cameraDirection = new Vector3();
-      camera.getWorldDirection(cameraDirection);
-      cameraDirection.multiplyScalar(5);
-      cameraPosition.add(cameraDirection);
-      
-      worldPosition = position ? new Vector3(...position) : cameraPosition;
-    } else {
-      worldPosition = new Vector3(0, 0, 0);
+    // Position
+    const worldPosition = new Vector3(
+      ...(computedPositionForModel || [0, 0, 0])
+    );
+
+    modelRef.current.matrixWorld.setPosition(worldPosition);
+    if (modelRef.current.parent) {
+      worldPosition.applyMatrix4(modelRef.current.parent.matrixWorld.invert());
     }
+    modelRef.current.position.copy(worldPosition);
 
-    rotationGroupRef.current.matrixWorld.setPosition(worldPosition);
-    if (rotationGroupRef.current.parent) {
-      worldPosition.applyMatrix4(rotationGroupRef.current.parent.matrixWorld.invert());
-    }
-    rotationGroupRef.current.position.copy(worldPosition);
-
-    // Apply rotation to the rotation group
+    // Rotation
     const worldRotation = computedRotation;
     const quaternion = new Quaternion();
     quaternion.setFromEuler(worldRotation);
 
-    if (rotationGroupRef.current.parent) {
+    if (modelRef.current.parent) {
       const parentQuaternion = new Quaternion();
-      rotationGroupRef.current.parent.getWorldQuaternion(parentQuaternion);
+      modelRef.current.parent.getWorldQuaternion(parentQuaternion);
 
       parentQuaternion.invert();
       quaternion.multiplyQuaternions(parentQuaternion, quaternion);
     }
-    rotationGroupRef.current.setRotationFromQuaternion(quaternion);
+    modelRef.current.setRotationFromQuaternion(quaternion);
   }, [
     position,
     computedPositionForModel,
     envAsset.type,
     computedRotation,
     camera,
-    rotationGroupRef,
+    modelRef,
+  ]);
+
+  useEffect(() => {
+    if (!meshRef.current || !backMeshRef.current || envAsset.type !== "PHOTO")
+      return;
+
+    // Position
+    const cameraPosition = new Vector3();
+    camera.getWorldPosition(cameraPosition);
+    const cameraDirection = new Vector3();
+    camera.getWorldDirection(cameraDirection);
+    cameraDirection.multiplyScalar(5);
+    cameraPosition.add(cameraDirection);
+
+    const worldPosition = position ? new Vector3(...position) : cameraPosition;
+
+    meshRef.current.matrixWorld.setPosition(worldPosition);
+    if (meshRef.current.parent) {
+      worldPosition.applyMatrix4(meshRef.current.parent.matrixWorld.invert());
+    }
+    meshRef.current.position.copy(worldPosition);
+    backMeshRef.current.position.copy(worldPosition);
+
+    // Rotation
+    const worldRotation = computedRotation;
+    const quaternion = new Quaternion();
+    quaternion.setFromEuler(worldRotation);
+
+    if (meshRef.current.parent) {
+      const parentQuaternion = new Quaternion();
+      meshRef.current.parent.getWorldQuaternion(parentQuaternion);
+
+      parentQuaternion.invert();
+      quaternion.multiplyQuaternions(parentQuaternion, quaternion);
+    }
+    meshRef.current.setRotationFromQuaternion(quaternion);
+    backMeshRef.current.setRotationFromQuaternion(quaternion);
+  }, [
+    position,
+    computedPositionForModel,
+    envAsset.type,
+    computedRotation,
+    camera,
+    meshRef,
+    backMeshRef,
   ]);
 
   const handleObjectTranslate = () => {
-    if (!rotationGroupRef.current) return;
+    if (envAsset.type === "MODEL_3D") {
+      if (!modelRef.current) return;
 
-    rotationGroupRef.current.updateMatrixWorld();
+      modelRef.current.updateMatrixWorld();
 
-    const position = new Vector3();
-    rotationGroupRef.current.getWorldPosition(position);
+      const position = new Vector3();
+      modelRef.current.getWorldPosition(position);
 
-    const pos = [
-      Math.round(position.x * 1000) / 1000,
-      Math.round(position.y * 1000) / 1000,
-      Math.round(position.z * 1000) / 1000,
-    ];
+      if (boxCenter) {
+        // Neutralize the auto generated offset
+        position.add(boxCenter);
+      }
 
-    const newEnvAsset: EnvAsset = {
-      id: envAsset.id,
-      name: envAsset.name,
-      type: envAsset.type,
-      src: envAsset.src,
-      isEnvironmentAsset: true,
-      status: envAsset.status,
-      position: pos,
-      scale: envScale,
-      source: envAsset.source,
-    };
+      const pos = [
+        Math.round(position.x * 1000) / 1000,
+        Math.round(position.y * 1000) / 1000,
+        Math.round(position.z * 1000) / 1000,
+      ];
 
-    modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+        type: envAsset.type,
+        src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos,
+        scale: envScale,
+        source: envAsset.source,
+      };
+
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+    } else if (envAsset.type === "PHOTO") {
+      if (!meshRef.current) return;
+
+      meshRef.current.updateMatrixWorld();
+
+      const position = new Vector3();
+      meshRef.current.getWorldPosition(position);
+
+      const pos = [
+        Math.round(position.x * 1000) / 1000,
+        Math.round(position.y * 1000) / 1000,
+        Math.round(position.z * 1000) / 1000,
+      ];
+
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+        type: envAsset.type,
+        src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos,
+        scale: envScale,
+        source: envAsset.source,
+      };
+
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+    }
   };
 
   const handleObjectMove = () => {
-    if (!rotationGroupRef.current) return;
+    if (envAsset.type === "MODEL_3D") {
+      if (!modelRef.current) return;
 
-    rotationGroupRef.current.updateMatrixWorld();
+      modelRef.current.updateMatrixWorld();
 
-    const position = new Vector3();
-    rotationGroupRef.current.getWorldPosition(position);
+      const position = new Vector3();
+      modelRef.current.getWorldPosition(position);
 
-    const quaternion = new Quaternion();
-    rotationGroupRef.current.getWorldQuaternion(quaternion);
+      if (boxCenter) {
+        // Neutralize the auto generated offset
+        position.add(boxCenter);
+      }
 
-    const euler = new Euler();
-    euler.setFromQuaternion(quaternion);
-    euler.reorder("YZX");
+      const quaternion = new Quaternion();
+      modelRef.current.getWorldQuaternion(quaternion);
 
-    const pos = [
-      Math.round(position.x * 1000) / 1000,
-      Math.round(position.y * 1000) / 1000,
-      Math.round(position.z * 1000) / 1000,
-    ];
-    const rot = [
-      Math.round(((euler.x * 180) / Math.PI) * 1000) / 1000,
-      Math.round(((euler.y * 180) / Math.PI) * 1000) / 1000,
-      Math.round(((euler.z * 180) / Math.PI) * 1000) / 1000,
-    ];
+      const euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+      euler.reorder("YZX");
 
-    const newEnvAsset: EnvAsset = {
-      id: envAsset.id,
-      name: envAsset.name,
-      type: envAsset.type,
-      src: envAsset.src,
-      isEnvironmentAsset: true,
-      status: envAsset.status,
-      position: pos,
-      rotation: rot,
-      scale: envScale,
-      source: envAsset.source,
-    };
+      const pos = [
+        Math.round(position.x * 1000) / 1000,
+        Math.round(position.y * 1000) / 1000,
+        Math.round(position.z * 1000) / 1000,
+      ];
+      const rot = [
+        Math.round(((euler.x * 180) / Math.PI) * 1000) / 1000,
+        Math.round(((euler.y * 180) / Math.PI) * 1000) / 1000,
+        Math.round(((euler.z * 180) / Math.PI) * 1000) / 1000,
+      ];
 
-    modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+        type: envAsset.type,
+        src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos,
+        rotation: rot,
+        scale: envScale,
+        source: envAsset.source,
+      };
+
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+    } else if (envAsset.type === "PHOTO") {
+      if (!meshRef.current) return;
+
+      meshRef.current.updateMatrixWorld();
+
+      const position = new Vector3();
+      meshRef.current.getWorldPosition(position);
+
+      const quaternion = new Quaternion();
+      meshRef.current.getWorldQuaternion(quaternion);
+
+      const euler = new Euler();
+      euler.setFromQuaternion(quaternion);
+      euler.reorder("YZX");
+
+      const pos = [
+        Math.round(position.x * 1000) / 1000,
+        Math.round(position.y * 1000) / 1000,
+        Math.round(position.z * 1000) / 1000,
+      ];
+      const rot = [
+        Math.round(((euler.x * 180) / Math.PI) * 1000) / 1000,
+        Math.round(((euler.y * 180) / Math.PI) * 1000) / 1000,
+        Math.round(((euler.z * 180) / Math.PI) * 1000) / 1000,
+      ];
+
+      const newEnvAsset: EnvAsset = {
+        id: envAsset.id,
+        name: envAsset.name,
+        type: envAsset.type,
+        src: envAsset.src,
+        isEnvironmentAsset: true,
+        status: envAsset.status,
+        position: pos,
+        rotation: rot,
+        scale: envScale,
+        source: envAsset.source,
+      };
+
+      modifyEnvAsset(newEnvAsset.id, newEnvAsset);
+    }
   };
 
   useEffect(() => {
@@ -411,49 +521,42 @@ const DraggableAssetContainer = ({
     <RigidBody type="fixed" collisionGroups={0}>
       <group position={[0, 0, 0]} rotation={new Euler(0, 0, 0, "YZX")}>
         <PivotControls
-          anchor={[0, 0, 0]}
+          anchor={pivotOffset}
           scale={1.25 * (scale >= 1 ? scale : 1)}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
           onDragEnd={handleObjectMove}
           disableScaling
         >
-          {/* Rotation Group - This is where rotation is applied */}
-          <group ref={rotationGroupRef}>
-            {envAsset.type === "MODEL_3D" && memoizedModelScene && (
-              <primitive
-                object={memoizedModelScene}
-                scale={[
-                  computedScaleForModel,
-                  computedScaleForModel,
-                  computedScaleForModel,
-                ]}
-                position={modelCenterOffset ? [
-                  -modelCenterOffset.x,
-                  -modelCenterOffset.y,
-                  -modelCenterOffset.z
-                ] : [0, 0, 0]}
-                castShadow
-                receiveShadow
-              />
-            )}
-            {envAsset.type === "PHOTO" && computedSizeForImage && (
-              <>
-                <mesh ref={meshRef}>
-                  <planeGeometry
-                    args={[computedSizeForImage[0], computedSizeForImage[1]]}
-                  />
-                  <meshBasicMaterial map={imageTexture} transparent={true} />
-                </mesh>
-                <mesh ref={backMeshRef}>
-                  <planeGeometry
-                    args={[computedSizeForImage[0], computedSizeForImage[1]]}
-                  />
-                  <meshBasicMaterial color={0xffffff} side={BackSide} />
-                </mesh>
-              </>
-            )}
-          </group>
+          {envAsset.type === "MODEL_3D" && memoizedModelScene && (
+            <primitive
+              ref={modelRef}
+              object={memoizedModelScene}
+              scale={[
+                computedScaleForModel,
+                computedScaleForModel,
+                computedScaleForModel,
+              ]}
+              castShadow
+              receiveShadow
+            />
+          )}
+          {envAsset.type === "PHOTO" && computedSizeForImage && (
+            <>
+              <mesh rotation={computedRotation} ref={meshRef}>
+                <planeGeometry
+                  args={[computedSizeForImage[0], computedSizeForImage[1]]}
+                />
+                <meshBasicMaterial map={imageTexture} transparent={true} />
+              </mesh>
+              <mesh ref={backMeshRef} rotation={computedRotation}>
+                <planeGeometry
+                  args={[computedSizeForImage[0], computedSizeForImage[1]]}
+                />
+                <meshBasicMaterial color={0xffffff} side={BackSide} />
+              </mesh>
+            </>
+          )}
         </PivotControls>
       </group>
     </RigidBody>
