@@ -5,6 +5,7 @@ import singleRoomPlaceHolderData from "./placeHolderData/SingleRoom";
 import PlaceHolderData from "./placeHolderData/PlaceHolderData";
 import ShowRoomPlaceHolderData from "./placeHolderData/ShowRoom";
 import LotusDomePlaceHolderData from "./placeHolderData/LotusDome";
+import LunoxPlaceHolderData from "./placeHolderData/Lunox";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -38,6 +39,7 @@ interface EnvironmentData {
       position: [number, number, number];
       rotation: [number, number, number];
       scale: number;
+      dark?: boolean;
     }[];
   };
 }
@@ -256,6 +258,52 @@ const environmentData: EnvironmentData = {
         position: [0, 0.4, 0],
         rotation: [-90, 0, 0],
         scale: 3,
+      },
+    ],
+  },
+  LUNOX: {
+    playerSpeed: 8,
+    playerHeight: 2,
+    placeHolderData: LunoxPlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [10, 5, 0],
+        rotation: [0, 90, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 3, 0],
+          rotation: [0, 90, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [-34, 5.2, 0],
+        rotation: [0, 0, 0],
+        scale: 0.45,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [17.2, 5, 7],
+        rotation: [0, -90, 0],
+        scale: 2.5,
+      },
+      {
+        position: [17.2, 5, -8],
+        rotation: [0, -90, 0],
+        scale: 2.5,
+      },
+    ],
+    compasses: [
+      {
+        position: [-8, 0.1, -0.4],
+        rotation: [-90, 0, 0],
+        scale: 5,
+        dark: true,
       },
     ],
   },
