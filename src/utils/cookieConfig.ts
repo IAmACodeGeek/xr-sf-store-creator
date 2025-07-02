@@ -6,48 +6,65 @@ interface CookieOptions {
 }
 
 export const getCookieConfig = (): CookieOptions => {
-  // Use Vite's environment detection
-  const isDevelopment = import.meta.env.DEV;
-  
-  console.log('Environment check:', {
-    isDevelopment,
-    mode: import.meta.env.MODE,
-    prod: import.meta.env.PROD
-  });
+  const isDevelopment = process.env.NODE_ENV === 'development';
   
   if (isDevelopment) {
     return {
-      expires: 2 / 24,      // 2 hours
+      expires: 2 / 24,      // 1 hour
       secure: false,        // No HTTPS required for localhost
       sameSite: "Lax",      // More permissive for development
       // No domain restriction for localhost
     };
   } else {
+    // Determine domain based on current hostname
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    let domain: string | undefined;
+    
+    if (hostname.includes('deltaxr.in')) {
+      domain = '.deltaxr.in';
+    } else if (hostname.includes('deltaxr.com')) {
+      domain = '.deltaxr.com';
+    } else if (hostname.includes('strategyfox.in')) {
+      domain = '.strategyfox.in';
+    }
+    
     return {
-      expires: 2 / 24,      // 2 hours
+      expires: 2 / 24,      // 1 hour
       secure: true,         // Require HTTPS in production
-      sameSite: "None",     // Required for cross-domain cookies
-      domain: ".strategyfox.in"  // Domain restriction for production
+      sameSite: "Strict",   // Strict security in production
+      domain: domain        // Domain restriction based on current hostname
     };
   }
 };
 
 export const getRemoveConfig = () => {
-  const isDevelopment = import.meta.env.DEV;
+  const isDevelopment = process.env.NODE_ENV === 'development';
   
   if (isDevelopment) {
     return {
       path: "/",
     };
   } else {
+    // Determine domain based on current hostname
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    let domain: string | undefined;
+    
+    if (hostname.includes('deltaxr.in')) {
+      domain = '.deltaxr.in';
+    } else if (hostname.includes('deltaxr.com')) {
+      domain = '.deltaxr.com';
+    } else if (hostname.includes('strategyfox.in')) {
+      domain = '.strategyfox.in';
+    }
+    
     return {
-      domain: ".strategyfox.in",
+      domain: domain,
       path: "/",
     };
   }
 };
 
 // Helper function to check environment
-export const isProduction = () => import.meta.env.PROD;
-export const isDevelopment = () => import.meta.env.DEV;
-export const getEnvironment = () => import.meta.env.MODE;
+export const isProduction = () => process.env.NODE_ENV === 'production';
+export const isDevelopment = () => process.env.NODE_ENV === 'development';
+export const getEnvironment = () => process.env.NODE_ENV;
