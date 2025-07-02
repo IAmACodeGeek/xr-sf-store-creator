@@ -34,7 +34,7 @@ export const App = () => {
           environmentData[environmentType].compasses.map((compass, index) => {
             return (
               <BrandPoster
-                imageUrl={"/media/compass.png"}
+                imageUrl={compass.dark ? "/media/Compass dark.png" : "/media/compass.png"}
                 position={compass.position}
                 rotation={compass.rotation}
                 scale={compass.scale}

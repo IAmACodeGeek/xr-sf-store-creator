@@ -7,4 +7,4 @@ export function LotusDomeModel() {
   )
 }
 
-useGLTF.preload('/lotus dome store.glb')
+useGLTF.preload('/models/lotus dome store.glb')

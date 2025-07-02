@@ -5,6 +5,7 @@ import SingleRoomModel from '@/data/environment/environmentModel/SingleRoom';
 import { useEnvironmentStore } from '@/stores/ZustandStores';
 import ShowroomModel from '@/data/environment/environmentModel/Showroom';
 import { LotusDomeModel } from '@/data/environment/environmentModel/LotusDome';
+import { LunoxModel } from '@/data/environment/environmentModel/Lunox';
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
@@ -15,6 +16,7 @@ export function Ground() {
       {environmentType === "SINGLEROOM" && <SingleRoomModel/>}
       {environmentType === "SHOWROOM" && <ShowroomModel/>}
       {environmentType === "LOTUSDOME" && <LotusDomeModel/>}  
+      {environmentType === "LUNOX" && <LunoxModel/>}  
     </RigidBody>
   );
 }
