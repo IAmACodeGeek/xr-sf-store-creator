@@ -6,6 +6,7 @@ import { useEnvironmentStore } from '@/stores/ZustandStores';
 import ShowroomModel from '@/data/environment/environmentModel/Showroom';
 import { LotusDomeModel } from '@/data/environment/environmentModel/LotusDome';
 import { LunoxModel } from '@/data/environment/environmentModel/Lunox';
+import { ShelfscapeModel } from '@/data/environment/environmentModel/Shelfscape';
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
@@ -17,6 +18,7 @@ export function Ground() {
       {environmentType === "SHOWROOM" && <ShowroomModel/>}
       {environmentType === "LOTUSDOME" && <LotusDomeModel/>}  
       {environmentType === "LUNOX" && <LunoxModel/>}  
+      {environmentType === "SHELFSCAPE" && <ShelfscapeModel/>}  
     </RigidBody>
   );
 }

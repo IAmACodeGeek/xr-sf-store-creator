@@ -6,6 +6,7 @@ import PlaceHolderData from "./placeHolderData/PlaceHolderData";
 import ShowRoomPlaceHolderData from "./placeHolderData/ShowRoom";
 import LotusDomePlaceHolderData from "./placeHolderData/LotusDome";
 import LunoxPlaceHolderData from "./placeHolderData/Lunox";
+import ShelfscapePlaceHolderData from "./placeHolderData/Shelfscape";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -304,6 +305,51 @@ const environmentData: EnvironmentData = {
         rotation: [-90, 0, 0],
         scale: 5,
         dark: true,
+      },
+    ],
+  },
+  SHELFSCAPE: {
+    playerSpeed: 8,
+    playerHeight: 3.5,
+    placeHolderData: ShelfscapePlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [10, 7, -2],
+        rotation: [0, 90, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 5, -2],
+          rotation: [0, 90, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [5, 7, -2],
+        rotation: [0, 180, 0],
+        scale: 0.45,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [5.5, 7, 7],
+        rotation: [0, -90, 0],
+        scale: 2.5,
+      },
+      {
+        position: [5.5, 7, -11],
+        rotation: [0, -90, 0],
+        scale: 2.5,
+      },
+    ],
+    compasses: [
+      {
+        position: [-16, 1.2, -2],
+        rotation: [-90, 0, 0],
+        scale: 5,
       },
     ],
   },
