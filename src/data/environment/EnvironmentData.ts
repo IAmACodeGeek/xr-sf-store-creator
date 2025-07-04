@@ -6,6 +6,7 @@ import PlaceHolderData from "./placeHolderData/PlaceHolderData";
 import ShowRoomPlaceHolderData from "./placeHolderData/ShowRoom";
 import LotusDomePlaceHolderData from "./placeHolderData/LotusDome";
 import LunoxPlaceHolderData from "./placeHolderData/Lunox";
+import ShelfscapePlaceHolderData from "./placeHolderData/Shelfscape";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -310,7 +311,7 @@ const environmentData: EnvironmentData = {
   SHELFSCAPE: {
     playerSpeed: 8,
     playerHeight: 3.5,
-    placeHolderData: LunoxPlaceHolderData,
+    placeHolderData: ShelfscapePlaceHolderData,
     initialGSAP: {
       start: {
         position: [10, 7, -2],
