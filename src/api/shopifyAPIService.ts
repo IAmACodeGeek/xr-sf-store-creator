@@ -120,7 +120,7 @@ export const ProductService = {
               availableForSale: variant.node.availableForSale,
             };
           }
-        );
+        ).filter(variant => parseFloat(variant.price) > 0);
 
         const arLensLink = product.node.metafields.edges.find(
           (metafield) =>
@@ -144,7 +144,8 @@ export const ProductService = {
       }
     );
 
-    return products;
+    // Filter out products that have no variants with price > 0
+    return products.filter(product => product.variants.length > 0);
   },
 
   async getAllProductsFromVendor(brandName: string): Promise<Product[]> {
@@ -204,7 +205,7 @@ export const ProductService = {
               availableForSale: variant.node.availableForSale,
             };
           }
-        );
+        ).filter(variant => parseFloat(variant.price) > 0);
 
         const arLensLink = product.node.metafields.edges.find(
           (metafield) =>
@@ -228,7 +229,8 @@ export const ProductService = {
       }
     );
 
-    return products;
+    // Filter out products that have no variants with price > 0
+    return products.filter(product => product.variants.length > 0);
   },
 
   async getLibraryAssetsAsProducts(): Promise<Product[]> {
