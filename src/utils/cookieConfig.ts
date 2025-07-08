@@ -47,13 +47,11 @@ export const getRemoveConfig = () => {
     const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
     let domain: string | undefined;
     
-    if (hostname.includes('deltaxr.in')) {
-      domain = '.deltaxr.in';
-    } else if (hostname.includes('deltaxr.com')) {
-      domain = '.deltaxr.com';
-    } else if (hostname.includes('strategyfox.in')) {
-      domain = '.strategyfox.in';
-    }
+    if (hostname.includes('shackit.in')) {
+      domain = '.shackit.in';
+    } else if (hostname.includes('shackit.com')) {
+      domain = '.shackit.com';
+    } 
     
     return {
       domain: domain,
