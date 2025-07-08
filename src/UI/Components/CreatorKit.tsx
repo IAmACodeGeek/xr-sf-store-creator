@@ -1566,7 +1566,7 @@ export const CreatorKit = () => {
         Swal.fire({
           title: "XR Store Updated",
           text: "Your store has been updated successfully!",
-          html: `<a href="https://${brandData.brand_name}.shackit.in" target="_blank">Go to your XR Store</a>`,
+          html: `<a href="https://${brandData.brand_name}.shackit.com" target="_blank">Go to your XR Store</a>`,
           icon: "success",
           allowOutsideClick: false,
           customClass: {

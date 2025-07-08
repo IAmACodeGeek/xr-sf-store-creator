@@ -154,7 +154,8 @@ export const ProductService = {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        vendor: brandName
+        vendor: brandName,
+        region: "global"
       })
     });
     const resultJSON: ProductResponse = await response.json();
