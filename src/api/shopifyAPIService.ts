@@ -93,54 +93,40 @@ export const ProductService = {
     const response = await fetch(BASE_URL + brandName);
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
-              edge.node.image
-          )
-          .map((edge) => {
-            return { src: edge.node.image?.url || "" };
-          });
+    const products: Product[] = [];
 
-        const models: {
-          id: string | undefined;
-          sources:
-            | {
-                url: string;
-                format: string;
-                mimeType: string;
-              }[]
-            | undefined;
-        }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "MODEL_3D" &&
-              edge.node.sources
-          )
-          .map((edge) => {
-            return {
-              id: edge.node.id,
-              sources: edge.node.sources,
-            };
-          });
+    resultJSON.data.products.edges.forEach((product) => {
+      const productVariants: Variant[] = product.node.variants.edges.map(
+        (variant) => {
+          const price = variant.node.contextualPricing?.price?.amount || variant.node.price || "0";
+          const compareAtPrice = variant.node.contextualPricing?.compareAtPrice?.amount || variant.node.compareAtPrice;
 
-        const productVariants: Variant[] = product.node.variants.edges.map(
-          (variant) => {
-            return {
-              id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.contextualPricing?.price?.amount || "0",
-              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
-              productId: Number(product.node.id.split("/").pop()),
-              selectedOptions: variant.node.selectedOptions,
-              availableForSale: variant.node.availableForSale,
-            };
-          }
-        ).filter(variant => parseFloat(variant.price) > 0);
+          return {
+            id: Number(variant.node.id.split("/").pop()),
+            price: price,
+            compareAtPrice: compareAtPrice,
+            productId: Number(product.node.id.split("/").pop()),
+            selectedOptions: variant.node.selectedOptions,
+            availableForSale: variant.node.availableForSale,
+          };
+        }
+      ).filter(variant => parseFloat(variant.price) > 0);
 
-        const arLensLink = product.node.metafields.edges.find(
+      if (productVariants.length > 0) {
+        const models = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "MODEL_3D")
+          .map((model) => ({
+            id: model.node.id,
+            sources: model.node.sources || [],
+          }));
+
+        const images = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "IMAGE")
+          .map((image) => ({
+            src: image.node.image?.url || ""
+          }));
+
+        const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
             metafield.node.namespace === "custom" &&
             metafield.node.key === "snapchat_lens_link"
@@ -150,20 +136,19 @@ export const ProductService = {
           id: Number(product.node.id.split("/").pop()),
           title: product.node.title,
           description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
+          images: images,
           models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
+          variants: productVariants,
+          options: product.node.options,
+          tags: product.node.tags ? product.node.tags.join(" ") : "",
+          arLensLink: arLensLink || undefined
         };
 
-        return parsedProduct;
+        products.push(parsedProduct);
       }
-    );
+    });
 
-    // Filter out products that have no variants with price > 0
-    return products.filter(product => product.variants.length > 0);
+    return products;
   },
 
   async getAllProductsFromVendor(brandName: string, market: string = 'USD'): Promise<Product[]> {
@@ -183,54 +168,40 @@ export const ProductService = {
     });
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
-              edge.node.image
-          )
-          .map((edge) => {
-            return { src: edge.node.image?.url || "" };
-          });
+    const products: Product[] = [];
 
-        const models: {
-          id: string | undefined;
-          sources:
-            | {
-                url: string;
-                format: string;
-                mimeType: string;
-              }[]
-            | undefined;
-        }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "MODEL_3D" &&
-              edge.node.sources
-          )
-          .map((edge) => {
-            return {
-              id: edge.node.id,
-              sources: edge.node.sources,
-            };
-          });
+    resultJSON.data.products.edges.forEach((product) => {
+      const productVariants: Variant[] = product.node.variants.edges.map(
+        (variant) => {
+          const price = variant.node.contextualPricing?.price?.amount || variant.node.price || "0";
+          const compareAtPrice = variant.node.contextualPricing?.compareAtPrice?.amount || variant.node.compareAtPrice;
 
-        const productVariants: Variant[] = product.node.variants.edges.map(
-          (variant) => {
-            return {
-              id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.contextualPricing?.price?.amount || "0",
-              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
-              productId: Number(product.node.id.split("/").pop()),
-              selectedOptions: variant.node.selectedOptions,
-              availableForSale: variant.node.availableForSale,
-            };
-          }
-        ).filter(variant => parseFloat(variant.price) > 0);
+          return {
+            id: Number(variant.node.id.split("/").pop()),
+            price: price,
+            compareAtPrice: compareAtPrice,
+            productId: Number(product.node.id.split("/").pop()),
+            selectedOptions: variant.node.selectedOptions,
+            availableForSale: variant.node.availableForSale,
+          };
+        }
+      ).filter(variant => parseFloat(variant.price) > 0);
 
-        const arLensLink = product.node.metafields.edges.find(
+      if (productVariants.length > 0) {
+        const models = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "MODEL_3D")
+          .map((model) => ({
+            id: model.node.id,
+            sources: model.node.sources || [],
+          }));
+
+        const images = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "IMAGE")
+          .map((image) => ({
+            src: image.node.image?.url || ""
+          }));
+
+        const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
             metafield.node.namespace === "custom" &&
             metafield.node.key === "snapchat_lens_link"
@@ -240,74 +211,59 @@ export const ProductService = {
           id: Number(product.node.id.split("/").pop()),
           title: product.node.title,
           description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
+          images: images,
           models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
+          variants: productVariants,
+          options: product.node.options,
+          tags: product.node.tags ? product.node.tags.join(" ") : "",
+          arLensLink: arLensLink || undefined
         };
 
-        return parsedProduct;
+        products.push(parsedProduct);
       }
-    );
+    });
 
-    // Filter out products that have no variants with price > 0
-    return products.filter(product => product.variants.length > 0);
+    return products;
   },
 
   async getLibraryAssetsAsProducts(): Promise<Product[]> {
     const response = await fetch(LIBRARY_URL);
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
-              edge.node.image
-          )
-          .map((edge) => {
-            return { src: edge.node.image?.url || "" };
-          });
+    const products: Product[] = [];
 
-        const models: {
-          id: string | undefined;
-          sources:
-            | {
-                url: string;
-                format: string;
-                mimeType: string;
-              }[]
-            | undefined;
-        }[] = product.node.media.edges
-          .filter(
-            (edge) =>
-              edge.node.mediaContentType.toUpperCase() === "MODEL_3D" &&
-              edge.node.sources
-          )
-          .map((edge) => {
-            return {
-              id: edge.node.id,
-              sources: edge.node.sources,
-            };
-          });
+    resultJSON.data.products.edges.forEach((product) => {
+      const productVariants: Variant[] = product.node.variants.edges.map(
+        (variant) => {
+          const price = variant.node.contextualPricing?.price?.amount || variant.node.price || "0";
+          const compareAtPrice = variant.node.contextualPricing?.compareAtPrice?.amount || variant.node.compareAtPrice;
 
-        const productVariants: Variant[] = product.node.variants.edges.map(
-          (variant) => {
-            return {
-              id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.contextualPricing?.price?.amount || "0",
-              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
-              productId: Number(product.node.id.split("/").pop()),
-              selectedOptions: variant.node.selectedOptions,
-              availableForSale: variant.node.availableForSale,
-            };
-          }
-        );
+          return {
+            id: Number(variant.node.id.split("/").pop()),
+            price: price,
+            compareAtPrice: compareAtPrice,
+            productId: Number(product.node.id.split("/").pop()),
+            selectedOptions: variant.node.selectedOptions,
+            availableForSale: variant.node.availableForSale,
+          };
+        }
+      );
 
-        const arLensLink = product.node.metafields.edges.find(
+      if (productVariants.length > 0) {
+        const models = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "MODEL_3D")
+          .map((model) => ({
+            id: model.node.id,
+            sources: model.node.sources || [],
+          }));
+
+        const images = product.node.media.edges
+          .filter((media) => media.node.mediaContentType === "IMAGE")
+          .map((image) => ({
+            src: image.node.image?.url || ""
+          }));
+
+        const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
             metafield.node.namespace === "custom" &&
             metafield.node.key === "snapchat_lens_link"
@@ -317,17 +273,17 @@ export const ProductService = {
           id: Number(product.node.id.split("/").pop()),
           title: product.node.title,
           description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
+          images: images,
           models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
+          variants: productVariants,
+          options: product.node.options,
+          tags: product.node.tags ? product.node.tags.join(" ") : "",
+          arLensLink: arLensLink || undefined
         };
 
-        return parsedProduct;
+        products.push(parsedProduct);
       }
-    );
+    });
 
     return products;
   },
