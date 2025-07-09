@@ -58,6 +58,14 @@ interface ProductResponse {
                   name: string;
                   value: string;
                 }[];
+                contextualPricing?: {
+                  price?: {
+                    amount: string;
+                  };
+                  compareAtPrice?: {
+                    amount: string;
+                  };
+                };
               };
             }[];
           };
@@ -123,8 +131,8 @@ export const ProductService = {
           (variant) => {
             return {
               id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.price,
-              compareAtPrice: variant.node.compareAtPrice,
+              price: variant.node.contextualPricing?.price?.amount || "0",
+              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
               productId: Number(product.node.id.split("/").pop()),
               selectedOptions: variant.node.selectedOptions,
               availableForSale: variant.node.availableForSale,
@@ -213,8 +221,8 @@ export const ProductService = {
           (variant) => {
             return {
               id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.price,
-              compareAtPrice: variant.node.compareAtPrice,
+              price: variant.node.contextualPricing?.price?.amount || "0",
+              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
               productId: Number(product.node.id.split("/").pop()),
               selectedOptions: variant.node.selectedOptions,
               availableForSale: variant.node.availableForSale,
@@ -290,8 +298,8 @@ export const ProductService = {
           (variant) => {
             return {
               id: Number(variant.node.id.split("/").pop()),
-              price: variant.node.price,
-              compareAtPrice: variant.node.compareAtPrice,
+              price: variant.node.contextualPricing?.price?.amount || "0",
+              compareAtPrice: variant.node.contextualPricing?.compareAtPrice?.amount,
               productId: Number(product.node.id.split("/").pop()),
               selectedOptions: variant.node.selectedOptions,
               availableForSale: variant.node.availableForSale,
