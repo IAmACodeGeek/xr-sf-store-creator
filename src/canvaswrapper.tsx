@@ -109,7 +109,7 @@ export default function CanvasWrapper() {
       try {
         if (!productsLoaded && !productsLoading && brandData) {
           setProductsLoading(true);
-          const response = (brandData.shopify_store_name !== 'nufewd-83.myshopify.com')
+          const response = (brandData.shopify_store_name !== 'nufewd-83.myshopify.com' || 'h49c6z-yr.myshopify.com')
             ? await ProductService.getAllProducts(brandData.brand_name) 
             : await ProductService.getAllProductsFromVendor(brandData.brand_name, brandData.market);
           setProducts(response);
