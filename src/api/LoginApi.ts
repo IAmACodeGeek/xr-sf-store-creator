@@ -17,6 +17,7 @@ export const loginUser = async (credentials: LoginCredentials) => {
         body: JSON.stringify({
           email: credentials.email,
           password: credentials.password,
+          region:"india"
         }),
       });
 
@@ -53,6 +54,7 @@ export const checkGoogleOauth = async(email: string,oauthProviderId:string,name:
           email: email,
           oauth_provider_id: oauthProviderId,
           name: name,
+          region:"india"
         }),
       });
       if (!backendResponse.ok) {

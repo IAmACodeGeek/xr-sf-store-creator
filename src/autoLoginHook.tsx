@@ -41,12 +41,15 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
       const response = await fetch(
         "https://function-cookie-validate-201137466588.asia-south1.run.app",
         {
-          method: "GET",
+          method: "POST",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            region: "india",
+          }),
         }
       );
 
