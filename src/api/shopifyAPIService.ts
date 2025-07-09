@@ -6,6 +6,16 @@ const BASE_URL =
   "https://function-14-201137466588.asia-south1.run.app?brandname=";
 const LIBRARY_URL = "https://ownstoreasset-201137466588.asia-south1.run.app";
 const OWN_STORE_PRODUCT_URL = "https://fetch-products-by-vendor-201137466588.asia-south1.run.app?vendor=";
+
+// Market to Shopify country code mapping
+const MARKET_TO_COUNTRY_CODE: { [key: string]: string } = {
+  'EUR': 'FR', // France for Euro
+  'INR': 'IN', // India for Indian Rupee
+  'GBP': 'GB', // Great Britain for British Pound
+  'USD': 'US', // United States for US Dollar
+  'GER': 'DE'  // Germany
+};
+
 interface ProductResponse {
   data: {
     products: {
@@ -148,7 +158,10 @@ export const ProductService = {
     return products.filter(product => product.variants.length > 0);
   },
 
-  async getAllProductsFromVendor(brandName: string): Promise<Product[]> {
+  async getAllProductsFromVendor(brandName: string, market: string = 'USD'): Promise<Product[]> {
+    // Get country code from market, default to US if not found
+    const countryCode = MARKET_TO_COUNTRY_CODE[market] || 'US';
+    
     const response = await fetch(OWN_STORE_PRODUCT_URL + brandName, {
       method: 'POST',
       headers: {
@@ -156,7 +169,8 @@ export const ProductService = {
       },
       body: JSON.stringify({
         vendor: brandName,
-        region: "global"
+        region: "global",
+        country: countryCode
       })
     });
     const resultJSON: ProductResponse = await response.json();
