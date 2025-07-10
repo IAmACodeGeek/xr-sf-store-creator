@@ -12,7 +12,7 @@ const EnvStoreService = {
     envAssets: { [id: string]: EnvAsset };
   }> {
     try {
-      const response = await fetch(GET_URL + brandName, {
+      const response = await fetch(GET_URL + brandName + ".shackit.in", {
         method: "GET",
       });
       return await response.json();
@@ -37,7 +37,7 @@ const EnvStoreService = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          brandName: brandName,
+          brandName: brandName + ".shackit.in",
           envProducts: envProducts,
           envAssets: envAssets,
         }),
