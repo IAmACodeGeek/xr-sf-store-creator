@@ -7,6 +7,8 @@ import ShowRoomPlaceHolderData from "./placeHolderData/ShowRoom";
 import LotusDomePlaceHolderData from "./placeHolderData/LotusDome";
 import LunoxPlaceHolderData from "./placeHolderData/Lunox";
 import ShelfscapePlaceHolderData from "./placeHolderData/Shelfscape";
+import KidsStorePlaceHolderData from "./placeHolderData/KidsStore";
+import ArcadeZonePlaceHolderData from "./placeHolderData/ArcadeZone";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -350,6 +352,87 @@ const environmentData: EnvironmentData = {
         position: [-16, 1.2, -2],
         rotation: [-90, 0, 0],
         scale: 5,
+      },
+    ],
+  },
+  KIDSSTORE: {
+    playerSpeed: 8,
+    playerHeight: 2.5,
+    placeHolderData: KidsStorePlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [10, 5, 0],
+        rotation: [0, 90, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 3, 0],
+          rotation: [0, 90, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [11.6, 4, -1],
+        rotation: [0, 180, 0],
+        scale: 0.35,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [-14.1, 7.4, -5.6],
+        rotation: [0, 90, 0],
+        scale: 2,
+      },
+    ],
+    compasses: [
+      {
+        position: [-2.5, 0.1, 1],
+        rotation: [-90, 0, 0],
+        scale: 5,
+      },
+    ],
+  },
+  ARCADEZONE: {
+    playerSpeed: 10,
+    playerHeight: 1.5,
+    placeHolderData: ArcadeZonePlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [0, 4, 10],
+        rotation: [0, 180, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 3, -20],
+          rotation: [0, 180, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [0.13, 2.5, 2.5],
+        rotation: [0, 90, 0],
+        scale: 0.27,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [0, 3.5, -21],
+        rotation: [0, 0, 0],
+        scale: 3,
+      },
+    ],
+    compasses: [
+      {
+        position: [0, -0.8, -8.2],
+        rotation: [-90, 0, 0],
+        scale: 5,
+        dark: true,
       },
     ],
   },
