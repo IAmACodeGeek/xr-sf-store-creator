@@ -522,6 +522,7 @@ const DraggableAssetContainer = ({
       <group position={[0, 0, 0]} rotation={new Euler(0, 0, 0, "YZX")}>
         <PivotControls
           anchor={pivotOffset}
+          depthTest={false}
           scale={1.25 * (scale >= 1 ? scale : 1)}
           activeAxes={[isActive, isActive, isActive]}
           visible={isActive}
