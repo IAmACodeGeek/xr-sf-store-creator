@@ -1561,12 +1561,14 @@ export const CreatorKit = () => {
           )
         );
 
-        console.log(envResponse);
+        if (!envResponse) {
+          throw new Error("Failed to update store");
+        }
 
         Swal.fire({
           title: "XR Store Updated",
           text: "Your store has been updated successfully!",
-          html: `<a href="https://${brandData.brand_name}.shackit.in" target="_blank">Go to your XR Store</a>`,
+          html: `<a href="https://${brandData.brand_name}.shackit.com" target="_blank">Go to your XR Store</a>`,
           icon: "success",
           allowOutsideClick: false,
           customClass: {
@@ -1577,6 +1579,15 @@ export const CreatorKit = () => {
         });
       } catch (error) {
         console.error(error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to update the store. Please try again.",
+          icon: "error",
+          customClass: {
+            title: styles.swalTitle,
+            popup: styles.swalPopup,
+          },
+        });
       }
     }
   }, [brandData, envProducts, envAssets]);
@@ -2023,8 +2034,8 @@ export const CreatorKit = () => {
                     ]
                   }
                   onChange={handlePositionChange}
-                  min={-20}
-                  max={20}
+                  min={-30}
+                  max={30}
                   step={0.1}
                   icon={Move3D}
                 />
