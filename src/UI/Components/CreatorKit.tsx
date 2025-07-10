@@ -2023,8 +2023,8 @@ export const CreatorKit = () => {
                     ]
                   }
                   onChange={handlePositionChange}
-                  min={-20}
-                  max={20}
+                  min={-30}
+                  max={30}
                   step={0.1}
                   icon={Move3D}
                 />
