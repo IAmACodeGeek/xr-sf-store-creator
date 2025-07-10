@@ -1561,7 +1561,9 @@ export const CreatorKit = () => {
           )
         );
 
-        console.log(envResponse);
+        if (!envResponse) {
+          throw new Error("Failed to update store");
+        }
 
         Swal.fire({
           title: "XR Store Updated",
@@ -1577,6 +1579,15 @@ export const CreatorKit = () => {
         });
       } catch (error) {
         console.error(error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to update the store. Please try again.",
+          icon: "error",
+          customClass: {
+            title: styles.swalTitle,
+            popup: styles.swalPopup,
+          },
+        });
       }
     }
   }, [brandData, envProducts, envAssets]);
