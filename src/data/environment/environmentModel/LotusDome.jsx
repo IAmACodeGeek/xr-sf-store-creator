@@ -6,5 +6,3 @@ export function LotusDomeModel() {
    <primitive object={scene} scale={20} />
   )
 }
-
-useGLTF.preload('/models/lotus dome store.glb')

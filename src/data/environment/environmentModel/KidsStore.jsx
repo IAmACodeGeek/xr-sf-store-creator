@@ -6,5 +6,3 @@ export function KidsStoreModel() {
     <primitive object={scene} rotation={[0, -Math.PI / 2, 0]} scale={35} />
   );
 }
-
-useGLTF.preload("/models/kids store.glb");

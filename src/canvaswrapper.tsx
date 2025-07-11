@@ -21,10 +21,12 @@ import { AssetService } from "./api/assetService.js";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Load from "./UI/Components/Loader";
+import { LinearToneMapping, NoToneMapping } from "three";
 
 export default function CanvasWrapper() {
   // Load brand data
   const { brandData, setBrandData } = useBrandStore();
+  const { environmentType } = useEnvironmentStore();
   const [brandStatus, setBrandStatus] = useState<"VALID" | "INVALID" | null>(
     null
   );
@@ -291,7 +293,11 @@ export default function CanvasWrapper() {
       )}
       {myProgress >= 100 && (
         <div className="canvas-container">
-          <Canvas camera={{ fov: 45 }} shadows>
+          <Canvas camera={{ fov: 45 }} 
+          gl={{
+            toneMapping: environmentType === "GLOWBAR" ? LinearToneMapping : NoToneMapping,
+          }}
+          shadows>
             <React.Suspense fallback={null}>
               <App />
             </React.Suspense>
