@@ -11,5 +11,3 @@ export function ArcadeZoneModel() {
   />
  );
 }
-
-useGLTF.preload("/models/Arcade Zone.glb");
