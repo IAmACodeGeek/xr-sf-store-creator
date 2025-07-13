@@ -32,6 +32,9 @@ export default function CanvasWrapper() {
   );
   const navigate = useNavigate();
 
+  // Environments that should use LinearToneMapping
+  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE"];
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const brandName = queryParams.get("brandName");
@@ -295,7 +298,7 @@ export default function CanvasWrapper() {
         <div className="canvas-container">
           <Canvas camera={{ fov: 45 }} 
           gl={{
-            toneMapping: environmentType === "GLOWBAR" ? LinearToneMapping : NoToneMapping,
+            toneMapping: environmentType && linearToneMappingEnvironments.includes(environmentType) ? LinearToneMapping : NoToneMapping,
           }}
           shadows>
             <React.Suspense fallback={null}>
