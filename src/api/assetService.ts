@@ -1,9 +1,10 @@
 import { EnvAsset } from "@/stores/ZustandStores";
 import { showPremiumPopup } from "@/UI/Components/PremiumRequired";
+import { CLOUD_RUN_ENDPOINTS } from "./cloudUtils";
 
-const UPLOAD_URL = "https://assets-uploading-201137466588.asia-south1.run.app";
-const IMPORT_URL = 'https://assets-importing-201137466588.asia-south1.run.app';
-const DELETE_URL = 'https://asset-deletion-201137466588.asia-south1.run.app';
+const UPLOAD_URL = CLOUD_RUN_ENDPOINTS.ASSETS.UPLOAD;
+const IMPORT_URL = CLOUD_RUN_ENDPOINTS.ASSETS.IMPORT;
+const DELETE_URL = CLOUD_RUN_ENDPOINTS.ASSETS.DELETE;
 
 const ALLOWED_MIME_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/svg+xml', 'model/gltf-binary'];
 

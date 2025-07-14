@@ -1,10 +1,10 @@
 import LoginCredentials from "../Types/LoginCredentials";
+import { CLOUD_RUN_ENDPOINTS } from "./cloudUtils";
 
 const API_ENDPOINTS = {
-  LOGIN_USER:
-    "https://function-login-dashboard-201137466588.asia-south1.run.app",
-  OAUTH_LOGIN: "https://function-oauth-login-201137466588.asia-south1.run.app",
-  GOOGLE_USER_INFO: "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
+  LOGIN_USER: CLOUD_RUN_ENDPOINTS.LOGIN.LOGIN_USER,
+  OAUTH_LOGIN: CLOUD_RUN_ENDPOINTS.LOGIN.OAUTH_LOGIN,
+  GOOGLE_USER_INFO: CLOUD_RUN_ENDPOINTS.LOGIN.GOOGLE_USER_INFO,
 };
 
 export const loginUser = async (credentials: LoginCredentials) => {
