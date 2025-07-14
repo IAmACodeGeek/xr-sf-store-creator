@@ -19,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { loginUser } from "../../api/LoginApi";
 import useAutoLogin from "../../autoLoginHook";
 import { getCookieConfig } from "../../utils/cookieConfig";
+import { CLOUD_RUN_ENDPOINTS } from "../../api/cloudUtils";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -50,7 +51,7 @@ export default function Login() {
         Cookies.set("accessToken", response.access_token, getCookieConfig());
 
         const postResponse = await fetch(
-          "https://function-15-201137466588.asia-south1.run.app",
+          CLOUD_RUN_ENDPOINTS.DASHBOARD.FETCH_BRAND_DETAILS,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -163,7 +164,7 @@ export default function Login() {
         );
 
         const postResponse = await fetch(
-          "https://function-15-201137466588.asia-south1.run.app",
+          CLOUD_RUN_ENDPOINTS.DASHBOARD.FETCH_BRAND_DETAILS,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
