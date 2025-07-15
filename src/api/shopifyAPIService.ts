@@ -1,11 +1,11 @@
 import Variant from "@/Types/Variant";
 import Product from "../Types/Product";
 import { EnvAsset } from "@/stores/ZustandStores";
+import { CLOUD_RUN_ENDPOINTS } from "./cloudUtils";
 
-const BASE_URL =
-  "https://function-14-201137466588.asia-south1.run.app?brandname=";
-const LIBRARY_URL = "https://ownstoreasset-201137466588.asia-south1.run.app";
-const OWN_STORE_PRODUCT_URL = "https://fetch-products-by-vendor-201137466588.asia-south1.run.app?vendor=";
+const BASE_URL = CLOUD_RUN_ENDPOINTS.PRODUCT_FETCH.SHOPIFY_PRODUCTS + "?brandname=";
+const LIBRARY_URL = CLOUD_RUN_ENDPOINTS.ASSETS.OWN_STORE;
+const OWN_STORE_PRODUCT_URL = CLOUD_RUN_ENDPOINTS.OWN_STORE.FETCH_PRODUCTS + "?vendor=";
 
 // Market to Shopify country code mapping
 const MARKET_TO_COUNTRY_CODE: { [key: string]: string } = {

@@ -1,4 +1,6 @@
-const BASE_URL = 'https://get-brand-details-via-customurl-201137466588.asia-south1.run.app';
+import { CLOUD_RUN_ENDPOINTS } from "./cloudUtils";
+
+const BASE_URL = CLOUD_RUN_ENDPOINTS.BRAND_FORM.GET_BRAND_DETAILS;
 
 const BrandService = {
   fetchBrandData: async function(brandName: string){
