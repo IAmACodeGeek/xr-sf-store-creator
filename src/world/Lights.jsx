@@ -9,6 +9,9 @@ import ShelfscapeLighting from "@/data/environment/environmentLighting/Shelfscap
 import KidsStoreLighting from "@/data/environment/environmentLighting/KidsStore";
 import ArcadeZoneLighting from "@/data/environment/environmentLighting/ArcadeZone";
 import VarsityVaultLighting from "@/data/environment/environmentLighting/VarsityVault";
+import GlowBarLighting from "@/data/environment/environmentLighting/Glowbar";
+import LuxeCradleLighting from "@/data/environment/environmentLighting/LuxeCradle";
+import FlareSuiteLighting from "@/data/environment/environmentLighting/FlareSuite";
 
 const Lights = () => {
   const { environmentType } = useEnvironmentStore();
@@ -25,6 +28,9 @@ const Lights = () => {
       {environmentType === "KIDSSTORE" && <KidsStoreLighting />}
       {environmentType === "ARCADEZONE" && <ArcadeZoneLighting />}
       {environmentType === "VARSITYVAULT" && <VarsityVaultLighting />}
+      {environmentType === "GLOWBAR" && <GlowBarLighting />}
+      {environmentType === "LUXECRADLE" && <LuxeCradleLighting />}
+      {environmentType === "FLARESUITE" && <FlareSuiteLighting />}
     </>
   );
 };
