@@ -12,6 +12,7 @@ import ArcadeZonePlaceHolderData from "./placeHolderData/ArcadeZone";
 import VarsityVaultPlaceHolderData from "./placeHolderData/VarsityVault";
 import GlowBarPlaceHolderData from "./placeHolderData/Glowbar";
 import LuxeCradlePlaceHolderData from "./placeHolderData/LuxeCradle";
+import FlareSuitePlaceHolderData from "./placeHolderData/FlareSuite";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -557,6 +558,47 @@ const environmentData: EnvironmentData = {
         position: [0, 0.1, 0],
         rotation: [-90, 0, 0],
         scale: 4,
+      },
+    ],
+  },
+  FLARESUITE: {
+    playerSpeed: 10,
+    playerHeight: 2.5,
+    placeHolderData: FlareSuitePlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [0, 6, 0],
+        rotation: [0, 90, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [15, 5, 0],
+          rotation: [0, 90, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [-26, 6, 0],
+        rotation: [0, 0, 0],
+        scale: 0.5,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [26.5, 6, 0],
+        rotation: [0, -90, 0],
+        scale: 3,
+      },
+    ],
+    compasses: [
+      {
+        position: [0, 0.1, -5.5],
+        rotation: [-90, 0, 0],
+        scale: 5,
+        dark: true,
       },
     ],
   },
