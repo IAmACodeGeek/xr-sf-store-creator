@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { getCookieConfig, getRemoveConfig } from "./utils/cookieConfig";
+import { CLOUD_RUN_ENDPOINTS } from "./api/cloudUtils";
 
 const useAutoLogin = (redirectPath = "/dashboard") => {
   const [isChecking, setIsChecking] = useState(true);
@@ -39,7 +40,7 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
       console.log("Found token, validating with cloud function...");
 
       const response = await fetch(
-        "https://function-cookie-validate-201137466588.asia-south1.run.app",
+        CLOUD_RUN_ENDPOINTS.COOKIE.VALIDATE,
         {
           method: "POST",
           credentials: "include",
@@ -91,7 +92,7 @@ const useAutoLogin = (redirectPath = "/dashboard") => {
             );
 
             const brandResponse = await fetch(
-              "https://function-15-201137466588.asia-south1.run.app",
+              CLOUD_RUN_ENDPOINTS.DASHBOARD.FETCH_BRAND_DETAILS,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
