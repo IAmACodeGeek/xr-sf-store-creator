@@ -21,14 +21,19 @@ import { AssetService } from "./api/assetService.js";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Load from "./UI/Components/Loader";
+import { LinearToneMapping, NoToneMapping } from "three";
 
 export default function CanvasWrapper() {
   // Load brand data
   const { brandData, setBrandData } = useBrandStore();
+  const { environmentType } = useEnvironmentStore();
   const [brandStatus, setBrandStatus] = useState<"VALID" | "INVALID" | null>(
     null
   );
   const navigate = useNavigate();
+
+  // Environments that should use LinearToneMapping
+  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE"];
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -291,7 +296,11 @@ export default function CanvasWrapper() {
       )}
       {myProgress >= 100 && (
         <div className="canvas-container">
-          <Canvas camera={{ fov: 45 }} shadows>
+          <Canvas camera={{ fov: 45 }} 
+          gl={{
+            toneMapping: environmentType && linearToneMappingEnvironments.includes(environmentType) ? LinearToneMapping : NoToneMapping,
+          }}
+          shadows>
             <React.Suspense fallback={null}>
               <App />
             </React.Suspense>
