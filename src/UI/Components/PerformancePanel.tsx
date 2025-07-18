@@ -342,15 +342,23 @@ const PerformancePanel: React.FC = () => {
 
             {/* Product Breakdown */}
             <div className={styles.section}>
-              <div className={styles.sectionHeader}>
+              <div 
+                className={styles.sectionHeader}
+                onClick={() => setShowProductDetails(!showProductDetails)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowProductDetails(!showProductDetails);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer' }}
+              >
                 <h4 className={styles.sectionTitle}>Products ({metrics.shopifyProductsCount})</h4>
-                <button 
-                  className={styles.toggleButton}
-                  onClick={() => setShowProductDetails(!showProductDetails)}
-                  title={showProductDetails ? 'Collapse' : 'Expand'}
-                >
+                <div className={styles.toggleButton}>
                   {showProductDetails ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-                </button>
+                </div>
               </div>
               
               {showProductDetails && (
@@ -375,15 +383,23 @@ const PerformancePanel: React.FC = () => {
 
             {/* Asset Breakdown */}
             <div className={styles.section}>
-              <div className={styles.sectionHeader}>
+              <div 
+                className={styles.sectionHeader}
+                onClick={() => setShowAssetDetails(!showAssetDetails)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowAssetDetails(!showAssetDetails);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer' }}
+              >
                 <h4 className={styles.sectionTitle}>Assets ({metrics.assetBreakdown.length})</h4>
-                <button 
-                  className={styles.toggleButton}
-                  onClick={() => setShowAssetDetails(!showAssetDetails)}
-                  title={showAssetDetails ? 'Collapse' : 'Expand'}
-                >
+                <div className={styles.toggleButton}>
                   {showAssetDetails ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-                </button>
+                </div>
               </div>
               
               {showAssetDetails && (
