@@ -33,7 +33,7 @@ export default function CanvasWrapper() {
   const navigate = useNavigate();
 
   // Environments that should use LinearToneMapping
-  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE"];
+  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE","GARDENATELIER"];
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
