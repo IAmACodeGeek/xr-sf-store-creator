@@ -13,6 +13,7 @@ import VarsityVaultPlaceHolderData from "./placeHolderData/VarsityVault";
 import GlowBarPlaceHolderData from "./placeHolderData/Glowbar";
 import LuxeCradlePlaceHolderData from "./placeHolderData/LuxeCradle";
 import FlareSuitePlaceHolderData from "./placeHolderData/FlareSuite";
+import GardenAtlierPlaceHolderData from "./placeHolderData/GardenAtelier";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -599,6 +600,47 @@ const environmentData: EnvironmentData = {
         rotation: [-90, 0, 0],
         scale: 5,
         dark: true,
+      },
+    ],
+  },
+  GARDENATELIER: {
+    playerSpeed: 10,
+    playerHeight: 3,
+    placeHolderData: GardenAtlierPlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [0, 5, 0],
+        rotation: [0, 180, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 5, -10],
+          rotation: [0, 180, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [0, 6, 23.5],
+        rotation: [0, 90, 0],
+        scale: 0.4,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [-0.1, 7, -20],
+        rotation: [0, 0, 0],
+        scale: 2.8,
+      },
+     
+    ],
+    compasses: [
+      {
+        position: [0, 0.1, -2],
+        rotation: [-90, 0, 0],
+        scale: 5,
       },
     ],
   },
