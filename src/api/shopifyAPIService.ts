@@ -26,7 +26,11 @@ interface ProductResponse {
                   url: string;
                   format: string;
                   mimeType: string;
+                  filesize?: number;
                 }[];
+                originalSource?: {
+                  fileSize: number;
+                };
               };
             }[];
           };
@@ -75,16 +79,19 @@ export const ProductService = {
     const response = await fetch(BASE_URL + brandName);
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
+    const products: Product[] = resultJSON.data.products.edges
+      .map((product) => {
+        const productImages: { src: string; size: number }[] = product.node.media.edges
           .filter(
             (edge) =>
               edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
               edge.node.image
           )
           .map((edge) => {
-            return { src: edge.node.image?.url || "" };
+            return { 
+              src: edge.node.image?.url || "",
+              size: edge.node.originalSource?.fileSize || 0
+            };
           });
 
         const models: {
@@ -122,27 +129,58 @@ export const ProductService = {
           }
         ).filter(variant => parseFloat(variant.price) > 0);
 
-        const arLensLink = product.node.metafields.edges.find(
-          (metafield) =>
-            metafield.node.namespace === "custom" &&
-            metafield.node.key === "snapchat_lens_link"
-        )?.node.value;
+        if (productVariants.length > 0) {
+          const models = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "MODEL_3D")
+            .map((model) => ({
+              id: model.node.id,
+              sources: model.node.sources || [],
+              filesize: model.node.originalSource?.fileSize || 0,
+            }));
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
-          models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
-        };
+          const images = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "IMAGE")
+            .map((image) => ({
+              src: image.node.image?.url || "",
+              size: image.node.originalSource?.fileSize || 0,
+            }));
 
-        return parsedProduct;
-      }
-    );
+          // Calculate total file size for all media assets
+          const totalFileSize = product.node.media.edges.reduce((total, media) => {
+            let size = media.node.originalSource?.fileSize || 0;
+            if (media.node.sources && media.node.sources.length) {
+              media.node.sources.forEach((src) => {
+                // Some APIs use filesize or fileSize; check both
+                size += (src.filesize ?? (src as any).fileSize ?? 0);
+              });
+            }
+            return total + size;
+          }, 0);
+
+          const arLensLink = product.node.metafields?.edges?.find(
+            (metafield) =>
+              metafield.node.namespace === "custom" &&
+              metafield.node.key === "snapchat_lens_link"
+          )?.node.value;
+
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize
+          };
+
+          return parsedProduct;
+        }
+        return undefined;
+      })
+      .filter((product): product is Product => product !== undefined);
 
     // Filter out products that have no variants with price > 0
     return products.filter(product => product.variants.length > 0);
@@ -160,16 +198,19 @@ export const ProductService = {
     });
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
+    const products: Product[] = resultJSON.data.products.edges
+      .map((product) => {
+        const productImages: { src: string; size: number }[] = product.node.media.edges
           .filter(
             (edge) =>
               edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
               edge.node.image
           )
           .map((edge) => {
-            return { src: edge.node.image?.url || "" };
+            return { 
+              src: edge.node.image?.url || "",
+              size: edge.node.originalSource?.fileSize || 0
+            };
           });
 
         const models: {
@@ -207,27 +248,58 @@ export const ProductService = {
           }
         ).filter(variant => parseFloat(variant.price) > 0);
 
-        const arLensLink = product.node.metafields.edges.find(
-          (metafield) =>
-            metafield.node.namespace === "custom" &&
-            metafield.node.key === "snapchat_lens_link"
-        )?.node.value;
+        if (productVariants.length > 0) {
+          const models = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "MODEL_3D")
+            .map((model) => ({
+              id: model.node.id,
+              sources: model.node.sources || [],
+              filesize: model.node.originalSource?.fileSize || 0,
+            }));
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
-          models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
-        };
+          const images = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "IMAGE")
+            .map((image) => ({
+              src: image.node.image?.url || "",
+              size: image.node.originalSource?.fileSize || 0,
+            }));
 
-        return parsedProduct;
-      }
-    );
+          // Calculate total file size for all media assets
+          const totalFileSize = product.node.media.edges.reduce((total, media) => {
+            let size = media.node.originalSource?.fileSize || 0;
+            if (media.node.sources && media.node.sources.length) {
+              media.node.sources.forEach((src) => {
+                // Some APIs use filesize or fileSize; check both
+                size += (src.filesize ?? (src as any).fileSize ?? 0);
+              });
+            }
+            return total + size;
+          }, 0);
+
+          const arLensLink = product.node.metafields?.edges?.find(
+            (metafield) =>
+              metafield.node.namespace === "custom" &&
+              metafield.node.key === "snapchat_lens_link"
+          )?.node.value;
+
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize
+          };
+
+          return parsedProduct;
+        }
+        return undefined;
+      })
+      .filter((product): product is Product => product !== undefined);
 
     // Filter out products that have no variants with price > 0
     return products.filter(product => product.variants.length > 0);
@@ -237,16 +309,22 @@ export const ProductService = {
     const response = await fetch(LIBRARY_URL);
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = resultJSON.data.products.edges.map(
-      (product) => {
-        const productImages: { src: string }[] = product.node.media.edges
+    console.log('=== Raw API Response Debug ===');
+    console.log('API Response:', resultJSON);
+
+    const products: Product[] = resultJSON.data.products.edges
+      .map((product) => {
+        const productImages: { src: string; size: number }[] = product.node.media.edges
           .filter(
             (edge) =>
               edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
               edge.node.image
           )
           .map((edge) => {
-            return { src: edge.node.image?.url || "" };
+            return { 
+              src: edge.node.image?.url || "",
+              size: edge.node.originalSource?.fileSize || 0
+            };
           });
 
         const models: {
@@ -284,35 +362,94 @@ export const ProductService = {
           }
         );
 
-        const arLensLink = product.node.metafields.edges.find(
-          (metafield) =>
-            metafield.node.namespace === "custom" &&
-            metafield.node.key === "snapchat_lens_link"
-        )?.node.value;
+        if (productVariants.length > 0) {
+          const models = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "MODEL_3D")
+            .map((model) => ({
+              id: model.node.id,
+              sources: model.node.sources || [],
+              filesize: model.node.originalSource?.fileSize || 0,
+            }));
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: productImages,
-          options: product.node.options,
-          variants: productVariants,
-          models: models,
-          arLensLink: arLensLink,
-          tags: product.node.tags.join(" "),
-        };
+          const images = product.node.media.edges
+            .filter((media) => media.node.mediaContentType === "IMAGE")
+            .map((image) => ({
+              src: image.node.image?.url || "",
+              size: image.node.originalSource?.fileSize || 0,
+            }));
 
-        return parsedProduct;
-      }
-    );
+          // Calculate total file size for all media assets
+          const totalFileSize = product.node.media.edges.reduce((total, media) => {
+            let size = media.node.originalSource?.fileSize || 0;
+            if (media.node.sources && media.node.sources.length) {
+              media.node.sources.forEach((src) => {
+                // Some APIs use filesize or fileSize; check both
+                size += (src.filesize ?? (src as any).fileSize ?? 0);
+              });
+            }
+            return total + size;
+          }, 0);
 
+          console.log(`Product ${product.node.title}:`, {
+            models: models.map(m => ({ filesize: m.filesize, sources: m.sources })),
+            images: images.map(i => ({ size: i.size })),
+            totalFileSize
+          });
+
+          const arLensLink = product.node.metafields?.edges?.find(
+            (metafield) =>
+              metafield.node.namespace === "custom" &&
+              metafield.node.key === "snapchat_lens_link"
+          )?.node.value;
+
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize
+          };
+
+          return parsedProduct;
+        }
+        return undefined;
+      })
+      .filter((product): product is Product => product !== undefined);
+
+    console.log('Parsed products:', products.length);
     return products;
   },
 
   async getLibraryAssets(brandName: string): Promise<EnvAsset[]> {
     const products = await this.getLibraryAssetsAsProducts();
 
+    console.log('=== Library Assets Debug ===');
+    console.log('Products from API:', products.length);
+
     const libraryAssets = products.map((product) => {
+      // Calculate file size based on the asset type
+      let fileSize = 0;
+      if (product.models.length > 0) {
+        // For 3D models, use the product's totalFileSize since individual model filesize is not available
+        fileSize = product.totalFileSize || 0;
+        console.log(`Model ${product.title}:`, {
+          modelFilesize: product.models[0].filesize,
+          totalFileSize: product.totalFileSize,
+          sources: product.models[0].sources?.map(s => ({ url: s.url, filesize: s.filesize }))
+        });
+      } else if (product.images.length > 0) {
+        // For images, use the first image's size
+        fileSize = product.images[0].size || 0;
+        console.log(`Image ${product.title}:`, {
+          imageSize: product.images[0].size
+        });
+      }
+
       const assets: EnvAsset = {
         id: `${brandName}/${product.id}`,
         type: product.models.length > 0 ? "MODEL_3D" : "PHOTO",
@@ -325,10 +462,20 @@ export const ProductService = {
         source: "LIBRARY",
         image : product?.images[0] && product?.images[0].src,
         isEnvironmentAsset: false,
+        filesize: fileSize, // Add file size information
       };
+      
+      console.log(`Created asset ${assets.name}:`, {
+        id: assets.id,
+        type: assets.type,
+        filesize: assets.filesize,
+        src: assets.src
+      });
+      
       return assets;
     });
 
+    console.log('Final library assets:', libraryAssets.length);
     return libraryAssets;
   },
 };

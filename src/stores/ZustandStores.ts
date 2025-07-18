@@ -79,6 +79,10 @@ interface ComponentStore {
   isProductSearcherOpen: boolean;
   openProductSearcher: () => void;
   closeProductSearcher: () => void;
+
+  // Performance Monitor
+  isAdvancedPerfVisible: boolean;
+  toggleAdvancedPerf: () => void;
 }
 
 const useComponentStore = create<ComponentStore>((set) => ({
@@ -150,6 +154,10 @@ const useComponentStore = create<ComponentStore>((set) => ({
   isProductSearcherOpen: false,
   openProductSearcher: () => set({ isProductSearcherOpen: true }),
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
+
+  // Performance Monitor
+  isAdvancedPerfVisible: false,
+  toggleAdvancedPerf: () => set((state) => ({ isAdvancedPerfVisible: !state.isAdvancedPerfVisible })),
 }));
 
 // Touch handling
@@ -261,6 +269,7 @@ interface EnvAsset {
   isEnvironmentAsset: boolean;
   source: 'OWN' | 'LIBRARY';
   image?: string;
+  filesize?: number; // Add file size property
 }
 
 interface EnvAssetStore {

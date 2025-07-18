@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
+import { Perf } from 'r3f-perf';
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
@@ -85,7 +86,7 @@ export default function CanvasWrapper() {
 
   // Load All resources
   const { envAssets, setEnvAssets } = useEnvAssetStore();
-  const { products, setProducts } = useComponentStore();
+  const { products, setProducts, isAdvancedPerfVisible } = useComponentStore();
   const { envProducts, setEnvProducts } = useEnvProductStore();
   const {
     productsLoaded,
@@ -220,13 +221,39 @@ export default function CanvasWrapper() {
                 }
               }
 
+              // Start with library assets as the base
               const newEnvAssets: { [id: string]: EnvAsset } = {...assetLibraryRef.current};
 
+              // Process environment assets and merge with library assets
               for (const envAsset of Object.values(response.envAssets)) {
-                newEnvAssets[envAsset.id] = {
-                  ...envAsset,
-                  isEnvironmentAsset: true,
-                };
+                // Check if this asset exists in the library with a different ID (without .shackit.in suffix)
+                const libraryAssetId = envAsset.id.replace('.shackit.in', '');
+                const libraryAsset = assetLibraryRef.current[libraryAssetId];
+                
+                console.log(`Processing env asset: ${envAsset.id}`);
+                console.log(`Looking for library asset: ${libraryAssetId}`);
+                console.log(`Library asset found:`, libraryAsset);
+                
+                if (libraryAsset) {
+                  // Use the library asset data but with environment settings
+                  newEnvAssets[libraryAssetId] = {
+                    ...libraryAsset,
+                    ...envAsset,
+                    id: libraryAssetId, // Ensure we use the library asset ID
+                    isEnvironmentAsset: true,
+                  };
+                  console.log(`Merged asset ${libraryAssetId} with filesize: ${libraryAsset.filesize}`);
+                } else {
+                  // If no library asset found, use the environment asset as is
+                  // But remove the .shackit.in suffix from the ID if present
+                  const cleanId = envAsset.id.replace('.shackit.in', '');
+                  newEnvAssets[cleanId] = {
+                    ...envAsset,
+                    id: cleanId,
+                    isEnvironmentAsset: true,
+                  };
+                  console.log(`No library asset found for ${envAsset.id}, using env asset with filesize: ${envAsset.filesize}`);
+                }
               }
 
               console.log("Env Products: ", response.envProducts);
@@ -302,6 +329,7 @@ export default function CanvasWrapper() {
           }}
           shadows>
             <React.Suspense fallback={null}>
+              {isAdvancedPerfVisible && <Perf position="top-right" />}
               <App />
             </React.Suspense>
           </Canvas>
