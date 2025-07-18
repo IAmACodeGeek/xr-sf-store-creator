@@ -1119,29 +1119,69 @@ export const CreatorKit = () => {
         if (!product) return;
 
         if (event.target.checked) {
-          // Premium limits check
-          if (
-            Object.values(envProducts).filter(
-              (envProduct) => envProduct.isEnvironmentProduct
-            ).length >= 20
-          ) {
-            showPremiumPopup(
-              "Your current plan supports up to 20 products. Reach out to our sales team to unlock more exclusive options."
-            );
-            return;
+          // Calculate current environment usage
+          const currentEnvironmentSize = Object.values(envProducts)
+            .filter(envProduct => envProduct.isEnvironmentProduct)
+            .reduce((total, envProduct) => {
+              const product = products.find(p => p.id === envProduct.id);
+              if (!product) return total;
+              
+              // Calculate product file size
+              if (envProduct.type === 'PHOTO') {
+                const imageIndex = envProduct.imageIndex || 0;
+                return total + (product.images[imageIndex]?.size || 0);
+              } else if (envProduct.type === 'MODEL_3D') {
+                const modelIndex = envProduct.modelIndex || 0;
+                const model = product.models[modelIndex];
+                if (model) {
+                  if (model.sources && model.sources.length > 0) {
+                    return total + (model.sources[0].filesize || 0);
+                  }
+                  return total + (model.filesize || 0);
+                }
+              }
+              return total;
+            }, 0);
+
+          // Calculate asset environment usage
+          const assetEnvironmentSize = Object.values(envAssets)
+            .filter(envAsset => envAsset.isEnvironmentAsset)
+            .reduce((total, envAsset) => total + (envAsset.filesize || 0), 0);
+
+          const totalCurrentUsage = currentEnvironmentSize + assetEnvironmentSize;
+
+          // Get environment threshold
+          const environmentThreshold = environmentData[brandData?.environment_name?.toUpperCase() || '']?.maxThreshold || 30 * 1024 * 1024;
+
+          // Calculate new product size
+          let newProductSize = 0;
+          const existingEnvProduct = envProducts[product.id];
+          if (existingEnvProduct?.type === 'PHOTO') {
+            const imageIndex = existingEnvProduct.imageIndex || 0;
+            newProductSize = product.images[imageIndex]?.size || 0;
+          } else if (existingEnvProduct?.type === 'MODEL_3D') {
+            const modelIndex = existingEnvProduct.modelIndex || 0;
+            const model = product.models[modelIndex];
+            if (model) {
+              if (model.sources && model.sources.length > 0) {
+                newProductSize = model.sources[0].filesize || 0;
+              } else {
+                newProductSize = model.filesize || 0;
+              }
+            }
+          } else {
+            // Default to first image size for new products
+            newProductSize = product.images[0]?.size || 0;
           }
 
-          const existingEnvProduct = envProducts[product.id];
-          if (
-            existingEnvProduct?.type === "MODEL_3D" &&
-            Object.values(envProducts).filter(
-              (envProduct) =>
-                envProduct.type === "MODEL_3D" &&
-                envProduct.isEnvironmentProduct
-            ).length >= 5
-          ) {
+          // Check if adding this product would exceed the threshold
+          if (totalCurrentUsage + newProductSize > environmentThreshold) {
+            const availableSpace = environmentThreshold - totalCurrentUsage;
+            const availableMB = (availableSpace / (1024 * 1024)).toFixed(2);
+            const productMB = (newProductSize / (1024 * 1024)).toFixed(2);
+            
             showPremiumPopup(
-              "Your current plan supports only up to 5 product models. Reach out to our sales team to unlock more exclusive options."
+              `Cannot add product "${product.title}" (${productMB} MB). Environment has only ${availableMB} MB available. Consider removing some items or using smaller products.`
             );
             return;
           }
@@ -1178,13 +1218,47 @@ export const CreatorKit = () => {
         if (!envAsset) return;
 
         if (event.target.checked) {
-          if (
-            Object.values(envAssets).filter(
-              (envAsset) => envAsset.isEnvironmentAsset
-            ).length >= 5
-          ) {
+          // Calculate current environment usage
+          const currentEnvironmentSize = Object.values(envProducts)
+            .filter(envProduct => envProduct.isEnvironmentProduct)
+            .reduce((total, envProduct) => {
+              const product = products.find(p => p.id === envProduct.id);
+              if (!product) return total;
+              
+              if (envProduct.type === 'PHOTO') {
+                const imageIndex = envProduct.imageIndex || 0;
+                return total + (product.images[imageIndex]?.size || 0);
+              } else if (envProduct.type === 'MODEL_3D') {
+                const modelIndex = envProduct.modelIndex || 0;
+                const model = product.models[modelIndex];
+                if (model) {
+                  if (model.sources && model.sources.length > 0) {
+                    return total + (model.sources[0].filesize || 0);
+                  }
+                  return total + (model.filesize || 0);
+                }
+              }
+              return total;
+            }, 0);
+
+          const assetEnvironmentSize = Object.values(envAssets)
+            .filter(envAsset => envAsset.isEnvironmentAsset)
+            .reduce((total, envAsset) => total + (envAsset.filesize || 0), 0);
+
+          const totalCurrentUsage = currentEnvironmentSize + assetEnvironmentSize;
+
+          // Get environment threshold
+          const environmentThreshold = environmentData[brandData?.environment_name?.toUpperCase() || '']?.maxThreshold || 30 * 1024 * 1024;
+
+          // Check if adding this asset would exceed the threshold
+          const assetSize = envAsset.filesize || 0;
+          if (totalCurrentUsage + assetSize > environmentThreshold) {
+            const availableSpace = environmentThreshold - totalCurrentUsage;
+            const availableMB = (availableSpace / (1024 * 1024)).toFixed(2);
+            const assetMB = (assetSize / (1024 * 1024)).toFixed(2);
+            
             showPremiumPopup(
-              "Your current plan supports only up to 5 assets. Reach out to our sales team to unlock more exclusive options."
+              `Cannot add asset "${envAsset.name}" (${assetMB} MB). Environment has only ${availableMB} MB available. Consider removing some items or using smaller assets.`
             );
             return;
           }
@@ -1215,6 +1289,7 @@ export const CreatorKit = () => {
       setMediaType,
       setActiveProductId,
       setActiveAssetId,
+      brandData,
     ]
   );
 
@@ -1370,19 +1445,63 @@ export const CreatorKit = () => {
       );
       if (!product) return;
 
-      // Ensure there are not more than 5 model products
-      if (type === "MODEL_3D") {
-        if (
-          Object.values(envProducts).filter(
-            (envProduct) =>
-              envProduct.type === "MODEL_3D" && envProduct.isEnvironmentProduct
-          ).length >= 5
-        ) {
-          showPremiumPopup(
-            "Your current plan supports only up to 5 product models. Reach out to our sales team to unlock more exclusive options."
-          );
-          return;
+      // Calculate current environment usage (excluding current product)
+      const currentEnvironmentSize = Object.values(envProducts)
+        .filter(envProduct => envProduct.isEnvironmentProduct && envProduct.id !== activeProductId)
+        .reduce((total, envProduct) => {
+          const product = products.find(p => p.id === envProduct.id);
+          if (!product) return total;
+          
+          if (envProduct.type === 'PHOTO') {
+            const imageIndex = envProduct.imageIndex || 0;
+            return total + (product.images[imageIndex]?.size || 0);
+          } else if (envProduct.type === 'MODEL_3D') {
+            const modelIndex = envProduct.modelIndex || 0;
+            const model = product.models[modelIndex];
+            if (model) {
+              if (model.sources && model.sources.length > 0) {
+                return total + (model.sources[0].filesize || 0);
+              }
+              return total + (model.filesize || 0);
+            }
+          }
+          return total;
+        }, 0);
+
+      const assetEnvironmentSize = Object.values(envAssets)
+        .filter(envAsset => envAsset.isEnvironmentAsset)
+        .reduce((total, envAsset) => total + (envAsset.filesize || 0), 0);
+
+      const totalCurrentUsage = currentEnvironmentSize + assetEnvironmentSize;
+
+      // Get environment threshold
+      const environmentThreshold = environmentData[brandData?.environment_name?.toUpperCase() || '']?.maxThreshold || 30 * 1024 * 1024;
+
+      // Calculate new product size based on selected type and index
+      let newProductSize = 0;
+      if (type === 'PHOTO') {
+        newProductSize = product.images[index]?.size || 0;
+      } else if (type === 'MODEL_3D') {
+        const model = product.models[index];
+        if (model) {
+          if (model.sources && model.sources.length > 0) {
+            newProductSize = model.sources[0].filesize || 0;
+          } else {
+            newProductSize = model.filesize || 0;
+          }
         }
+      }
+
+      // Check if changing to this media type would exceed the threshold
+      if (totalCurrentUsage + newProductSize > environmentThreshold) {
+        const availableSpace = environmentThreshold - totalCurrentUsage;
+        const availableMB = (availableSpace / (1024 * 1024)).toFixed(2);
+        const productMB = (newProductSize / (1024 * 1024)).toFixed(2);
+        
+        showPremiumPopup(
+          `Cannot switch to ${type === 'MODEL_3D' ? '3D model' : 'image'} (${productMB} MB). Environment has only ${availableMB} MB available. Consider removing some items or using smaller media.`
+        );
+        return;
       }
 
       const envProduct: EnvProduct = {
@@ -1395,7 +1514,7 @@ export const CreatorKit = () => {
 
       modifyEnvProduct(product.id, envProduct);
     },
-    [activeProductId, products, envProducts, modifyEnvProduct]
+    [activeProductId, products, envProducts, envAssets, modifyEnvProduct, brandData]
   );
 
   // Handle placeholder selection

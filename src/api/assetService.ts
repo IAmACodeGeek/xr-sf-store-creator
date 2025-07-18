@@ -47,11 +47,7 @@ const AssetService = {
       return;
     }
 
-    // Limit the number of assets to 5
-    if(files.length + existingAssetCount > 5){
-      showPremiumPopup("Your current plan supports up to 5 assets. Reach out to our sales team to unlock more exclusive options.");
-      return;
-    }
+    // No asset limit - removed the 5 asset restriction
   
     const formData = new FormData();
     validFiles.forEach((file) => {
@@ -79,7 +75,8 @@ const AssetService = {
           src: fileResponse.src,
           isEnvironmentAsset: false,
           status: 'SUCCESS',
-          source: 'OWN'
+          source: 'OWN',
+          filesize: fileResponse.size // Add file size from upload response
         };
       });
 
@@ -114,7 +111,8 @@ const AssetService = {
           src: fileResponse.src,
           isEnvironmentAsset: false,
           status: 'SUCCESS',
-          source: 'OWN'
+          source: 'OWN',
+          filesize: fileResponse.size // Add file size from import response
         };
       });
   
