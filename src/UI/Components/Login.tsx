@@ -326,9 +326,6 @@ export default function Login() {
           {isGoogleLoading ? <CircularProgress size={24} color="inherit" /> : "Continue with Google"}
         </Button>
 
-        <Typography variant="body2" color="black" sx={{ marginTop: "15px" }}>
-          Don't have an account? <a href="/register">Sign Up</a>
-        </Typography>
         <ToastContainer />
       </Box>
     </Container>
