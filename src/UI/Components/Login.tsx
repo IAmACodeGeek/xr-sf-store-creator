@@ -49,17 +49,17 @@ export default function Login() {
         );
         console.log("Backend OAuth result:", backendResult);
 
-        if (backendResult.success) {
+        if (backendResult.message === "OAuth login successful") {
           // Set access token with environment-specific config
-          Cookies.set("accessToken", response.access_token, getCookieConfig());
+          Cookies.set("accessToken", backendResult.token, getCookieConfig());
 
           // Store user data in localStorage
           localStorage.setItem("user", JSON.stringify({
-            id: backendResult.user?.id || userProfile.id,
-            email: userProfile.email,
-            name: userProfile.name,
-            authType: "google",
-            createdAt: backendResult.user?.createdAt || new Date().toISOString(),
+            id: backendResult.user.id,
+            email: backendResult.user.email,
+            name: backendResult.user.name,
+            authType: backendResult.user.authType,
+            createdAt: backendResult.user.createdAt,
           }));
 
           const postResponse = await fetch(
@@ -67,7 +67,7 @@ export default function Login() {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email: userProfile.email }),
+              body: JSON.stringify({ email: backendResult.user.email }),
             }
           );
 
