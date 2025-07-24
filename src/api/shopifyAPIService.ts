@@ -23,6 +23,7 @@ interface ProductResponse {
         node: {
           id: string;
           title: string;
+          status: string; // Add status field
           media: {
             edges: {
               node: {
@@ -150,18 +151,19 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined,
-          totalFileSize: totalFileSize
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
         products.push(parsedProduct);
       }
@@ -240,18 +242,19 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined,
-          totalFileSize: totalFileSize
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
         products.push(parsedProduct);
       }
@@ -349,18 +352,19 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined,
-          totalFileSize: totalFileSize
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
           return parsedProduct;
         }

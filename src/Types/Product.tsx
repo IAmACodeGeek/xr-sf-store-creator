@@ -25,4 +25,5 @@ export default interface Product {
   arLensLink: string | undefined;
   tags:string;
   totalFileSize?: number; // File size in bytes for all media assets
+  status: string; // Product status (e.g., ACTIVE, DRAFT)
 }
