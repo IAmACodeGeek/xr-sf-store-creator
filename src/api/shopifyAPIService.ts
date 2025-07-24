@@ -264,27 +264,56 @@ export const ProductService = {
     const response = await fetch(LIBRARY_URL);
     const resultJSON: ProductResponse = await response.json();
 
-    console.log('=== Raw API Response Debug ===');
-    console.log('API Response:', resultJSON);
 
-    const products: Product[] = [];
+    const products: Product[] = resultJSON.data.products.edges
+      .map((product) => {
+        const productImages: { src: string; size: number }[] = product.node.media.edges
+          .filter(
+            (edge) =>
+              edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
+              edge.node.image
+          )
+          .map((edge) => {
+            return { 
+              src: edge.node.image?.url || "",
+              size: edge.node.originalSource?.fileSize || 0
+            };
+          });
 
-    resultJSON.data.products.edges.forEach((product) => {
-      const productVariants: Variant[] = product.node.variants.edges.map(
-        (variant) => {
-          const price = variant.node.contextualPricing?.price?.amount || variant.node.price || "0";
-          const compareAtPrice = variant.node.contextualPricing?.compareAtPrice?.amount || variant.node.compareAtPrice;
+        const models: {
+          id: string | undefined;
+          sources:
+            | {
+                url: string;
+                format: string;
+                mimeType: string;
+              }[]
+            | undefined;
+        }[] = product.node.media.edges
+          .filter(
+            (edge) =>
+              edge.node.mediaContentType.toUpperCase() === "MODEL_3D" &&
+              edge.node.sources
+          )
+          .map((edge) => {
+            return {
+              id: edge.node.id,
+              sources: edge.node.sources,
+            };
+          });
 
-          return {
-            id: Number(variant.node.id.split("/").pop()),
-            price: price,
-            compareAtPrice: compareAtPrice,
-            productId: Number(product.node.id.split("/").pop()),
-            selectedOptions: variant.node.selectedOptions,
-            availableForSale: variant.node.availableForSale,
-          };
-        }
-      );
+        const productVariants: Variant[] = product.node.variants.edges.map(
+          (variant) => {
+            return {
+              id: Number(variant.node.id.split("/").pop()),
+              price: variant.node.price,
+              compareAtPrice: variant.node.compareAtPrice,
+              productId: Number(product.node.id.split("/").pop()),
+              selectedOptions: variant.node.selectedOptions,
+              availableForSale: variant.node.availableForSale,
+            };
+          }
+        );
 
       if (productVariants.length > 0) {
         const models = product.node.media.edges
@@ -302,23 +331,17 @@ export const ProductService = {
             size: image.node.originalSource?.fileSize || 0,
           }));
 
-        // Calculate total file size for all media assets
-        const totalFileSize = product.node.media.edges.reduce((total, media) => {
-          let size = media.node.originalSource?.fileSize || 0;
-          if (media.node.sources && media.node.sources.length) {
-            media.node.sources.forEach((src) => {
-              // Some APIs use filesize or fileSize; check both
-              size += (src.filesize ?? (src as any).fileSize ?? 0);
-            });
-          }
-          return total + size;
-        }, 0);
-
-        console.log(`Product ${product.node.title}:`, {
-          models: models.map(m => ({ filesize: m.filesize, sources: m.sources })),
-          images: images.map(i => ({ size: i.size })),
-          totalFileSize
-        });
+          // Calculate total file size for all media assets
+          const totalFileSize = product.node.media.edges.reduce((total, media) => {
+            let size = media.node.originalSource?.fileSize || 0;
+            if (media.node.sources && media.node.sources.length) {
+              media.node.sources.forEach((src) => {
+                // Some APIs use filesize or fileSize; check both
+                size += (src.filesize ?? (src as any).fileSize ?? 0);
+              });
+            }
+            return total + size;
+          }, 0);
 
         const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
@@ -339,19 +362,17 @@ export const ProductService = {
           totalFileSize: totalFileSize
         };
 
-        products.push(parsedProduct);
-      }
-    });
-
-    console.log('Parsed products:', products.length);
+          return parsedProduct;
+        }
+        return undefined;
+      })
+      .filter((product): product is Product => product !== undefined);
     return products;
   },
 
   async getLibraryAssets(brandName: string): Promise<EnvAsset[]> {
     const products = await this.getLibraryAssetsAsProducts();
 
-    console.log('=== Library Assets Debug ===');
-    console.log('Products from API:', products.length);
 
     const libraryAssets = products.map((product) => {
       // Calculate file size based on the asset type
@@ -359,17 +380,9 @@ export const ProductService = {
       if (product.models.length > 0) {
         // For 3D models, use the product's totalFileSize since individual model filesize is not available
         fileSize = product.totalFileSize || 0;
-        console.log(`Model ${product.title}:`, {
-          modelFilesize: product.models[0].filesize,
-          totalFileSize: product.totalFileSize,
-          sources: product.models[0].sources?.map(s => ({ url: s.url, filesize: s.filesize }))
-        });
       } else if (product.images.length > 0) {
         // For images, use the first image's size
         fileSize = product.images[0].size || 0;
-        console.log(`Image ${product.title}:`, {
-          imageSize: product.images[0].size
-        });
       }
 
       const assets: EnvAsset = {
@@ -387,17 +400,10 @@ export const ProductService = {
         filesize: fileSize, // Add file size information
       };
       
-      console.log(`Created asset ${assets.name}:`, {
-        id: assets.id,
-        type: assets.type,
-        filesize: assets.filesize,
-        src: assets.src
-      });
       
       return assets;
     });
 
-    console.log('Final library assets:', libraryAssets.length);
     return libraryAssets;
   },
 };

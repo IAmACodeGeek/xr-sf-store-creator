@@ -73,20 +73,97 @@
 }
 
 .swalPopup{
-  font-family: 'Poppins', sans-serif !important;
+  font-family: 'DM Sans', sans-serif !important;
+  padding: 0.5rem !important;
+  background: #2a2a2e !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e0e0e0 !important;
 }
 
 .swalTitle{
-  font-family: 'Poppins', sans-serif !important;
-  font-size: 32px;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+}
+
+.swalHtmlContainer {
+  color: #b0b0b0 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 1rem !important;
+  margin-top: 0 !important;
+}
+
+.swalIcon {
+  &.swal2-warning {
+    border-color: #ff7f32 !important;
+    color: #ff7f32 !important;
+  }
+  &.swal2-success {
+    border-color: #22c55e !important;
+    .swal2-success-line-tip, .swal2-success-line-long {
+      background-color: #22c55e !important;
+    }
+  }
+  &.swal2-error {
+    border-color: #ef4444 !important;
+  }
+  &.swal2-question {
+    border-color: #3b82f6 !important;
+    color: #3b82f6 !important;
+  }
 }
 
 .swalActions{
   width: 100%;
+  gap: 1rem !important;
+  margin-top: 1.5rem !important;
 }
 
-.swalButton{
-  font-size: 20px;
+.swalButton {
+  border-radius: 12px !important;
+  padding: 12px 28px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: all 0.25s ease !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(255, 127, 50, 0.4) !important;
+  }
+}
+
+.swalConfirmButton {
+  background-color: #ff7f32 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  color: white !important;
+
+  &:hover {
+    background-color: #e6722d !important;
+  }
+}
+
+.swalDenyButton {
+  background-color: #ef4444 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  color: white !important;
+
+  &:hover {
+    background-color: #dc2626 !important;
+  }
+}
+
+.swalCancelButton {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  color: #e0e0e0 !important;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
 }
 
 /* Mobile responsiveness */

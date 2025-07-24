@@ -30,12 +30,12 @@ const DraggableAssetContainer = ({
   envAsset,
 }: DraggableAssetContainerProps) => {
   const { camera } = useThree();
-  const { modifyEnvAsset, activeAssetId } = useEnvAssetStore();
+  const { modifyEnvAsset, activeAssetId, activeTab } = useEnvAssetStore();
 
   // To show axes when selected
   const isActive = useMemo(() => {
-    return activeAssetId === envAsset.id;
-  }, [activeAssetId, envAsset.id]);
+    return activeAssetId === envAsset.id && activeTab === "POSITION";
+  }, [activeAssetId, envAsset.id, activeTab]);
 
   // Get the model URL based on modelIndex
   const modelUrl = useMemo(() => {

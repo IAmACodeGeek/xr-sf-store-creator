@@ -123,7 +123,7 @@ function AppRouter() {
         width: "100vw", height: "100vh"
       }}>
         <h3 style={{
-          fontFamily: "Poppins, sans-seriff", fontWeight: "bold", textAlign: "center",
+          fontFamily: "DM Sans, sans-seriff", fontWeight: "bold", textAlign: "center",
           color: "#f26e02"
         }}>Please open the store builder on your desktop!</h3>
       </div>
