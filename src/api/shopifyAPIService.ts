@@ -13,6 +13,7 @@ interface ProductResponse {
         node: {
           id: string;
           title: string;
+          status: string; // Add status field
           media: {
             edges: {
               node: {
@@ -173,7 +174,8 @@ export const ProductService = {
             variants: productVariants,
             tags: product.node.tags ? product.node.tags.join(" ") : "",
             arLensLink: arLensLink || undefined,
-            totalFileSize: totalFileSize
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
           };
 
           return parsedProduct;
@@ -292,7 +294,8 @@ export const ProductService = {
             variants: productVariants,
             tags: product.node.tags ? product.node.tags.join(" ") : "",
             arLensLink: arLensLink || undefined,
-            totalFileSize: totalFileSize
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
           };
 
           return parsedProduct;
@@ -404,7 +407,8 @@ export const ProductService = {
             variants: productVariants,
             tags: product.node.tags ? product.node.tags.join(" ") : "",
             arLensLink: arLensLink || undefined,
-            totalFileSize: totalFileSize
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
           };
 
           return parsedProduct;

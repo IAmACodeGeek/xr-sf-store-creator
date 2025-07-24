@@ -2092,7 +2092,7 @@ export const CreatorKit = () => {
                   Products
                 </Typography>
                 <Box sx={{ maxHeight: "400px", overflowY: "auto" }}>
-                  {products.map((product) => (
+                  {products.filter(product => product.status === "ACTIVE").map((product) => (
                     <Box
                       key={product.id}
                       sx={{
