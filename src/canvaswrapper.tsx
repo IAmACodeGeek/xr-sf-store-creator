@@ -182,20 +182,22 @@ export default function CanvasWrapper() {
             };
           }
           setEnvAssets(newEnvAssets);
-          console.log("All Assets:", response);
 
           // Preload asset models
           Object.keys(envAssets).forEach((envAsset) => {
             if (envAssets[envAsset].type === "MODEL_3D")
               useGLTF.preload(envAssets[envAsset].src);
           });
+          
+          return newEnvAssets; // Return the loaded assets
         }
       } catch (err) {
         console.error("Assets error:", err);
       }
+      return {}; // Return empty object on error
     }
 
-    async function fetchEnvData() {
+    async function fetchEnvData(currentAssets: { [id: string]: EnvAsset }) {
       try {
         if (!envItemsLoaded && !envItemsLoading && brandData) {
           setEnvItemsLoading(true);
@@ -221,43 +223,28 @@ export default function CanvasWrapper() {
                 }
               }
 
-              // Start with library assets as the base
-              const newEnvAssets: { [id: string]: EnvAsset } = {...assetLibraryRef.current};
+              const newEnvAssets: { [id: string]: EnvAsset } = {...currentAssets};
 
-              // Process environment assets and merge with library assets
               for (const envAsset of Object.values(response.envAssets)) {
-                // Check if this asset exists in the library with a different ID (without .shackit.in suffix)
-                const libraryAssetId = envAsset.id.replace('.shackit.in', '');
-                const libraryAsset = assetLibraryRef.current[libraryAssetId];
+                const cleanId = envAsset.id.replace('.shackit.in', '');
                 
-                console.log(`Processing env asset: ${envAsset.id}`);
-                console.log(`Looking for library asset: ${libraryAssetId}`);
-                console.log(`Library asset found:`, libraryAsset);
-                
-                if (libraryAsset) {
-                  // Use the library asset data but with environment settings
-                  newEnvAssets[libraryAssetId] = {
-                    ...libraryAsset,
-                    ...envAsset,
-                    id: libraryAssetId, // Ensure we use the library asset ID
-                    isEnvironmentAsset: true,
+                if (newEnvAssets[cleanId]) {
+                  // Asset already exists (from library or personal), update it
+                  newEnvAssets[cleanId] = {
+                    ...newEnvAssets[cleanId], // Keep existing data
+                    ...envAsset,             // Overlay env data
+                    id: cleanId,               // Ensure clean ID
+                    isEnvironmentAsset: true,  // Set as active
                   };
-                  console.log(`Merged asset ${libraryAssetId} with filesize: ${libraryAsset.filesize}`);
                 } else {
-                  // If no library asset found, use the environment asset as is
-                  // But remove the .shackit.in suffix from the ID if present
-                  const cleanId = envAsset.id.replace('.shackit.in', '');
+                  // New asset from env data
                   newEnvAssets[cleanId] = {
                     ...envAsset,
                     id: cleanId,
                     isEnvironmentAsset: true,
                   };
-                  console.log(`No library asset found for ${envAsset.id}, using env asset with filesize: ${envAsset.filesize}`);
                 }
               }
-
-              console.log("Env Products: ", response.envProducts);
-              console.log("Env Assets: ", response.envAssets);
 
               async function setResults() {
                 setEnvProducts(newEnvProducts);
@@ -301,9 +288,9 @@ export default function CanvasWrapper() {
         setProgress(myProgress > 24 ? myProgress : 24);
         await fetchLibraryAssets();
         setProgress(myProgress > 47 ? myProgress : 47);
-        await fetchAssets();
+        const currentAssets = await fetchAssets();
         setProgress(myProgress > 62 ? myProgress : 62);
-        await fetchEnvData();
+        await fetchEnvData(currentAssets);
         setProgress(myProgress > 76 ? myProgress : 76);
         await fetchModels();
         setProgress(myProgress > 99 ? myProgress : 99);

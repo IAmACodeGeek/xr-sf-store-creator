@@ -12,7 +12,7 @@ interface FileResponse {
   name: string;
   originalName: string;
   type: string;
-  size: number;
+  size: string | number; // API returns string but we convert to number
   uploadTime: number;
   src: string;
 }
@@ -76,7 +76,7 @@ const AssetService = {
           isEnvironmentAsset: false,
           status: 'SUCCESS',
           source: 'OWN',
-          filesize: fileResponse.size // Add file size from upload response
+          filesize: Number(fileResponse.size) // Convert string to number
         };
       });
 
@@ -112,7 +112,7 @@ const AssetService = {
           isEnvironmentAsset: false,
           status: 'SUCCESS',
           source: 'OWN',
-          filesize: fileResponse.size // Add file size from import response
+          filesize: Number(fileResponse.size) // Convert string to number from API
         };
       });
   

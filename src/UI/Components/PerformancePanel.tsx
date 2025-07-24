@@ -37,6 +37,8 @@ interface PerformanceMetrics {
   environmentProductsSize: number;
   environmentAssetsCount: number;
   environmentAssetsSize: number;
+  ownAssetsCount: number;
+  ownAssetsSize: number;
   totalSize: number;
   totalEnvironmentSize: number;
   productBreakdown: ProductMetrics[];
@@ -54,6 +56,8 @@ const PerformancePanel: React.FC = () => {
     environmentProductsSize: 0,
     environmentAssetsCount: 0,
     environmentAssetsSize: 0,
+    ownAssetsCount: 0,
+    ownAssetsSize: 0,
     totalSize: 0,
     totalEnvironmentSize: 0,
     productBreakdown: [],
@@ -68,23 +72,6 @@ const PerformancePanel: React.FC = () => {
   const percentageUsed = Math.min((metrics.totalEnvironmentSize / maxThresholdBytes) * 100, 100);
 
   useEffect(() => {
-    // Debug logging
-    console.log('=== Performance Panel Debug ===');
-    console.log('Products:', products.length);
-    console.log('EnvProducts:', Object.keys(envProducts).length);
-    console.log('EnvAssets:', Object.keys(envAssets).length);
-    
-    // Debug asset file sizes
-    console.log('Asset Details:');
-    Object.values(envAssets).forEach(asset => {
-      console.log(`Asset ${asset.name}:`, {
-        id: asset.id,
-        type: asset.type,
-        source: asset.source,
-        filesize: asset.filesize,
-        isEnvironmentAsset: asset.isEnvironmentAsset
-      });
-    });
 
     // Helper function to calculate actual file size based on product type and selection
     const calculateProductFileSize = (product: Product, envProduct: any): number => {
@@ -152,7 +139,6 @@ const PerformancePanel: React.FC = () => {
     // Calculate asset metrics with file size
     const assetBreakdown: AssetMetrics[] = Object.values(envAssets).map(asset => {
       const fileSize = asset.filesize || 0;
-      console.log(`Asset ${asset.name} filesize:`, fileSize);
       
       return {
         id: asset.id,
@@ -178,20 +164,20 @@ const PerformancePanel: React.FC = () => {
     }, 0);
 
     const environmentAssets = Object.values(envAssets).filter(a => a.isEnvironmentAsset);
+    const ownAssets = Object.values(envAssets).filter(a => a.source === 'OWN');
     const environmentAssetsSize = environmentAssets.reduce((total, asset) => {
       const assetSize = asset.filesize || 0;
-      console.log(`Environment asset ${asset.name} size:`, assetSize);
       return total + assetSize;
     }, 0);
 
-    console.log('Calculated sizes:');
-    console.log('- Environment Products Size:', environmentProductsSize);
-    console.log('- Environment Assets Size:', environmentAssetsSize);
-    console.log('- Total Environment Size:', environmentProductsSize + environmentAssetsSize);
+    const ownAssetsSize = ownAssets.reduce((tot, a) => {
+      return tot + (a.filesize || 0);
+    }, 0);
 
     const shopifyProductsCount = products.length;
     const environmentProductsCount = environmentProducts.length;
     const environmentAssetsCount = environmentAssets.length;
+    const ownAssetsCount = ownAssets.length;
     const totalSize = shopifyProductsSize;
     const totalEnvironmentSize = environmentProductsSize + environmentAssetsSize;
 
@@ -202,6 +188,8 @@ const PerformancePanel: React.FC = () => {
       environmentProductsSize,
       environmentAssetsCount,
       environmentAssetsSize,
+      ownAssetsCount,
+      ownAssetsSize,
       totalSize,
       totalEnvironmentSize,
       productBreakdown,
@@ -335,6 +323,10 @@ const PerformancePanel: React.FC = () => {
                 <span className={styles.value}>
                   {metrics.environmentAssetsCount} items ({formatFileSize(metrics.environmentAssetsSize)})
                 </span>
+              </div>
+              <div className={styles.metricRow}>
+                <span className={styles.label}>Your Asset Library:</span>
+                <span className={styles.value}>{metrics.ownAssetsCount} items ({formatFileSize(metrics.ownAssetsSize)})</span>
               </div>
             </div>
 

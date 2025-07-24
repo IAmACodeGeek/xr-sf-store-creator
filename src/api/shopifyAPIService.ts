@@ -309,8 +309,6 @@ export const ProductService = {
     const response = await fetch(LIBRARY_URL);
     const resultJSON: ProductResponse = await response.json();
 
-    console.log('=== Raw API Response Debug ===');
-    console.log('API Response:', resultJSON);
 
     const products: Product[] = resultJSON.data.products.edges
       .map((product) => {
@@ -390,12 +388,6 @@ export const ProductService = {
             return total + size;
           }, 0);
 
-          console.log(`Product ${product.node.title}:`, {
-            models: models.map(m => ({ filesize: m.filesize, sources: m.sources })),
-            images: images.map(i => ({ size: i.size })),
-            totalFileSize
-          });
-
           const arLensLink = product.node.metafields?.edges?.find(
             (metafield) =>
               metafield.node.namespace === "custom" &&
@@ -420,16 +412,12 @@ export const ProductService = {
         return undefined;
       })
       .filter((product): product is Product => product !== undefined);
-
-    console.log('Parsed products:', products.length);
     return products;
   },
 
   async getLibraryAssets(brandName: string): Promise<EnvAsset[]> {
     const products = await this.getLibraryAssetsAsProducts();
 
-    console.log('=== Library Assets Debug ===');
-    console.log('Products from API:', products.length);
 
     const libraryAssets = products.map((product) => {
       // Calculate file size based on the asset type
@@ -437,17 +425,9 @@ export const ProductService = {
       if (product.models.length > 0) {
         // For 3D models, use the product's totalFileSize since individual model filesize is not available
         fileSize = product.totalFileSize || 0;
-        console.log(`Model ${product.title}:`, {
-          modelFilesize: product.models[0].filesize,
-          totalFileSize: product.totalFileSize,
-          sources: product.models[0].sources?.map(s => ({ url: s.url, filesize: s.filesize }))
-        });
       } else if (product.images.length > 0) {
         // For images, use the first image's size
         fileSize = product.images[0].size || 0;
-        console.log(`Image ${product.title}:`, {
-          imageSize: product.images[0].size
-        });
       }
 
       const assets: EnvAsset = {
@@ -465,17 +445,10 @@ export const ProductService = {
         filesize: fileSize, // Add file size information
       };
       
-      console.log(`Created asset ${assets.name}:`, {
-        id: assets.id,
-        type: assets.type,
-        filesize: assets.filesize,
-        src: assets.src
-      });
       
       return assets;
     });
 
-    console.log('Final library assets:', libraryAssets.length);
     return libraryAssets;
   },
 };
