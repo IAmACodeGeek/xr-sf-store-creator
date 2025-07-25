@@ -14,6 +14,7 @@ import GlowBarPlaceHolderData from "./placeHolderData/Glowbar";
 import LuxeCradlePlaceHolderData from "./placeHolderData/LuxeCradle";
 import FlareSuitePlaceHolderData from "./placeHolderData/FlareSuite";
 import GardenAtlierPlaceHolderData from "./placeHolderData/GardenAtelier";
+import CocktailDenPlaceHolderData from "./placeHolderData/CocktailDen";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -662,7 +663,7 @@ const environmentData: EnvironmentData = {
     playerSpeed: 10,
     playerHeight: 5,
     maxThreshold: 30 * 1024 * 1024, //30MB
-    placeHolderData: GardenAtlierPlaceHolderData,
+    placeHolderData: CocktailDenPlaceHolderData,
     initialGSAP: {
       start: {
         position: [0, 6, 0],
