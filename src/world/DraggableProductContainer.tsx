@@ -1,7 +1,6 @@
 import {
   useComponentStore,
   EnvProduct,
-  useToolStore,
   useEnvProductStore,
   useBrandStore,
 } from "@/stores/ZustandStores";
@@ -43,8 +42,7 @@ const DraggableProductContainer = ({
 }: DraggableProductContainerProps) => {
   const { products } = useComponentStore();
   const { camera } = useThree();
-  const { toolType } = useToolStore();
-  const { modifyEnvProduct, activeProductId } = useEnvProductStore();
+  const { modifyEnvProduct, activeProductId, activeTab } = useEnvProductStore();
   const { brandData } = useBrandStore();
 
   // Placeholder data
@@ -63,10 +61,10 @@ const DraggableProductContainer = ({
   const isActive = useMemo(() => {
     return (
       activeProductId === envProduct.id &&
-      toolType === "3DPARAMS" &&
+      activeTab === "POSITION" &&
       envProduct.placeHolderId === undefined
     );
-  }, [activeProductId, envProduct.id, envProduct.placeHolderId, toolType]);
+  }, [activeProductId, envProduct.id, envProduct.placeHolderId, activeTab]);
 
   // Fetch position, rotation & scale from placeholder
   const position = useMemo(() => {

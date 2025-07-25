@@ -12,7 +12,7 @@ interface FileResponse {
   name: string;
   originalName: string;
   type: string;
-  size: number;
+  size: string | number; // API returns string but we convert to number
   uploadTime: number;
   src: string;
 }
@@ -47,11 +47,7 @@ const AssetService = {
       return;
     }
 
-    // Limit the number of assets to 5
-    if(files.length + existingAssetCount > 5){
-      showPremiumPopup("Your current plan supports up to 5 assets. Reach out to our sales team to unlock more exclusive options.");
-      return;
-    }
+    // No asset limit - removed the 5 asset restriction
   
     const formData = new FormData();
     validFiles.forEach((file) => {
@@ -79,7 +75,8 @@ const AssetService = {
           src: fileResponse.src,
           isEnvironmentAsset: false,
           status: 'SUCCESS',
-          source: 'OWN'
+          source: 'OWN',
+          filesize: Number(fileResponse.size) // Convert string to number
         };
       });
 
@@ -114,7 +111,8 @@ const AssetService = {
           src: fileResponse.src,
           isEnvironmentAsset: false,
           status: 'SUCCESS',
-          source: 'OWN'
+          source: 'OWN',
+          filesize: Number(fileResponse.size) // Convert string to number from API
         };
       });
   

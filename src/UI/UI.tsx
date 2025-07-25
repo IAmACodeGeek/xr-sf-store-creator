@@ -13,6 +13,7 @@ import ProductSearcher from "@/UI/Components/ProductSearcher";
 import { CreatorKit } from "./Components/CreatorKit";
 import DiamondIcon from "@mui/icons-material/Diamond";
 import { showPremiumPopup } from "./Components/PremiumRequired";
+import PerformancePanel from "./Components/PerformancePanel";
 
 const customDriverStyles = `
   .driver-popover {
@@ -207,6 +208,7 @@ const UI = () => {
       </div>
 
       <CreatorKit/>
+      <PerformancePanel />
       {isInfoModalOpen && (
         <InfoModal></InfoModal>
       )}

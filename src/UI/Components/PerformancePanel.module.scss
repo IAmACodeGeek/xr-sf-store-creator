@@ -1,0 +1,551 @@
+.performancePanel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999999 !important;
+  font-family: 'Poppins', sans-serif;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+.performanceControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.indicator {
+  // Modern glassmorphic design
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 16px;
+  
+  // Layout & typography - fixed height for consistency
+  height: 48px;
+  padding: 0 20px 0 40px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  
+  // Advanced shadows
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(249, 115, 22, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  
+  // Smooth transitions
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto !important;
+  user-select: none;
+  z-index: 999999 !important;
+  isolation: isolate;
+  
+  // Gradient animation overlay
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.6s ease;
+  }
+  
+  .iconContainer {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    color: rgba(249, 115, 22, 1);
+    font-size: 18px;
+  }
+
+  // Hover effects
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.4), rgba(234, 88, 12, 0.25));
+    border-color: rgba(249, 115, 22, 0.6);
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(249, 115, 22, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    
+    &::before {
+      left: 100%;
+    }
+    
+    &::after {
+      opacity: 1;
+      transform: translateY(-50%) scale(1.2);
+    }
+  }
+  
+  // Active state
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.15s ease;
+  }
+  
+  // Focus state for accessibility
+  &:focus {
+    outline: none;
+    border-color: rgba(249, 115, 22, 0.8);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 4px 16px rgba(249, 115, 22, 0.3),
+      0 0 0 3px rgba(249, 115, 22, 0.2);
+  }
+}
+
+// Removed old pulse animation - using new modern design
+
+.indicatorText {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.expandedPanel {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 400px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 140px);
+  
+  // Modern glassmorphic background
+  background: linear-gradient(
+    135deg,
+    rgba(20, 20, 30, 0.95),
+    rgba(15, 15, 25, 0.98)
+  );
+  backdrop-filter: blur(40px);
+  
+  // Enhanced border and shadows
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 24px;
+  box-shadow: 
+    0 20px 80px rgba(0, 0, 0, 0.6),
+    0 8px 32px rgba(249, 115, 22, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  
+  overflow: hidden;
+  animation: fadeIn 0.15s ease-out;
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  will-change: opacity, transform;
+  
+  // Subtle inner glow
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(249, 115, 22, 0.4),
+      transparent
+    );
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(249, 115, 22, 0.1);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+
+  h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.headerButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.advancedButton {
+  // Match the indicator styling for consistency
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.15));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 16px;
+  color: #fff;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 18px;
+  
+  // Advanced shadows to match indicator
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(249, 115, 22, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.4), rgba(234, 88, 12, 0.25));
+    border-color: rgba(249, 115, 22, 0.6);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(249, 115, 22, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+    transition: all 0.15s ease;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: rgba(249, 115, 22, 0.8);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 4px 16px rgba(249, 115, 22, 0.3),
+      0 0 0 3px rgba(249, 115, 22, 0.2);
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.metrics {
+  padding: 16px 20px;
+  max-height: calc(100vh - 240px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  // Ensure smooth scrolling
+  scroll-behavior: smooth;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(249, 115, 22, 0.5);
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(249, 115, 22, 0.7);
+    }
+  }
+  
+  // Ensure content doesn't get cut off
+  padding-bottom: 30px;
+}
+
+.metricRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.value {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 16px 0;
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  color: #f97316;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: rgba(249, 115, 22, 0.8);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #f97316;
+    transform: scale(1.1);
+  }
+}
+
+.breakdown {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 8px;
+  
+  // Ensure smooth scrolling
+  scroll-behavior: smooth;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(249, 115, 22, 0.5);
+    border-radius: 2px;
+    
+    &:hover {
+      background: rgba(249, 115, 22, 0.7);
+    }
+  }
+}
+
+.breakdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(249, 115, 22, 0.1);
+    border-color: rgba(249, 115, 22, 0.2);
+  }
+  
+  &.active {
+    background: rgba(249, 115, 22, 0.15);
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemType {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  margin-top: 1px;
+}
+
+.itemStats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.itemSize {
+  color: rgba(249, 115, 22, 0.9);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.activeIndicator {
+  font-size: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.recommendations {
+  margin-top: 16px;
+  margin-bottom: 12px;
+  
+  h4 {
+    color: #f97316;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    
+    li {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 11px;
+      margin-bottom: 3px;
+      line-height: 1.3;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Mobile responsiveness
+@media screen and (max-width: 768px) {
+  .performancePanel {
+    bottom: 80px; // Higher to avoid mobile navigation bars
+    right: 16px;
+  }
+  
+  .performanceControls {
+    gap: 6px;
+  }
+  
+  .expandedPanel {
+    width: 280px;
+    bottom: 50px;
+    max-height: calc(100vh - 130px);
+  }
+  
+  .metrics {
+    max-height: calc(100vh - 190px);
+    padding-bottom: 25px;
+  }
+  
+  .breakdown {
+    max-height: 100px;
+  }
+  
+  .indicator {
+    height: 40px;
+    padding: 0 16px 0 32px;
+    font-size: 12px;
+    
+    .iconContainer {
+      font-size: 16px;
+    }
+  }
+  
+  .advancedButton {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .expandedPanel {
+    width: calc(100vw - 32px);
+    right: -16px;
+    max-height: calc(100vh - 110px);
+  }
+  
+  .metrics {
+    max-height: calc(100vh - 170px);
+    padding-bottom: 20px;
+  }
+  
+  .breakdown {
+    max-height: 80px;
+  }
+} 

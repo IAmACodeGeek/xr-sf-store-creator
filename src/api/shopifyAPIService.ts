@@ -23,6 +23,7 @@ interface ProductResponse {
         node: {
           id: string;
           title: string;
+          status: string; // Add status field
           media: {
             edges: {
               node: {
@@ -36,7 +37,11 @@ interface ProductResponse {
                   url: string;
                   format: string;
                   mimeType: string;
+                  filesize?: number;
                 }[];
+                originalSource?: {
+                  fileSize: number;
+                };
               };
             }[];
           };
@@ -118,13 +123,27 @@ export const ProductService = {
           .map((model) => ({
             id: model.node.id,
             sources: model.node.sources || [],
+            filesize: model.node.originalSource?.fileSize || 0,
           }));
 
         const images = product.node.media.edges
           .filter((media) => media.node.mediaContentType === "IMAGE")
           .map((image) => ({
-            src: image.node.image?.url || ""
+            src: image.node.image?.url || "",
+            size: image.node.originalSource?.fileSize || 0,
           }));
+
+        // Calculate total file size for all media assets
+        const totalFileSize = product.node.media.edges.reduce((total, media) => {
+          let size = media.node.originalSource?.fileSize || 0;
+          if (media.node.sources && media.node.sources.length) {
+            media.node.sources.forEach((src) => {
+              // Some APIs use filesize or fileSize; check both
+              size += (src.filesize ?? (src as any).fileSize ?? 0);
+            });
+          }
+          return total + size;
+        }, 0);
 
         const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
@@ -132,17 +151,19 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: images,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
         products.push(parsedProduct);
       }
@@ -193,13 +214,27 @@ export const ProductService = {
           .map((model) => ({
             id: model.node.id,
             sources: model.node.sources || [],
+            filesize: model.node.originalSource?.fileSize || 0,
           }));
 
         const images = product.node.media.edges
           .filter((media) => media.node.mediaContentType === "IMAGE")
           .map((image) => ({
-            src: image.node.image?.url || ""
+            src: image.node.image?.url || "",
+            size: image.node.originalSource?.fileSize || 0,
           }));
+
+        // Calculate total file size for all media assets
+        const totalFileSize = product.node.media.edges.reduce((total, media) => {
+          let size = media.node.originalSource?.fileSize || 0;
+          if (media.node.sources && media.node.sources.length) {
+            media.node.sources.forEach((src) => {
+              // Some APIs use filesize or fileSize; check both
+              size += (src.filesize ?? (src as any).fileSize ?? 0);
+            });
+          }
+          return total + size;
+        }, 0);
 
         const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
@@ -207,17 +242,19 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: images,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
         products.push(parsedProduct);
       }
@@ -230,24 +267,56 @@ export const ProductService = {
     const response = await fetch(LIBRARY_URL);
     const resultJSON: ProductResponse = await response.json();
 
-    const products: Product[] = [];
 
-    resultJSON.data.products.edges.forEach((product) => {
-      const productVariants: Variant[] = product.node.variants.edges.map(
-        (variant) => {
-          const price = variant.node.contextualPricing?.price?.amount || variant.node.price || "0";
-          const compareAtPrice = variant.node.contextualPricing?.compareAtPrice?.amount || variant.node.compareAtPrice;
+    const products: Product[] = resultJSON.data.products.edges
+      .map((product) => {
+        const productImages: { src: string; size: number }[] = product.node.media.edges
+          .filter(
+            (edge) =>
+              edge.node.mediaContentType.toUpperCase() === "IMAGE" &&
+              edge.node.image
+          )
+          .map((edge) => {
+            return { 
+              src: edge.node.image?.url || "",
+              size: edge.node.originalSource?.fileSize || 0
+            };
+          });
 
-          return {
-            id: Number(variant.node.id.split("/").pop()),
-            price: price,
-            compareAtPrice: compareAtPrice,
-            productId: Number(product.node.id.split("/").pop()),
-            selectedOptions: variant.node.selectedOptions,
-            availableForSale: variant.node.availableForSale,
-          };
-        }
-      );
+        const models: {
+          id: string | undefined;
+          sources:
+            | {
+                url: string;
+                format: string;
+                mimeType: string;
+              }[]
+            | undefined;
+        }[] = product.node.media.edges
+          .filter(
+            (edge) =>
+              edge.node.mediaContentType.toUpperCase() === "MODEL_3D" &&
+              edge.node.sources
+          )
+          .map((edge) => {
+            return {
+              id: edge.node.id,
+              sources: edge.node.sources,
+            };
+          });
+
+        const productVariants: Variant[] = product.node.variants.edges.map(
+          (variant) => {
+            return {
+              id: Number(variant.node.id.split("/").pop()),
+              price: variant.node.price,
+              compareAtPrice: variant.node.compareAtPrice,
+              productId: Number(product.node.id.split("/").pop()),
+              selectedOptions: variant.node.selectedOptions,
+              availableForSale: variant.node.availableForSale,
+            };
+          }
+        );
 
       if (productVariants.length > 0) {
         const models = product.node.media.edges
@@ -255,13 +324,27 @@ export const ProductService = {
           .map((model) => ({
             id: model.node.id,
             sources: model.node.sources || [],
+            filesize: model.node.originalSource?.fileSize || 0,
           }));
 
         const images = product.node.media.edges
           .filter((media) => media.node.mediaContentType === "IMAGE")
           .map((image) => ({
-            src: image.node.image?.url || ""
+            src: image.node.image?.url || "",
+            size: image.node.originalSource?.fileSize || 0,
           }));
+
+          // Calculate total file size for all media assets
+          const totalFileSize = product.node.media.edges.reduce((total, media) => {
+            let size = media.node.originalSource?.fileSize || 0;
+            if (media.node.sources && media.node.sources.length) {
+              media.node.sources.forEach((src) => {
+                // Some APIs use filesize or fileSize; check both
+                size += (src.filesize ?? (src as any).fileSize ?? 0);
+              });
+            }
+            return total + size;
+          }, 0);
 
         const arLensLink = product.node.metafields?.edges?.find(
           (metafield) =>
@@ -269,29 +352,43 @@ export const ProductService = {
             metafield.node.key === "snapchat_lens_link"
         )?.node.value;
 
-        const parsedProduct: Product = {
-          id: Number(product.node.id.split("/").pop()),
-          title: product.node.title,
-          description: product.node.descriptionHtml,
-          images: images,
-          models: models,
-          variants: productVariants,
-          options: product.node.options,
-          tags: product.node.tags ? product.node.tags.join(" ") : "",
-          arLensLink: arLensLink || undefined
-        };
+          const parsedProduct: Product = {
+            id: Number(product.node.id.split("/").pop()),
+            title: product.node.title,
+            description: product.node.descriptionHtml,
+            images: productImages,
+            models: models,
+            options: product.node.options,
+            variants: productVariants,
+            tags: product.node.tags ? product.node.tags.join(" ") : "",
+            arLensLink: arLensLink || undefined,
+            totalFileSize: totalFileSize,
+            status: product.node.status // Add status from API
+          };
 
-        products.push(parsedProduct);
-      }
-    });
-
+          return parsedProduct;
+        }
+        return undefined;
+      })
+      .filter((product): product is Product => product !== undefined);
     return products;
   },
 
   async getLibraryAssets(brandName: string): Promise<EnvAsset[]> {
     const products = await this.getLibraryAssetsAsProducts();
 
+
     const libraryAssets = products.map((product) => {
+      // Calculate file size based on the asset type
+      let fileSize = 0;
+      if (product.models.length > 0) {
+        // For 3D models, use the product's totalFileSize since individual model filesize is not available
+        fileSize = product.totalFileSize || 0;
+      } else if (product.images.length > 0) {
+        // For images, use the first image's size
+        fileSize = product.images[0].size || 0;
+      }
+
       const assets: EnvAsset = {
         id: `${brandName}/${product.id}`,
         type: product.models.length > 0 ? "MODEL_3D" : "PHOTO",
@@ -304,7 +401,10 @@ export const ProductService = {
         source: "LIBRARY",
         image : product?.images[0] && product?.images[0].src,
         isEnvironmentAsset: false,
+        filesize: fileSize, // Add file size information
       };
+      
+      
       return assets;
     });
 

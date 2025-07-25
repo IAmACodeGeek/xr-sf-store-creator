@@ -4,14 +4,16 @@ export default interface Product {
   id: number;
   title: string;
   description?: string;
-  images: { src: string }[];
+  images: { src: string; size: number }[];
   models: {
     id: string | undefined;
     sources: {
       url: string,
       format: string,
-      mimeType: string
+      mimeType: string,
+      filesize?: number
     }[] | undefined;
+    filesize: number;
   }[];
   options: {
     id: string;
@@ -22,4 +24,6 @@ export default interface Product {
   variants: Variant[];
   arLensLink: string | undefined;
   tags:string;
+  totalFileSize?: number; // File size in bytes for all media assets
+  status: string; // Product status (e.g., ACTIVE, DRAFT)
 }

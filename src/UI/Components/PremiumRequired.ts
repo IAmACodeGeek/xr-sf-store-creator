@@ -13,8 +13,11 @@ const showPremiumPopup: (description: string) => void = (description: string) =>
     customClass: {
       title: styles.swalTitle,
       popup: styles.swalPopup,
-      confirmButton: styles.swalButton,
-      cancelButton: styles.swalButton
+      htmlContainer: styles.swalHtmlContainer,
+      icon: styles.swalIcon,
+      actions: styles.swalActions,
+      confirmButton: `${styles.swalButton} ${styles.swalConfirmButton}`,
+      cancelButton: `${styles.swalButton} ${styles.swalCancelButton}`,
     },
   }).then((result) => {
     if(result.isConfirmed){

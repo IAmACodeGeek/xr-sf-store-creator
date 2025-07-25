@@ -79,6 +79,10 @@ interface ComponentStore {
   isProductSearcherOpen: boolean;
   openProductSearcher: () => void;
   closeProductSearcher: () => void;
+
+  // Performance Monitor
+  isAdvancedPerfVisible: boolean;
+  toggleAdvancedPerf: () => void;
 }
 
 const useComponentStore = create<ComponentStore>((set) => ({
@@ -150,6 +154,10 @@ const useComponentStore = create<ComponentStore>((set) => ({
   isProductSearcherOpen: false,
   openProductSearcher: () => set({ isProductSearcherOpen: true }),
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
+
+  // Performance Monitor
+  isAdvancedPerfVisible: false,
+  toggleAdvancedPerf: () => set((state) => ({ isAdvancedPerfVisible: !state.isAdvancedPerfVisible })),
 }));
 
 // Touch handling
@@ -230,7 +238,10 @@ interface EnvProductStore {
   modifyEnvProduct: (id: number, envProduct: EnvProduct) => void;
 
   activeProductId: number | null,
-  setActiveProductId: (value: number | null) => void
+  setActiveProductId: (value: number | null) => void;
+  
+  activeTab: "MEDIA" | "POSITION";
+  setActiveTab: (value: "MEDIA" | "POSITION") => void;
 }
 
 const useEnvProductStore = create<EnvProductStore>((set) => ({
@@ -246,7 +257,10 @@ const useEnvProductStore = create<EnvProductStore>((set) => ({
   })),
 
   activeProductId: null,
-  setActiveProductId: (value: number | null) => set({activeProductId: value})
+  setActiveProductId: (value: number | null) => set({activeProductId: value}),
+  
+  activeTab: "MEDIA" as "MEDIA" | "POSITION",
+  setActiveTab: (value: "MEDIA" | "POSITION") => set({activeTab: value})
 }));
 
 interface EnvAsset {
@@ -261,6 +275,7 @@ interface EnvAsset {
   isEnvironmentAsset: boolean;
   source: 'OWN' | 'LIBRARY';
   image?: string;
+  filesize?: number; // Add file size property
 }
 
 interface EnvAssetStore {
@@ -270,11 +285,13 @@ interface EnvAssetStore {
 
   activeAssetId: string | null;
   setActiveAssetId: (value: string | null) => void;
+  
+  activeTab: "MEDIA" | "POSITION";
+  setActiveTab: (value: "MEDIA" | "POSITION") => void;
 }
 
 const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   envAssets: {},
-  // Replace the whole envAssets map (needed for deletions)
   setEnvAssets: (envAssets: { [id: string]: EnvAsset }) => set({ envAssets }),
   modifyEnvAsset: (id: string, envAsset: EnvAsset) => set((state: {envAssets: {[id: string]: EnvAsset}}) => ({
     envAssets: {
@@ -284,7 +301,10 @@ const useEnvAssetStore = create<EnvAssetStore>((set) => ({
   })),
   
   activeAssetId: null,
-  setActiveAssetId: (value: string | null) => set({activeAssetId: value})
+  setActiveAssetId: (value: string | null) => set({activeAssetId: value}),
+  
+  activeTab: "MEDIA" as "MEDIA" | "POSITION",
+  setActiveTab: (value: "MEDIA" | "POSITION") => set({activeTab: value})
 }));
 
 interface ToolStore {

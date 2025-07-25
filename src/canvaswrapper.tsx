@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
+import { Perf } from 'r3f-perf';
 import App from "./world/App.jsx";
 import "@/index.scss";
 import UI from "@/UI/UI.tsx";
@@ -85,7 +86,7 @@ export default function CanvasWrapper() {
 
   // Load All resources
   const { envAssets, setEnvAssets } = useEnvAssetStore();
-  const { products, setProducts } = useComponentStore();
+  const { products, setProducts, isAdvancedPerfVisible } = useComponentStore();
   const { envProducts, setEnvProducts } = useEnvProductStore();
   const {
     productsLoaded,
@@ -181,20 +182,22 @@ export default function CanvasWrapper() {
             };
           }
           setEnvAssets(newEnvAssets);
-          console.log("All Assets:", response);
 
           // Preload asset models
           Object.keys(envAssets).forEach((envAsset) => {
             if (envAssets[envAsset].type === "MODEL_3D")
               useGLTF.preload(envAssets[envAsset].src);
           });
+          
+          return newEnvAssets; // Return the loaded assets
         }
       } catch (err) {
         console.error("Assets error:", err);
       }
+      return {}; // Return empty object on error
     }
 
-    async function fetchEnvData() {
+    async function fetchEnvData(currentAssets: { [id: string]: EnvAsset }) {
       try {
         if (!envItemsLoaded && !envItemsLoading && brandData) {
           setEnvItemsLoading(true);
@@ -220,17 +223,28 @@ export default function CanvasWrapper() {
                 }
               }
 
-              const newEnvAssets: { [id: string]: EnvAsset } = {...assetLibraryRef.current};
+              const newEnvAssets: { [id: string]: EnvAsset } = {...currentAssets};
 
               for (const envAsset of Object.values(response.envAssets)) {
-                newEnvAssets[envAsset.id] = {
-                  ...envAsset,
-                  isEnvironmentAsset: true,
-                };
+                const cleanId = envAsset.id.replace('.shackit.com', '');
+                
+                if (newEnvAssets[cleanId]) {
+                  // Asset already exists (from library or personal), update it
+                  newEnvAssets[cleanId] = {
+                    ...newEnvAssets[cleanId], // Keep existing data
+                    ...envAsset,             // Overlay env data
+                    id: cleanId,               // Ensure clean ID
+                    isEnvironmentAsset: true,  // Set as active
+                  };
+                } else {
+                  // New asset from env data
+                  newEnvAssets[cleanId] = {
+                    ...envAsset,
+                    id: cleanId,
+                    isEnvironmentAsset: true,
+                  };
+                }
               }
-
-              console.log("Env Products: ", response.envProducts);
-              console.log("Env Assets: ", response.envAssets);
 
               async function setResults() {
                 setEnvProducts(newEnvProducts);
@@ -274,9 +288,9 @@ export default function CanvasWrapper() {
         setProgress(myProgress > 24 ? myProgress : 24);
         await fetchLibraryAssets();
         setProgress(myProgress > 47 ? myProgress : 47);
-        await fetchAssets();
+        const currentAssets = await fetchAssets();
         setProgress(myProgress > 62 ? myProgress : 62);
-        await fetchEnvData();
+        await fetchEnvData(currentAssets);
         setProgress(myProgress > 76 ? myProgress : 76);
         await fetchModels();
         setProgress(myProgress > 99 ? myProgress : 99);
@@ -302,6 +316,7 @@ export default function CanvasWrapper() {
           }}
           shadows>
             <React.Suspense fallback={null}>
+              {isAdvancedPerfVisible && <Perf position="top-right" />}
               <App />
             </React.Suspense>
           </Canvas>
