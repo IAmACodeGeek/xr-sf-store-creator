@@ -14,6 +14,7 @@ import { GlowBarModel } from "@/data/environment/environmentModel/Glowbar";
 import { LuxeCradleModel } from "@/data/environment/environmentModel/LuxeCradle";
 import { FlareSuiteModel } from "@/data/environment/environmentModel/FlareSuite";
 import { GardenAtelierModel } from "@/data/environment/environmentModel/GardenAtelier";
+import { CocktailDenModel } from "@/data/environment/environmentModel/CocktailDen";
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
@@ -34,6 +35,7 @@ export function Ground() {
         {environmentType === "LUXECRADLE" && <LuxeCradleModel />}
         {environmentType === "FLARESUITE" && <FlareSuiteModel />}
         {environmentType === "GARDENATELIER" && <GardenAtelierModel />}
+        {environmentType === "COCKTAILDEN" && <CocktailDenModel />}
       </RigidBody>
     )
   );
