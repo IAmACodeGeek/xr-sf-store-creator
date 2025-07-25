@@ -49,6 +49,7 @@ interface EnvironmentData {
       scale: number;
       dark?: boolean;
     }[];
+    maxThreshold: number;
   };
 }
 
@@ -56,6 +57,7 @@ const environmentData: EnvironmentData = {
   BIGROOM: {
     playerSpeed: 10,
     playerHeight: 2,
+    maxThreshold: 30 * 1024 * 1024, // 30 MB limit
     placeHolderData: bigRoomPlaceHolderData,
     initialGSAP: {
       start: {
@@ -101,6 +103,7 @@ const environmentData: EnvironmentData = {
   CASTLE: {
     playerSpeed: 17,
     playerHeight: 2,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: castlePlaceHolderData,
     initialGSAP: {
       start: {
@@ -137,6 +140,7 @@ const environmentData: EnvironmentData = {
   SINGLEROOM: {
     playerSpeed: 15,
     playerHeight: 2,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: singleRoomPlaceHolderData,
     initialGSAP: {
       start: {
@@ -187,6 +191,7 @@ const environmentData: EnvironmentData = {
   SHOWROOM: {
     playerSpeed: 15,
     playerHeight: 7,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: ShowRoomPlaceHolderData,
     initialGSAP: {
       start: {
@@ -227,6 +232,7 @@ const environmentData: EnvironmentData = {
   LOTUSDOME: {
     playerSpeed: 15,
     playerHeight: 1.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: LotusDomePlaceHolderData,
     initialGSAP: {
       start: {
@@ -272,6 +278,7 @@ const environmentData: EnvironmentData = {
   LUNOX: {
     playerSpeed: 8,
     playerHeight: 2,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: LunoxPlaceHolderData,
     initialGSAP: {
       start: {
@@ -318,6 +325,7 @@ const environmentData: EnvironmentData = {
   SHELFSCAPE: {
     playerSpeed: 8,
     playerHeight: 3.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: ShelfscapePlaceHolderData,
     initialGSAP: {
       start: {
@@ -363,6 +371,7 @@ const environmentData: EnvironmentData = {
   KIDSSTORE: {
     playerSpeed: 8,
     playerHeight: 2.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: KidsStorePlaceHolderData,
     initialGSAP: {
       start: {
@@ -403,6 +412,7 @@ const environmentData: EnvironmentData = {
   ARCADEZONE: {
     playerSpeed: 10,
     playerHeight: 1.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: ArcadeZonePlaceHolderData,
     initialGSAP: {
       start: {
@@ -444,6 +454,7 @@ const environmentData: EnvironmentData = {
   VARSITYVAULT: {
     playerSpeed: 15,
     playerHeight: 2.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: VarsityVaultPlaceHolderData,
     initialGSAP: {
       start: {
@@ -485,6 +496,7 @@ const environmentData: EnvironmentData = {
   GLOWBAR: {
     playerSpeed: 10,
     playerHeight: 3,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: GlowBarPlaceHolderData,
     initialGSAP: {
       start: {
@@ -525,6 +537,7 @@ const environmentData: EnvironmentData = {
   LUXECRADLE: {
     playerSpeed: 10,
     playerHeight: 3,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: LuxeCradlePlaceHolderData,
     initialGSAP: {
       start: {
@@ -565,6 +578,7 @@ const environmentData: EnvironmentData = {
   FLARESUITE: {
     playerSpeed: 10,
     playerHeight: 2.5,
+    maxThreshold: 30 * 1024 * 1024,
     placeHolderData: FlareSuitePlaceHolderData,
     initialGSAP: {
       start: {

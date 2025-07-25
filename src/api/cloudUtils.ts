@@ -12,7 +12,7 @@ export const CLOUD_RUN_ENDPOINTS = {
     UPLOAD: fn('assets-uploading'),
     IMPORT: fn('assets-importing'),
     DELETE: fn('asset-deletion'),
-    OWN_STORE: fn('ownstoreasset')
+    OWN_STORE: fn('own-store-asset')
   },
 
   // Brand Form API

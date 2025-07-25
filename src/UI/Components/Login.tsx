@@ -16,7 +16,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { loginUser } from "../../api/LoginApi";
+import { loginUser, getGoogleUserInfo, checkGoogleOauth } from "../../api/LoginApi";
 import useAutoLogin from "../../autoLoginHook";
 import { getCookieConfig } from "../../utils/cookieConfig";
 import { CLOUD_RUN_ENDPOINTS } from "../../api/cloudUtils";
@@ -25,6 +25,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -35,54 +36,67 @@ export default function Login() {
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       console.log("Google Login Success:", response);
-      setIsLoading(true);
+      setIsGoogleLoading(true);
 
       try {
-        const res = await fetch(
-          "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
-          {
-            headers: { Authorization: `Bearer ${response.access_token}` },
-          }
-        );
-        const userProfile = await res.json();
+        const userProfile = await getGoogleUserInfo(response.access_token);
         console.log("User Profile:", userProfile);
 
-        // Set access token with environment-specific config
-        Cookies.set("accessToken", response.access_token, getCookieConfig());
-
-        const postResponse = await fetch(
-          CLOUD_RUN_ENDPOINTS.DASHBOARD.FETCH_BRAND_DETAILS,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: userProfile.email }),
-          }
+        const backendResult = await checkGoogleOauth(
+          userProfile.email,
+          userProfile.id,
+          userProfile.name
         );
+        console.log("Backend OAuth result:", backendResult);
 
-        if (!postResponse.ok) {
-          throw new Error(`API returned status ${postResponse.status}`);
-        }
+        if (backendResult.message === "OAuth login successful") {
+          // Set access token with environment-specific config
+          Cookies.set("accessToken", backendResult.token, getCookieConfig());
 
-        const data = await postResponse.json();
-        console.log("Brand verification response:", data);
+          // Store user data in localStorage
+          localStorage.setItem("user", JSON.stringify({
+            id: backendResult.user.id,
+            email: backendResult.user.email,
+            name: backendResult.user.name,
+            authType: backendResult.user.authType,
+            createdAt: backendResult.user.createdAt,
+          }));
 
-        if (brandNameFromQuery) {
-          if (data["brand_name"] === brandNameFromQuery) {
-            // Store user data in localStorage
-            localStorage.setItem("user", JSON.stringify(userProfile));
+          const postResponse = await fetch(
+            CLOUD_RUN_ENDPOINTS.DASHBOARD.FETCH_BRAND_DETAILS,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: backendResult.user.email }),
+            }
+          );
 
-            Cookies.set("brandName", brandNameFromQuery, getCookieConfig());
-            toast.success("Successful: brand configuration matches!");
-            navigate("/canvas");
+          if (!postResponse.ok) {
+            throw new Error(`API returned status ${postResponse.status}`);
+          }
+
+          const data = await postResponse.json();
+          console.log("Brand verification response:", data);
+
+          if (brandNameFromQuery) {
+            if (data["brand_name"] === brandNameFromQuery) {
+              Cookies.set("brandName", brandNameFromQuery, getCookieConfig());
+              toast.success("Successful: brand configuration matches!");
+              navigate("/canvas");
+            } else {
+              localStorage.removeItem("user");
+              Cookies.remove("accessToken");
+              toast.error("This is not your configuration");
+            }
           } else {
             localStorage.removeItem("user");
             Cookies.remove("accessToken");
             toast.error("This is not your configuration");
           }
         } else {
+          toast.error(backendResult.message || "Google authentication failed");
           localStorage.removeItem("user");
           Cookies.remove("accessToken");
-          toast.error("This is not your configuration");
         }
       } catch (error) {
         console.error("Failed to handle Google login flow:", error);
@@ -90,13 +104,13 @@ export default function Login() {
         localStorage.removeItem("user");
         Cookies.remove("accessToken");
       } finally {
-        setIsLoading(false);
+        setIsGoogleLoading(false);
       }
     },
     onError: () => {
       console.log("Google Login Failed");
       toast.error("Google login failed");
-      setIsLoading(false);
+      setIsGoogleLoading(false);
     },
     scope: "openid email profile",
   });
@@ -300,7 +314,7 @@ export default function Login() {
           variant="outlined"
           fullWidth
           startIcon={<GoogleIcon />}
-          disabled={isLoading}
+          disabled={isLoading || isGoogleLoading}
           sx={{
             padding: "10px",
             fontSize: "16px",
@@ -309,12 +323,9 @@ export default function Login() {
             textTransform: "none",
           }}
           onClick={() => googleLogin()}>
-          Continue with Google
+          {isGoogleLoading ? <CircularProgress size={24} color="inherit" /> : "Continue with Google"}
         </Button>
 
-        <Typography variant="body2" color="black" sx={{ marginTop: "15px" }}>
-          Don't have an account? <a href="/register">Sign Up</a>
-        </Typography>
         <ToastContainer />
       </Box>
     </Container>
