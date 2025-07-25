@@ -13,7 +13,10 @@ import {
   TextField,
   ImageList,
   ImageListItem,
+  InputAdornment,
 } from "@mui/material";
+import TutorialButton from "./TutorialButton";
+import TutorialOverlay from "./TutorialOverlay";
 import {
   EnvProduct,
   useComponentStore,
@@ -48,6 +51,7 @@ import {
   RotateCcw,
   ZoomIn,
   Check,
+  Search,
 } from "lucide-react";
 import PlaceHolderData from "@/data/environment/placeHolderData/PlaceHolderData";
 
@@ -68,14 +72,15 @@ const GlassBox = styled(Box)(() => ({
   },
 }));
 
-const GlassButton = styled(Button)<{ isPrimary?: boolean }>(
-  ({ isPrimary }) => ({
+const GlassButton = styled(Button)<{ isPrimary?: boolean; isSmall?: boolean }>(
+  ({ isPrimary, isSmall }) => ({
     borderRadius: "12px",
     textTransform: "none",
     fontFamily: "'DM Sans', sans-serif",
     fontWeight: 600,
-    padding: "12px 24px",
-    minHeight: "48px",
+    padding: isSmall ? "8px 16px" : "12px 24px",
+    minHeight: isSmall ? "32px" : "48px",
+    fontSize: isSmall ? "0.8rem" : "0.875rem",
     transition: "all 0.3s ease",
     backdropFilter: "blur(12px)",
     border: isPrimary
@@ -241,7 +246,7 @@ const MediaTypeSelector = memo(
             isPrimary={mediaType === "PHOTO"}
             onClick={() => onMediaTypeChange("PHOTO")}
             startIcon={<ImageIcon size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             2D Images
           </GlassButton>
@@ -249,7 +254,7 @@ const MediaTypeSelector = memo(
             isPrimary={mediaType === "MODEL_3D"}
             onClick={() => onMediaTypeChange("MODEL_3D")}
             startIcon={<BoxIcon size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             3D Models
           </GlassButton>
@@ -285,7 +290,7 @@ const CompactTabPanel = memo(
             isPrimary={activeTab === "MEDIA"}
             onClick={() => onTabChange("MEDIA")}
             startIcon={<ImageIcon size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             Media
           </GlassButton>
@@ -293,7 +298,7 @@ const CompactTabPanel = memo(
             isPrimary={activeTab === "POSITION"}
             onClick={() => onTabChange("POSITION")}
             startIcon={<Settings size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             Position
           </GlassButton>
@@ -328,7 +333,7 @@ const ParamsTypeSelector = memo(
             isPrimary={paramsType === "CUSTOM"}
             onClick={() => onParamsTypeChange("CUSTOM")}
             startIcon={<Settings size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             Custom
           </GlassButton>
@@ -336,7 +341,7 @@ const ParamsTypeSelector = memo(
             isPrimary={paramsType === "PLACEHOLDER"}
             onClick={() => onParamsTypeChange("PLACEHOLDER")}
             startIcon={<Layers size={18} />}
-            fullWidth
+            sx={{ flex: 1 }}
           >
             Placeholder
           </GlassButton>
@@ -641,32 +646,18 @@ const FaceSelector = memo(
         </Typography>
         <Box sx={{ display: "flex", gap: 1.5 }}>
           {faceOptions.map((opt) => (
-            <Button
+            <GlassButton
               key={opt.value}
+              isPrimary={value === opt.value}
               onClick={() => onChange(opt.value)}
               sx={{
                 flex: 1,
                 minWidth: "0px",
                 px: 0,
-                color: value === opt.value ? "#FFFFFF" : "rgba(255,255,255,0.85)",
-                background: value === opt.value ? "#FF7F32" : "rgba(255,255,255,0.06)",
-                backdropFilter: "blur(6px)",
-                border: value === opt.value
-                  ? "1px solid #FF7F32"
-                  : "1px solid rgba(255,255,255,0.2)",
-                borderRadius: 2,
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "14px",
-                fontWeight: 600,
-                transition: "all 0.25s ease",
-                '&:hover': {
-                  background: value === opt.value ? "#FF7F32" : "rgba(255,255,255,0.12)",
-                  borderColor: "#FF7F32",
-                },
               }}
             >
               {opt.label}
-            </Button>
+            </GlassButton>
           ))}
         </Box>
       </GlassBox>
@@ -840,9 +831,9 @@ const AssetList = memo(
       <GlassBox sx={{ p: 3, mb: 2 }}>
         <Typography
           sx={{
-            fontFamily: "'Poppins', sans-serif",
+            fontFamily: "'DM Sans', sans-serif",
             fontSize: "18px",
-            fontWeight: 600,
+            fontWeight: 700,
             color: "white",
             mb: 2,
           }}
@@ -854,6 +845,7 @@ const AssetList = memo(
             <Box
               key={asset.id}
               sx={{
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 p: 2,
@@ -890,7 +882,6 @@ const AssetList = memo(
                   height: "48px",
                   borderRadius: "8px",
                   objectFit: "cover",
-                  mr: 2,
                   opacity: asset.isEnvironmentAsset ? 1 : 0.5,
                   backgroundColor:
                     asset.type === "PHOTO"
@@ -898,82 +889,89 @@ const AssetList = memo(
                       : "rgba(77, 177, 255, 0.1)",
                 }}
               />
-              <Typography
-                sx={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  color: asset.isEnvironmentAsset
-                    ? "white"
-                    : "rgba(255, 255, 255, 0.5)",
-                  fontSize: "14px",
-                  flex: 1,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {asset.name}
-              </Typography>
-              {asset.isEnvironmentAsset && (
-                <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  size="small"
-                    onClick={() => {
-                      onEdit(asset.id);
-                      onSetActiveTab("MEDIA");
-                    }}
+              <Box sx={{ flex: 1, ml: 2, overflow: 'hidden' }}>
+                <Typography
+                  noWrap
                   sx={{
-                      minWidth: "36px",
-                      width: "36px",
-                      height: "36px",
-                      padding: 0,
-                      color: "rgba(255, 127, 50, 0.8)",
-                      border: "1px solid rgba(255, 127, 50, 0.3)",
-                      borderRadius: "8px",
-                      "&:hover": { 
-                        color: "white",
-                        backgroundColor: "rgba(255, 127, 50, 0.1)",
-                        borderColor: "rgba(255, 127, 50, 0.6)",
-                      },
+                    fontFamily: "'DM Sans', sans-serif",
+                    color: asset.isEnvironmentAsset
+                      ? "white"
+                      : "rgba(255, 255, 255, 0.5)",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    textOverflow: "ellipsis",
                   }}
                 >
-                    <ImageIcon size={16} />
-                </Button>
-                  <Button
-                    size="small"
-                                         onClick={() => {
-                       onEdit(asset.id);
-                       onSetActiveTab("POSITION");
-                     }}
-                    sx={{
-                      minWidth: "36px",
-                      width: "36px",
-                      height: "36px",
-                      padding: 0,
-                      color: "rgba(255, 127, 50, 0.8)",
-                      border: "1px solid rgba(255, 127, 50, 0.3)",
-                      borderRadius: "8px",
-                      "&:hover": { 
-                        color: "white",
-                        backgroundColor: "rgba(255, 127, 50, 0.1)",
-                        borderColor: "rgba(255, 127, 50, 0.6)",
-                      },
-                    }}
-                  >
-                    <Settings size={16} />
-                  </Button>
-                </Box>
-              )}
+                  {asset.name}
+                </Typography>
+                
+                {asset.isEnvironmentAsset && (
+                  <Box sx={{ display: "flex", gap: 0, mt: 1.5 }}>
+                    <GlassButton
+                      isSmall
+                      onClick={() => {
+                        onEdit(asset.id);
+                        onSetActiveTab("MEDIA");
+                      }}
+                      sx={{
+                        flex: 1,
+                        borderRadius: '12px 0 0 12px',
+                        borderRight: 'none',
+                        '&:hover': { 
+                          background: "rgba(255, 255, 255, 0.1)",
+                          borderColor: "rgba(255, 127, 50, 0.4)",
+                        },
+                      }}
+                    >
+                      Media
+                    </GlassButton>
+                    <GlassButton
+                      isSmall
+                      onClick={() => {
+                        onEdit(asset.id);
+                        onSetActiveTab("POSITION");
+                      }}
+                      sx={{
+                        flex: 1,
+                        borderRadius: '0 12px 12px 0',
+                        borderLeft: 'none',
+                        '&:hover': { 
+                          background: "rgba(255, 255, 255, 0.1)",
+                          borderColor: "rgba(255, 127, 50, 0.4)",
+                        },
+                      }}
+                    >
+                      Position
+                    </GlassButton>
+                  </Box>
+                )}
+              </Box>
               {asset.source === "OWN" && (
                 <Button
                   size="small"
                   onClick={() => onDelete(asset.id)}
                   sx={{
-                    minWidth: "40px",
-                    color: "rgba(255, 100, 100, 0.8)",
-                    "&:hover": { color: "rgba(255, 100, 100, 1)" },
+                    position: "absolute",
+                    top: "8px",
+                    right: "8px",
+                    minWidth: "24px",
+                    width: "24px",
+                    height: "24px",
+                    padding: 0,
+                    color: "rgba(255, 100, 100, 0.6)",
+                    background: "rgba(255, 100, 100, 0.1)",
+                    border: "1px solid rgba(255, 100, 100, 0.2)",
+                    borderRadius: "6px",
+                    transition: "all 0.2s ease",
+                    "&:hover": { 
+                      color: "rgba(255, 100, 100, 1)",
+                      background: "rgba(255, 100, 100, 0.2)",
+                      borderColor: "rgba(255, 100, 100, 0.4)",
+                      transform: "scale(1.1)",
+                    },
                   }}
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={12} />
                 </Button>
               )}
             </Box>
@@ -1068,21 +1066,12 @@ const MediaEditor = memo(
                   gap: 2,
                 }}
               >
-                <Button
-                  variant="contained"
+                <GlassButton
+                  isPrimary
                   onClick={() => onMediaSelect("MODEL_3D", index)}
-                  sx={{
-                    background: "#FF7F32",
-                    color: "white",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 600,
-                    "&:hover": {
-                      background: "#E6722D",
-                    },
-                  }}
                 >
                   Use This Model
-                </Button>
+                </GlassButton>
                 <ModelViewer
                   style={{
                     width: "100%",
@@ -1188,25 +1177,21 @@ const PlaceholderEditor = memo(
                     envAssets[placeholderEntity?.id || ""]?.name ||
                     "Available"}
                 </Typography>
-                <Button
-                  variant="contained"
+                <GlassButton
+                  isPrimary={!placeholderEntity}
                   disabled={placeholderEntity !== undefined}
                   onClick={() => onPlaceholderSelect(placeholder.id)}
                   sx={{
-                    background: placeholderEntity
-                      ? "rgba(100, 100, 100, 0.5)"
-                      : "#FF7F32",
-                    color: "white",
                     minWidth: "80px",
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 600,
-                    "&:hover": {
-                      background: "#E6722D",
-                    },
+                    '&.Mui-disabled': {
+                      background: 'rgba(100, 100, 100, 0.5)',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      border: "1px solid rgba(100, 100, 100, 0.3)",
+                    }
                   }}
                 >
                   {placeholderEntity ? "In Use" : "Use"}
-                </Button>
+                </GlassButton>
               </Box>
             );
           })}
@@ -1231,6 +1216,7 @@ export const CreatorKit = () => {
     useEnvProductStore();
 
   const { brandData } = useBrandStore();
+  const { setInputFocused, openTutorial } = useComponentStore();
 
   const [entityType, setEntityType] = useState<"PRODUCT" | "ASSET">("PRODUCT");
   const [mediaType, setMediaType] = useState<"PHOTO" | "MODEL_3D">("PHOTO");
@@ -1238,6 +1224,7 @@ export const CreatorKit = () => {
     "CUSTOM"
   );
   const [assetSource, setAssetSource] = useState<"LIBRARY" | "OWN">("LIBRARY");
+  const [productSearchQuery, setProductSearchQuery] = useState<string>("");
 
   // Track previous state for products / assets to enable discard
   const [previousProductState, setPreviousProductState] = useState<EnvProduct | null>(null);
@@ -1249,6 +1236,19 @@ export const CreatorKit = () => {
     return environmentData[brandData?.environment_name.toUpperCase()]
       .placeHolderData;
   }, [brandData]);
+
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!productSearchQuery.trim()) {
+      return products.filter(product => product.status === "ACTIVE");
+    }
+    
+    const query = productSearchQuery.toLowerCase().trim();
+    return products.filter(product => 
+      product.status === "ACTIVE" && 
+      product.title.toLowerCase().includes(query)
+    );
+  }, [products, productSearchQuery]);
 
   // Current active item
   const activeEnvProduct = useMemo(() => {
@@ -1539,20 +1539,20 @@ export const CreatorKit = () => {
         );
 
         if (result && result.assets) {
-          Object.keys(result.assets).forEach((id) => {
-            const uploadedAssetData = result.assets[id];
-            const assetWithDefaults: EnvAsset = {
-              ...uploadedAssetData,
-              position: uploadedAssetData.position || [0, 0, 0],
-              rotation: uploadedAssetData.rotation || [0, 0, 0],
-              scale:
-                typeof uploadedAssetData.scale === "number"
-                  ? uploadedAssetData.scale
-                  : 1,
-              isEnvironmentAsset: uploadedAssetData.isEnvironmentAsset || false,
-            };
-            modifyEnvAsset(id, assetWithDefaults);
-          });
+                  Object.keys(result.assets).forEach((id) => {
+          const uploadedAssetData = result.assets[id];
+          const assetWithDefaults: EnvAsset = {
+            ...uploadedAssetData,
+            // Don't set position for new assets - let DraggableAssetContainer use camera position
+            rotation: uploadedAssetData.rotation || [0, 0, 0],
+            scale:
+              typeof uploadedAssetData.scale === "number"
+                ? uploadedAssetData.scale
+                : 1,
+            isEnvironmentAsset: uploadedAssetData.isEnvironmentAsset || false,
+          };
+          modifyEnvAsset(id, assetWithDefaults);
+        });
 
           if (result.fileErrors && result.fileErrors.length > 0) {
             Swal.close(); // Close loader before showing another popup
@@ -2044,6 +2044,8 @@ export const CreatorKit = () => {
           }}
           alt="Strategy Fox Logo"
         />
+        
+        <TutorialButton onClick={openTutorial} />
       </Box>
 
       {/* Scrollable content */}
@@ -2080,39 +2082,121 @@ export const CreatorKit = () => {
           <>
             {!activeProductId && (
               <GlassBox sx={{ p: 3, mb: 2 }}>
-                <Typography
-                  sx={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    color: "white",
-                    mb: 2,
-                  }}
-                >
-                  Products
-                </Typography>
-                <Box sx={{ maxHeight: "400px", overflowY: "auto" }}>
-                  {products.filter(product => product.status === "ACTIVE").map((product) => (
-                    <Box
-                      key={product.id}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "18px",
+                      fontWeight: 700,
+                      color: "white",
+                    }}
+                  >
+                    Products
+                  </Typography>
+                  {productSearchQuery.trim() && (
+                    <Typography
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        p: 2,
-                        mb: 1,
-                        borderRadius: "12px",
-                        background: envProducts[product.id]
-                          ?.isEnvironmentProduct
-                          ? "rgba(255, 127, 50, 0.08)"
-                          : "rgba(255, 255, 255, 0.02)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          background: "rgba(255, 127, 50, 0.12)",
-                          borderColor: "#FF7F32",
-                        },
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: "12px",
+                        color: "rgba(255, 255, 255, 0.6)",
                       }}
                     >
+                      {filteredProducts.length} of {products.filter(p => p.status === "ACTIVE").length} products
+                    </Typography>
+                  )}
+                </Box>
+                
+                {/* Search Bar */}
+                <TextField
+                  fullWidth
+                  placeholder="Search products..."
+                  value={productSearchQuery}
+                  onChange={(e) => setProductSearchQuery(e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      color: 'white',
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '14px',
+                      borderRadius: '12px',
+                      '& fieldset': {
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: '12px',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(255, 127, 50, 0.4)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#FF7F32',
+                      },
+                      '& input::placeholder': {
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        opacity: 1,
+                      },
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '12px 16px',
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search size={18} color="rgba(255, 127, 50, 0.8)" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                
+                <Box sx={{ maxHeight: "400px", overflowY: "auto" }}>
+                  {filteredProducts.length === 0 ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        py: 4,
+                        color: "rgba(255, 255, 255, 0.5)",
+                      }}
+                    >
+                      <Search size={32} style={{ marginBottom: "8px" }} />
+                      <Typography
+                        sx={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "14px",
+                          textAlign: "center",
+                        }}
+                      >
+                        {productSearchQuery.trim() 
+                          ? `No products found matching "${productSearchQuery}"`
+                          : "No active products available"
+                        }
+                      </Typography>
+                    </Box>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <Box
+                        key={product.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          p: 2,
+                          mb: 1,
+                          borderRadius: "12px",
+                          background: envProducts[product.id]
+                            ?.isEnvironmentProduct
+                            ? "rgba(255, 127, 50, 0.08)"
+                            : "rgba(255, 255, 255, 0.02)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            background: "rgba(255, 127, 50, 0.12)",
+                            borderColor: "#FF7F32",
+                          },
+                        }}
+                      >
                       <Checkbox
                         checked={
                           envProducts[product.id]?.isEnvironmentProduct || false
@@ -2159,30 +2243,26 @@ export const CreatorKit = () => {
                         {envProducts[product.id]?.isEnvironmentProduct && (
                           <Box sx={{ display: "flex", gap: 0, mt: 1.5 }}>
                             <GlassButton
-                              size="small"
+                              isSmall
                               onClick={() => {
                                 setActiveProductId(product.id);
                                 setMediaType(envProducts[product.id]?.type || "PHOTO");
                                 setActiveTab("MEDIA");
                               }}
                               sx={{
-                                py: 1, px: 2, flex: 1,
-                                fontSize: '0.8rem',
-                                minHeight: 'auto',
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                color: "rgba(255,255,255,0.85)",
-                                background: "rgba(255, 255, 255, 0.06)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid rgba(255, 255, 255, 0.15)",
+                                flex: 1,
                                 borderRadius: '12px 0 0 12px',
-                                '&:hover': { background: "rgba(255, 255, 255, 0.1)" },
+                                borderRight: 'none',
+                                '&:hover': { 
+                                  background: "rgba(255, 255, 255, 0.1)",
+                                  borderColor: "rgba(255, 127, 50, 0.4)",
+                                },
                               }}
                             >
                               Media
                             </GlassButton>
                             <GlassButton
-                              size="small"
+                              isSmall
                               onClick={() => {
                                 if (
                                   envProducts[product.id]?.imageIndex !== undefined ||
@@ -2202,18 +2282,13 @@ export const CreatorKit = () => {
                                 envProducts[product.id]?.modelIndex === undefined
                               }
                               sx={{
-                                py: 1, px: 2, flex: 1,
-                                fontSize: '0.8rem',
-                                minHeight: 'auto',
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                color: "rgba(255,255,255,0.85)",
-                                background: "rgba(255, 255, 255, 0.06)",
-                                backdropFilter: "blur(8px)",
-                                border: "1px solid rgba(255, 255, 255, 0.15)",
-                                borderLeft: 'none',
+                                flex: 1,
                                 borderRadius: '0 12px 12px 0',
-                                '&:hover': { background: "rgba(255, 255, 255, 0.1)" },
+                                borderLeft: 'none',
+                                '&:hover': { 
+                                  background: "rgba(255, 255, 255, 0.1)",
+                                  borderColor: "rgba(255, 127, 50, 0.4)",
+                                },
                                 '&.Mui-disabled': {
                                   background: 'rgba(255, 255, 255, 0.02)',
                                   color: 'rgba(255, 255, 255, 0.3)',
@@ -2228,7 +2303,8 @@ export const CreatorKit = () => {
                         )}
                       </Box>
                     </Box>
-                  ))}
+                  ))
+                )}
                 </Box>
               </GlassBox>
             )}
@@ -2340,7 +2416,7 @@ export const CreatorKit = () => {
                         setAssetSource("LIBRARY");
                         setActiveAssetId(null);
                       }}
-                      fullWidth
+                      sx={{ flex: 1 }}
                     >
                       Library
                     </GlassButton>
@@ -2350,7 +2426,7 @@ export const CreatorKit = () => {
                         setAssetSource("OWN");
                         setActiveAssetId(null);
                       }}
-                      fullWidth
+                      sx={{ flex: 1 }}
                     >
                       Your Assets
                     </GlassButton>
@@ -2478,15 +2554,13 @@ export const CreatorKit = () => {
             isPrimary
             onClick={handleSaveStore}
             startIcon={<Save size={18} />}
-            fullWidth
-            size="large"
+            sx={{ width: '100%' }}
           >
             Save and Deploy Store
           </GlassButton>
         ) : (
           <Box sx={{ display: 'flex', gap: 2 }}>
             <GlassButton
-              fullWidth
               onClick={() => {
                 if (entityType === "PRODUCT" && previousProductState) {
                   modifyEnvProduct(previousProductState.id, previousProductState);
@@ -2502,6 +2576,7 @@ export const CreatorKit = () => {
                 }
               }}
               startIcon={<Trash2 size={18} />}
+              sx={{ flex: 1 }}
             >
               Discard
             </GlassButton>
@@ -2518,13 +2593,15 @@ export const CreatorKit = () => {
                 }
               }}
               startIcon={<Check size={18} />}
-              fullWidth
+              sx={{ flex: 1 }}
             >
               Done
             </GlassButton>
           </Box>
         )}
       </Box>
+
+
     </Box>
   );
 };
