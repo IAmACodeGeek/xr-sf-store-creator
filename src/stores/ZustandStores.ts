@@ -80,6 +80,15 @@ interface ComponentStore {
   openProductSearcher: () => void;
   closeProductSearcher: () => void;
 
+  // Input Focus Handling
+  isInputFocused: boolean;
+  setInputFocused: (focused: boolean) => void;
+
+  // Tutorial Handling
+  isTutorialOpen: boolean;
+  openTutorial: () => void;
+  closeTutorial: () => void;
+
   // Performance Monitor
   isAdvancedPerfVisible: boolean;
   toggleAdvancedPerf: () => void;
@@ -154,6 +163,15 @@ const useComponentStore = create<ComponentStore>((set) => ({
   isProductSearcherOpen: false,
   openProductSearcher: () => set({ isProductSearcherOpen: true }),
   closeProductSearcher: () => set({ isProductSearcherOpen: false }),
+
+  // Input Focus Handling
+  isInputFocused: false,
+  setInputFocused: (focused: boolean) => set({ isInputFocused: focused }),
+
+  // Tutorial Handling
+  isTutorialOpen: false,
+  openTutorial: () => set({ isTutorialOpen: true }),
+  closeTutorial: () => set({ isTutorialOpen: false }),
 
   // Performance Monitor
   isAdvancedPerfVisible: false,

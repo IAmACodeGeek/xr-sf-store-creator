@@ -189,7 +189,9 @@ const DraggableAssetContainer = ({
     camera.getWorldDirection(cameraDirection);
     cameraDirection.multiplyScalar(5);
     cameraPosition.add(cameraDirection);
-    const positionVector = position
+    // Check if position is meaningful (not [0,0,0] or undefined)
+    const hasValidPosition = position && (position[0] !== 0 || position[1] !== 0 || position[2] !== 0);
+    const positionVector = hasValidPosition
       ? new Vector3(position[0], position[1], position[2])
       : cameraPosition;
 
@@ -324,7 +326,9 @@ const DraggableAssetContainer = ({
     cameraDirection.multiplyScalar(5);
     cameraPosition.add(cameraDirection);
 
-    const worldPosition = position ? new Vector3(...position) : cameraPosition;
+    // Check if position is meaningful (not [0,0,0] or undefined)
+    const hasValidPosition = position && (position[0] !== 0 || position[1] !== 0 || position[2] !== 0);
+    const worldPosition = hasValidPosition ? new Vector3(...position) : cameraPosition;
 
     meshRef.current.matrixWorld.setPosition(worldPosition);
     if (meshRef.current.parent) {
