@@ -620,6 +620,7 @@ const environmentData: EnvironmentData = {
   GARDENATELIER: {
     playerSpeed: 10,
     playerHeight: 3,
+    maxThreshold: 30 * 1024 * 1024, //30MB
     placeHolderData: GardenAtlierPlaceHolderData,
     initialGSAP: {
       start: {
@@ -648,11 +649,51 @@ const environmentData: EnvironmentData = {
         rotation: [0, 0, 0],
         scale: 2.8,
       },
-     
     ],
     compasses: [
       {
         position: [0, 0.1, -2],
+        rotation: [-90, 0, 0],
+        scale: 5,
+      },
+    ],
+  },
+  COCKTAILDEN: {
+    playerSpeed: 10,
+    playerHeight: 5,
+    maxThreshold: 30 * 1024 * 1024, //30MB
+    placeHolderData: GardenAtlierPlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [0, 6, 0],
+        rotation: [0, 45, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [22, 6, 22],
+          rotation: [0, 45, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [4.102, 10.115, 22.392],
+        rotation: [0, 90, 0],
+        scale: 0.6,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [22.875, 10.115, -0.785],
+        rotation: [0, -90, 0],
+        scale: 4,
+      },
+    ],
+    compasses: [
+      {
+        position: [16, -1.5, 16],
         rotation: [-90, 0, 0],
         scale: 5,
       },
