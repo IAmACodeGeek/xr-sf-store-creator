@@ -21,6 +21,8 @@ export const Player = () => {
   // Set player speed based on environment
   const [moveSpeed, setMoveSpeed] = useState(0);
   const {environmentType} = useEnvironmentStore();
+  // Set initial position & rotation
+      const startPosition = new THREE.Vector3(...environmentData[environmentType].initialGSAP.start.position);
   useEffect(() => {
     if(!environmentData[environmentType]) return;
     setMoveSpeed(environmentData[environmentType].playerSpeed);
@@ -50,8 +52,7 @@ export const Player = () => {
     if (!playerRef.current || initialTourComplete.current) return;
     if (!environmentData[environmentType]) return;
 
-    // Set initial position & rotation
-    const startPosition = new THREE.Vector3(...environmentData[environmentType].initialGSAP.start.position);
+
     const startRotation = [
       environmentData[environmentType].initialGSAP.start.rotation[0] * Math.PI / 180,
       environmentData[environmentType].initialGSAP.start.rotation[1] * Math.PI / 180,
@@ -215,7 +216,7 @@ export const Player = () => {
   const respawnPlayer = () => {
     if (!initialTourComplete.current) return;
 
-    playerRef.current.setTranslation(START_POSITION);
+    playerRef.current.setTranslation(startPosition);
     playerRef.current.setLinvel({ x: 0, y: 0, z: 0 });
     playerRef.current.setAngvel({ x: 0, y: 0, z: 0 });
   };
