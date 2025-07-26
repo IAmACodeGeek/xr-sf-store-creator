@@ -22,7 +22,7 @@ import { AssetService } from "./api/assetService.js";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Load from "./UI/Components/Loader";
-import { LinearToneMapping, NoToneMapping } from "three";
+import { ACESFilmicToneMapping, LinearToneMapping } from "three";
 import TutorialOverlay from "./UI/Components/TutorialOverlay";
 
 export default function CanvasWrapper() {
@@ -35,7 +35,7 @@ export default function CanvasWrapper() {
   const navigate = useNavigate();
 
   // Environments that should use LinearToneMapping
-  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE"];
+  const linearToneMappingEnvironments = ["GLOWBAR", "LUXECRADLE","GARDENATELIER"];
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -313,7 +313,7 @@ export default function CanvasWrapper() {
         <div className="canvas-container">
           <Canvas camera={{ fov: 45 }} 
           gl={{
-            toneMapping: environmentType && linearToneMappingEnvironments.includes(environmentType) ? LinearToneMapping : NoToneMapping,
+            toneMapping: environmentType && linearToneMappingEnvironments.includes(environmentType) ? LinearToneMapping : ACESFilmicToneMapping,
           }}
           shadows>
             <React.Suspense fallback={null}>

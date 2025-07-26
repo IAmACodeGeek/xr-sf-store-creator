@@ -12,6 +12,9 @@ import VarsityVaultLighting from "@/data/environment/environmentLighting/Varsity
 import GlowBarLighting from "@/data/environment/environmentLighting/Glowbar";
 import LuxeCradleLighting from "@/data/environment/environmentLighting/LuxeCradle";
 import FlareSuiteLighting from "@/data/environment/environmentLighting/FlareSuite";
+import GardenAtelierLighting from "@/data/environment/environmentLighting/GardenAtelier";
+import CocktailDenLighting from "@/data/environment/environmentLighting/CocktailDen";
+import PetalPavilionLighting from "@/data/environment/environmentLighting/PetalPavilion";
 
 const Lights = () => {
   const { environmentType } = useEnvironmentStore();
@@ -31,6 +34,9 @@ const Lights = () => {
       {environmentType === "GLOWBAR" && <GlowBarLighting />}
       {environmentType === "LUXECRADLE" && <LuxeCradleLighting />}
       {environmentType === "FLARESUITE" && <FlareSuiteLighting />}
+      {environmentType === "GARDENATELIER" && <GardenAtelierLighting />}
+      {environmentType === "COCKTAILDEN" && <CocktailDenLighting />}
+      {environmentType === "PETALPAVILION" && <PetalPavilionLighting />}
     </>
   );
 };
