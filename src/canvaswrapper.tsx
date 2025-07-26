@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import Load from "./UI/Components/Loader";
 import { ACESFilmicToneMapping, LinearToneMapping } from "three";
+import TutorialOverlay from "./UI/Components/TutorialOverlay";
 
 export default function CanvasWrapper() {
   // Load brand data
@@ -86,7 +87,7 @@ export default function CanvasWrapper() {
 
   // Load All resources
   const { envAssets, setEnvAssets } = useEnvAssetStore();
-  const { products, setProducts, isAdvancedPerfVisible } = useComponentStore();
+  const { products, setProducts, isAdvancedPerfVisible, isTutorialOpen, closeTutorial } = useComponentStore();
   const { envProducts, setEnvProducts } = useEnvProductStore();
   const {
     productsLoaded,
@@ -321,6 +322,14 @@ export default function CanvasWrapper() {
             </React.Suspense>
           </Canvas>
         </div>
+      )}
+
+      {/* Tutorial Overlay - rendered at app level to appear above canvas */}
+      {isTutorialOpen && (
+        <TutorialOverlay
+          url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          onClose={closeTutorial}
+        />
       )}
     </div>
   );

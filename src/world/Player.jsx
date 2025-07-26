@@ -40,7 +40,7 @@ export const Player = () => {
   const initialTourComplete = useRef(false);
   const {
     crosshairVisible,
-    isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, isProductSearcherOpen,
+    isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, isProductSearcherOpen, isInputFocused,
   } = useComponentStore();
 
   const { isTouchEnabled, enableTouch } = useTouchStore();
@@ -108,7 +108,7 @@ export const Player = () => {
   useEffect(() => {
     const handleMouseDown = (e) => {
       if (!isTouchEnabled) return;
-      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
+      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible || isInputFocused) return;
       
       setMouseDown(true);
     };
@@ -122,7 +122,7 @@ export const Player = () => {
         return;
       }
       
-      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
+      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible || isInputFocused) return;
       
       const deltaX = previousMousePosition.current? e.clientX - previousMousePosition.current.x : 0;
       const deltaY = previousMousePosition.current? e.clientY - previousMousePosition.current.y : 0;
@@ -142,7 +142,7 @@ export const Player = () => {
 
     const handleMouseUp = () => {
       if (!isTouchEnabled) return;
-      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible) return;
+      if ( isInfoModalOpen || isSettingsModalOpen || isTermsModalOpen || isContactModalOpen || isProductSearcherOpen || !crosshairVisible || isInputFocused) return;
       
       setMouseDown(false);
       previousMousePosition.current = null;
@@ -157,7 +157,7 @@ export const Player = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isMouseDown, camera, isTouchEnabled, isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, crosshairVisible, isProductSearcherOpen]);
+  }, [isMouseDown, camera, isTouchEnabled, isInfoModalOpen, isSettingsModalOpen, isTermsModalOpen, isContactModalOpen, crosshairVisible, isProductSearcherOpen, isInputFocused]);
 
   const combinedInput = new THREE.Vector3();
   const movementDirection = new THREE.Vector3();
@@ -169,7 +169,7 @@ export const Player = () => {
       respawnPlayer();
     }
 
-    if ( !isInfoModalOpen && !isSettingsModalOpen && !isTermsModalOpen && !isContactModalOpen && !isProductSearcherOpen && crosshairVisible) {
+    if ( !isInfoModalOpen && !isSettingsModalOpen && !isTermsModalOpen && !isContactModalOpen && !isProductSearcherOpen && !isInputFocused && crosshairVisible) {
       const velocity = playerRef.current.linvel();
 
       frontVector.set(0, 0, backward - forward);
