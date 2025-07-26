@@ -15,11 +15,13 @@ import { LuxeCradleModel } from "@/data/environment/environmentModel/LuxeCradle"
 import { FlareSuiteModel } from "@/data/environment/environmentModel/FlareSuite";
 import { GardenAtelierModel } from "@/data/environment/environmentModel/GardenAtelier";
 import { CocktailDenModel } from "@/data/environment/environmentModel/CocktailDen";
+import { PetalPavilionModel } from "@/data/environment/environmentModel/PetalPavilion";
 
 export function Ground() {
   const { environmentType } = useEnvironmentStore();
   return (
     environmentType && (
+      <>
       <RigidBody type="fixed" colliders="trimesh">
         {environmentType === "BIGROOM" && <BigRoomModel />}
         {environmentType === "CASTLE" && <CastleModel />}
@@ -37,6 +39,9 @@ export function Ground() {
         {environmentType === "GARDENATELIER" && <GardenAtelierModel />}
         {environmentType === "COCKTAILDEN" && <CocktailDenModel />}
       </RigidBody>
+      // Custom Physics
+        {environmentType === "PETALPAVILION" && <PetalPavilionModel />}
+      </>
     )
   );
 }

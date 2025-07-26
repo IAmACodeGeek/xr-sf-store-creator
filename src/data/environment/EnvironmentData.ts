@@ -15,6 +15,7 @@ import LuxeCradlePlaceHolderData from "./placeHolderData/LuxeCradle";
 import FlareSuitePlaceHolderData from "./placeHolderData/FlareSuite";
 import GardenAtlierPlaceHolderData from "./placeHolderData/GardenAtelier";
 import CocktailDenPlaceHolderData from "./placeHolderData/CocktailDen";
+import PetalPavilionPlaceHolderData from "./placeHolderData/PetalPavilion";
 
 interface EnvironmentData {
   [environment_name: string]: {
@@ -695,6 +696,52 @@ const environmentData: EnvironmentData = {
     compasses: [
       {
         position: [16, -1.5, 16],
+        rotation: [-90, 0, 0],
+        scale: 5,
+      },
+    ],
+  },
+  PETALPAVILION: {
+    playerSpeed: 12,
+    playerHeight: 2,
+    maxThreshold: 30 * 1024 * 1024, //30MB
+    placeHolderData: PetalPavilionPlaceHolderData,
+    initialGSAP: {
+      start: {
+        position: [0, 3, 55],
+        rotation: [0, 0, 0],
+        duration: 0,
+      },
+      update: [
+        {
+          position: [0, 3, 85],
+          rotation: [0, 0, 0],
+          duration: 2,
+        },
+      ],
+    },
+    televisions: [
+      {
+        position: [0, 2, -26.5],
+        rotation: [0, -90, 0],
+        scale: 0.4,
+      },
+    ],
+    brandPosters: [
+      {
+        position: [19.022, 2, -18.814],
+        rotation: [0, -45, 0],
+        scale: 3,
+      },
+      {
+        position: [-19.022, 2, -18.814],
+        rotation: [0, 45, 0],
+        scale: 3,
+      },
+    ],
+    compasses: [
+      {
+        position: [0,-2.8,0],
         rotation: [-90, 0, 0],
         scale: 5,
       },
